@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<script src="assets/gate.js?v=20261028a"></script>
+<title>세미나/컨퍼런스 · 유진 Insight Lab</title>
+<meta name="description" content="콥데이·NDR·IPO·Conference·WM특화세미나 일정을 한 곳에서 찾고 신청해요." />
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+<link rel="preload" href="assets/fonts/PretendardVariable.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="stylesheet" href="assets/app.css?v=20261028e" />
+<link rel="stylesheet" href="assets/orbit-books.css?v=20261028c" />
+<style>
+/* ── 세미나·컨퍼런스 페이지 전용 (app.css 토큰만 사용) ──
+   상단: D안 오비트 북(카테고리) / 하단: B안 목록·캘린더 탐색 */
+:root{--cx-ease:cubic-bezier(.16,1,.3,1)}
+.cx-note{font-size:var(--text-micro);color:var(--color-muted);background:var(--color-surface-tint);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:18px}
+.cx-topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.cx-topbar .tabs{margin-bottom:0}
+.cx-my{display:inline-flex;align-items:center;gap:8px}
+.cx-my .n{min-width:20px;height:20px;padding:0 6px;border-radius:var(--radius-full);background:var(--color-primary);color:#fff;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center}
+.cx-my .n[data-zero]{background:var(--gray-200)}
+
+/* 선택 카테고리 설명 */
+.book-desc{display:grid;grid-template-columns:1fr auto;align-items:center;gap:20px;padding:20px 4px;border-bottom:1px solid var(--color-hairline);min-height:104px}
+.book-desc .bd-copy{animation:cxRise .45s var(--cx-ease) both}
+.book-desc .eyebrow{font-size:var(--text-micro);font-weight:700;color:var(--color-primary);letter-spacing:.02em}
+.book-desc h3{font-size:22px;font-weight:800;color:var(--blue-navy);letter-spacing:-.02em;margin:4px 0 6px}
+.book-desc p{font-size:var(--text-body);color:var(--color-muted)}
+.book-desc .acts{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.cx-live{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@keyframes cxRise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* ═════ 일정 탐색 (B안) ═════ */
+.cx-explore{margin-top:40px;scroll-margin-top:84px}
+.cx-explore-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:16px}
+.cx-explore-head h2{font-size:var(--text-title);font-weight:800;color:var(--blue-navy);letter-spacing:-.02em}
+.cx-explore-head .sub{font-size:var(--text-body);color:var(--color-muted);margin-top:4px}
+.cx-search{position:relative;width:320px;max-width:100%}
+.cx-search svg{position:absolute;left:14px;top:50%;width:18px;height:18px;transform:translateY(-50%);stroke:var(--gray-400);fill:none;stroke-width:1.8}
+.cx-search input{width:100%;height:46px;border:1px solid var(--color-hairline);border-radius:var(--radius-full);padding:0 16px 0 42px;font:inherit;font-size:var(--text-body);background:#fff}
+.cx-search input:focus{outline:none;border-color:var(--color-accent-outline)}
+.cx-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.cx-controls .tabs{margin-bottom:0}
+.cx-controls .grow{flex:1}
+.cx-select{height:40px;border:1px solid var(--color-hairline);border-radius:var(--radius-full);padding:0 14px;font:inherit;font-size:var(--text-micro);font-weight:600;color:var(--ink-800);background:#fff}
+.cx-toggle{display:inline-flex;align-items:center;gap:6px;font-size:var(--text-micro);font-weight:600;color:var(--ink-800);cursor:pointer;user-select:none}
+.cx-toggle input{width:16px;height:16px;accent-color:var(--color-primary)}
+.cx-view{display:inline-flex;padding:4px;background:var(--surface-tint);border-radius:var(--radius-full)}
+.cx-view button{height:32px;padding:0 14px;border:0;border-radius:var(--radius-full);background:transparent;font:600 var(--text-micro) var(--font-sans);color:var(--color-muted);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.cx-view button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8}
+.cx-view button[aria-pressed=true]{background:#fff;color:var(--ink-900);box-shadow:var(--shadow-soft)}
+.cx-cats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.cx-cats .chip{height:36px;padding:0 14px;font-size:var(--text-micro)}
+.cx-cats .chip i{width:8px;height:8px;border-radius:50%;background:var(--dot);display:block}
+.cx-cats .chip .c{font-weight:500;opacity:.7;font-variant-numeric:tabular-nums}
+.cx-count{font-size:var(--text-micro);color:var(--color-muted);margin-bottom:6px}
+.cx-count b{color:var(--ink-900);font-variant-numeric:tabular-nums}
+
+/* 목록 */
+.cx-month{display:flex;align-items:center;gap:10px;font-size:var(--text-body);font-weight:800;color:var(--blue-navy);padding:22px 0 8px}
+.cx-month span{font-size:var(--text-micro);font-weight:600;color:var(--color-muted)}
+.cx-row{display:grid;grid-template-columns:76px 1fr auto;gap:18px;align-items:center;padding:18px 16px;border:1px solid var(--color-hairline);border-radius:var(--radius-md);background:#fff;margin-bottom:8px;
+  transition:border-color var(--dur-micro) var(--ease-out),box-shadow var(--dur-toggle) var(--ease-out)}
+.cx-row:hover{border-color:transparent;box-shadow:var(--shadow-pop)}
+.cx-row.is-past{background:#fbfcfd}
+.cx-row.is-past .cx-title{color:var(--ink-500)}
+.cx-row.in{animation:cxRise .4s var(--cx-ease) both;animation-delay:var(--d,0ms)}
+.cx-date{text-align:center;border-right:1px solid var(--color-hairline);padding-right:14px}
+.cx-date .m{font-size:11px;font-weight:700;color:var(--color-muted);font-variant-numeric:tabular-nums}
+.cx-date .d{font-size:28px;font-weight:800;color:var(--blue-navy);line-height:1.1;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.cx-date .w{font-size:11px;color:var(--color-muted)}
+.cx-date .r{font-size:10px;color:var(--color-muted);font-variant-numeric:tabular-nums}
+.cx-cat{display:inline-flex;align-items:center;gap:6px;font-size:var(--text-micro);font-weight:700;color:var(--ink-800)}
+.cx-cat i{width:8px;height:8px;border-radius:50%;background:var(--dot)}
+.cx-sample{font-size:10px;font-weight:600;color:var(--gray-400);margin-left:4px}
+.cx-title{display:block;font-size:var(--text-lg);font-weight:800;color:var(--ink-900);letter-spacing:-.02em;margin:4px 0;border:0;background:none;padding:0;text-align:left;cursor:pointer;font-family:inherit;line-height:1.35}
+.cx-title:hover{color:var(--color-primary)}
+.cx-meta{font-size:var(--text-micro);color:var(--color-muted)}
+.cx-badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.cx-badges .badge{height:22px;padding:0 9px;font-size:11px;font-weight:700}
+.badge--mine{background:var(--color-primary);color:#fff}
+.badge--warn{background:rgba(224,52,75,.1);color:var(--price-up)}
+.cx-acts{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.cx-acts .btn{height:42px;padding:0 18px;font-size:var(--text-body)}
+.cx-acts .more{border:0;background:none;font:600 var(--text-micro) var(--font-sans);color:var(--color-muted);cursor:pointer;padding:2px 0}
+.cx-acts .more:hover{color:var(--color-primary)}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.cx-empty{padding:44px 16px;text-align:center;color:var(--color-muted);border:1px dashed var(--color-hairline);border-radius:var(--radius-md);margin-top:10px}
+.cx-empty .btn{margin-top:14px}
+
+/* 캘린더 */
+.cx-cal{border:1px solid var(--color-hairline);border-radius:var(--radius-lg);padding:18px;background:#fff}
+.cx-cal-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.cx-cal-bar h3{font-size:var(--text-lg);font-weight:800;color:var(--blue-navy);font-variant-numeric:tabular-nums}
+.cx-cal-nav{display:flex;gap:6px}
+.cx-cal-nav button{height:36px;min-width:36px;padding:0 12px;border:1px solid var(--color-hairline);border-radius:var(--radius-full);background:#fff;font:600 var(--text-micro) var(--font-sans);color:var(--ink-800);cursor:pointer}
+.cx-cal-nav button:hover{background:var(--surface-tint)}
+.cx-grid{display:grid;grid-template-columns:repeat(7,1fr);border-top:1px solid var(--color-hairline);border-left:1px solid var(--color-hairline)}
+.cx-grid .dow{font-size:11px;font-weight:700;color:var(--color-muted);text-align:center;padding:8px 0;border-right:1px solid var(--color-hairline);border-bottom:1px solid var(--color-hairline);background:var(--surface-tint)}
+.cx-grid .dow:first-child{color:var(--price-up)}
+.cx-cell{min-height:104px;padding:6px;border-right:1px solid var(--color-hairline);border-bottom:1px solid var(--color-hairline);display:flex;flex-direction:column;gap:4px;min-width:0}
+.cx-cell.blank{background:#fbfcfd}
+.cx-cell .n{font-size:11px;font-weight:700;color:var(--ink-500);font-variant-numeric:tabular-nums}
+.cx-cell.today .n{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--color-primary);color:#fff}
+.cx-ev{display:block;width:100%;border:0;border-left:3px solid var(--dot);border-radius:4px;background:color-mix(in srgb,var(--dot) 9%,#fff);padding:4px 6px;text-align:left;cursor:pointer;font-family:inherit;min-width:0}
+.cx-ev b{display:block;font-size:11px;font-weight:700;color:var(--ink-900);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cx-ev span{display:block;font-size:10px;color:var(--color-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cx-ev.past{opacity:.55}
+.cx-ev:hover{background:color-mix(in srgb,var(--dot) 16%,#fff)}
+.cx-agenda{margin-top:16px}
+.cx-agenda h4{font-size:var(--text-body);font-weight:800;color:var(--blue-navy);margin-bottom:6px}
+.cx-ag{display:flex;align-items:center;gap:12px;width:100%;padding:11px 8px;border:0;border-bottom:1px solid var(--color-hairline);background:none;cursor:pointer;text-align:left;font-family:inherit}
+.cx-ag:hover{background:var(--surface-tint)}
+.cx-ag time{flex:0 0 64px;font-size:var(--text-micro);font-weight:700;color:var(--ink-800);font-variant-numeric:tabular-nums}
+.cx-ag .t{flex:1;min-width:0;font-size:var(--text-body);font-weight:600;color:var(--ink-900)}
+.cx-ag .badge{height:22px;font-size:11px}
+
+/* 세미나 요청 배너 */
+.cx-inquiry{display:flex;align-items:center;gap:18px;margin-top:28px;padding:22px 24px;border-radius:var(--radius-lg);background:var(--surface-tint)}
+.cx-inquiry h3{font-size:var(--text-lg);font-weight:800;color:var(--blue-navy)}
+.cx-inquiry p{font-size:var(--text-body);color:var(--color-muted);margin-top:2px}
+.cx-inquiry .acts{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+
+/* ═════ 세미나 요청 / 외부 행사 탭 ═════ */
+.cx-split{display:grid;grid-template-columns:1fr 1.1fr;gap:48px;align-items:start;margin-top:26px}
+.cx-split .eyebrow{font-size:var(--text-micro);font-weight:700;color:var(--color-primary);letter-spacing:.06em}
+.cx-split h2{font-size:var(--text-hero);font-weight:800;color:var(--blue-navy);letter-spacing:-.03em;line-height:1.22;margin:8px 0 14px}
+.cx-split .lead{font-size:var(--text-body);color:var(--color-muted);line-height:1.75}
+.cx-steps{display:flex;flex-direction:column;gap:10px;margin:22px 0;padding:0;list-style:none}
+.cx-steps li{display:flex;align-items:center;gap:12px;font-size:var(--text-body);font-weight:600;color:var(--ink-800)}
+.cx-steps b{width:30px;height:30px;border-radius:50%;background:#fff;border:1px solid var(--color-hairline);display:inline-flex;align-items:center;justify-content:center;font-size:11px;color:var(--color-primary);font-variant-numeric:tabular-nums}
+.cx-card{border:1px solid var(--color-hairline);border-radius:var(--radius-lg);padding:26px;background:#fff;box-shadow:var(--shadow-soft)}
+.cx-card h3{font-size:var(--text-lg);font-weight:800;color:var(--ink-900);margin-bottom:16px}
+.cx-svc{background:var(--surface-tint);border-radius:var(--radius-md);padding:14px 16px;margin:16px 0}
+.cx-svc strong{display:block;font-size:var(--text-micro);color:var(--color-primary);margin-bottom:4px}
+.cx-svc p{font-size:var(--text-micro);color:var(--ink-500);line-height:1.7}
+.cx-faq{margin-top:26px}
+.cx-faq h3{font-size:var(--text-body);font-weight:800;margin-bottom:6px}
+.cx-faq details{border-bottom:1px solid var(--color-hairline);padding:12px 0}
+.cx-faq summary{cursor:pointer;font-size:var(--text-body);font-weight:600;color:var(--ink-800)}
+.cx-faq details p{font-size:var(--text-micro);color:var(--ink-500);line-height:1.75;margin-top:8px}
+.cx-ext-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:22px 0}
+.cx-ext{display:flex;flex-direction:column;gap:10px;border:1px solid var(--color-hairline);border-radius:var(--radius-lg);padding:22px;background:#fff}
+.cx-ext .ix{font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--gray-400)}
+.cx-ext h3{font-size:var(--text-lg);font-weight:800;color:var(--blue-navy)}
+.cx-ext p{font-size:var(--text-micro);color:var(--ink-500);line-height:1.7;flex:1}
+.cx-ext .tags{display:flex;gap:6px;flex-wrap:wrap}
+.cx-ext .btn{align-self:flex-start;height:40px;padding:0 16px;font-size:var(--text-micro)}
+.cx-suggest{display:flex;align-items:center;gap:20px;padding:20px 22px;border-radius:var(--radius-lg);background:var(--surface-tint);margin-bottom:36px}
+.cx-suggest h3{font-size:var(--text-body);font-weight:800;color:var(--ink-900)}
+.cx-suggest p{font-size:var(--text-micro);color:var(--ink-500);margin-top:2px}
+.cx-suggest .btn{margin-left:auto;flex-shrink:0}
+
+/* 폼 */
+.cx-fields{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+.cx-fields .full{grid-column:1/-1}
+.cx-fields .field>label{font-size:var(--text-micro)}
+.cx-fields .field>label .req{color:var(--price-up);margin-left:3px}
+.cx-fields .field>label small{color:var(--gray-400);font-weight:500;margin-left:5px}
+.cx-in{width:100%;height:44px;border:1px solid var(--color-hairline);border-radius:var(--radius-md);padding:0 13px;font:inherit;font-size:var(--text-body);background:#fff;color:var(--ink-900)}
+textarea.cx-in{height:96px;padding:11px 13px;resize:vertical}
+.cx-in:focus{outline:none;border-color:var(--color-accent-outline)}
+.cx-seg{display:inline-flex;padding:4px;background:var(--surface-tint);border-radius:var(--radius-full);margin-bottom:16px}
+.cx-seg button{height:34px;padding:0 14px;border:0;border-radius:var(--radius-full);background:none;font:600 var(--text-micro) var(--font-sans);color:var(--color-muted);cursor:pointer}
+.cx-seg button[aria-pressed=true]{background:#fff;color:var(--ink-900);box-shadow:var(--shadow-soft)}
+.cx-check{display:flex;gap:9px;align-items:flex-start;font-size:var(--text-micro);color:var(--ink-800);margin:8px 0;line-height:1.6;cursor:pointer}
+.cx-check input{width:16px;height:16px;margin-top:2px;accent-color:var(--color-primary);flex-shrink:0}
+.cx-formacts{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+.cx-formnote{font-size:11px;color:var(--gray-400);margin-top:10px}
+
+/* 다이얼로그 */
+.cx-overlay{position:fixed;inset:0;z-index:70;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(11,26,49,.5);backdrop-filter:blur(3px)}
+.cx-overlay[hidden]{display:none}
+.cx-dialog{background:#fff;border-radius:var(--radius-lg);box-shadow:var(--shadow-pop);width:100%;max-width:580px;max-height:88vh;overflow-y:auto;padding:24px 26px 26px;animation:cxPop var(--dur-page) var(--ease-out)}
+@keyframes cxPop{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
+.cx-dhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.cx-dhead .lbl{font-size:11px;font-weight:700;letter-spacing:.12em;color:var(--color-primary)}
+.cx-dialog h2{font-size:var(--text-title);font-weight:800;color:var(--blue-navy);letter-spacing:-.02em;line-height:1.25;margin:6px 0 8px}
+.cx-dialog .lead{font-size:var(--text-body);color:var(--ink-500);line-height:1.7}
+.cx-dialog h3{font-size:var(--text-body);font-weight:800;color:var(--ink-900);margin:22px 0 8px}
+.cx-dl{display:grid;grid-template-columns:96px 1fr;gap:0;margin-top:16px;border-top:1px solid var(--color-hairline)}
+.cx-dl dt,.cx-dl dd{margin:0;padding:10px 0;border-bottom:1px solid var(--color-hairline);font-size:var(--text-micro)}
+.cx-dl dt{color:var(--color-muted);font-weight:600}
+.cx-dl dd{color:var(--ink-900);font-weight:600}
+.cx-prog{display:flex;flex-direction:column}
+.cx-prog div{display:flex;gap:14px;padding:9px 0;border-bottom:1px solid var(--color-hairline);font-size:var(--text-micro)}
+.cx-prog time{flex:0 0 46px;font-weight:700;color:var(--color-primary);font-variant-numeric:tabular-nums}
+.cx-prog small{display:block;color:var(--color-muted)}
+.cx-daytabs{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:4px;padding:4px;background:var(--surface-tint);border-radius:var(--radius-md);margin-bottom:8px}
+.cx-daytabs button{border:0;background:none;border-radius:10px;padding:7px 4px;font:600 var(--text-micro) var(--font-sans);color:var(--color-muted);cursor:pointer}
+.cx-daytabs button[aria-selected=true]{background:#fff;color:var(--ink-900);box-shadow:var(--shadow-soft)}
+.cx-ab{width:100%;border-collapse:collapse;font-size:var(--text-micro)}
+.cx-ab th,.cx-ab td{padding:9px 6px;border-bottom:1px solid var(--color-hairline);text-align:left}
+.cx-ab thead th{color:var(--color-muted);font-weight:700}
+.cx-ab tbody th{color:var(--color-primary);font-variant-numeric:tabular-nums}
+.cx-dfoot{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:22px;flex-wrap:wrap}
+.cx-dfoot .meta{font-size:11px;color:var(--color-muted)}
+.cx-mini{font-size:var(--text-micro);color:var(--ink-500);background:var(--surface-tint);border-radius:var(--radius-md);padding:12px 14px;margin:14px 0;line-height:1.7}
+.cx-sum{display:grid;grid-template-columns:100px 1fr;margin-top:14px;border-top:1px solid var(--color-hairline)}
+.cx-sum dt,.cx-sum dd{margin:0;padding:9px 0;border-bottom:1px solid var(--color-hairline);font-size:var(--text-micro);word-break:break-all}
+.cx-sum dt{color:var(--color-muted)}
+.cx-ok{width:56px;height:56px;border-radius:50%;background:var(--color-primary);color:#fff;font-size:26px;display:grid;place-items:center;margin:6px auto 10px;animation:cxPop .4s var(--ease-out)}
+.cx-center{text-align:center}
+.cx-myitem{border:1px solid var(--color-hairline);border-radius:var(--radius-md);padding:14px 16px;margin-top:10px;display:flex;gap:12px;align-items:center}
+.cx-myitem .b{flex:1;min-width:0}
+.cx-myitem h4{font-size:var(--text-body);font-weight:700;color:var(--ink-900);margin:4px 0 2px}
+.cx-myitem p{font-size:11px;color:var(--color-muted)}
+.cx-myitem button{border:0;background:none;font:600 11px var(--font-sans);color:var(--color-muted);cursor:pointer}
+.cx-myitem button:hover{color:var(--price-up)}
+
+/* ── 태블릿 ── */
+@media(max-width:1000px){
+  .cx-split{grid-template-columns:1fr;gap:28px}
+  .cx-ext-grid{grid-template-columns:1fr}
+}
+/* ── 모바일: 오비트 → 가벼운 스와이프 카드 ── */
+@media(max-width:760px){
+  .book-desc{grid-template-columns:1fr;gap:12px;padding:14px 0;min-height:0}
+  .book-desc h3{font-size:19px}.book-desc .acts{justify-content:flex-start}
+  .cx-search{width:100%}
+  .cx-topbar .tabs{max-width:100%;overflow-x:auto;scrollbar-width:none}.cx-topbar .tabs button{flex-shrink:0;padding:0 16px}
+  .cx-controls .grow{display:none}
+  .cx-cats{flex-wrap:nowrap;overflow-x:auto;margin:0 -16px 14px;padding:0 16px;scrollbar-width:none}
+  .cx-cats::-webkit-scrollbar{display:none}
+  .cx-cats .chip{flex-shrink:0}
+  .cx-row{grid-template-columns:58px 1fr;gap:12px;padding:14px 12px}
+  .cx-date{padding-right:10px}.cx-date .d{font-size:22px}
+  .cx-title{font-size:var(--text-body)}
+  .cx-acts{grid-column:1/-1;flex-direction:row;align-items:center;justify-content:space-between}
+  .cx-acts .btn{height:40px;flex:1}
+  .cx-cal{padding:10px}
+  .cx-cell{min-height:52px;padding:4px 3px;gap:2px}
+  .cx-ev{padding:0;height:6px;border-left:0;background:var(--dot);border-radius:3px}
+  .cx-ev b,.cx-ev span{display:none}
+  .cx-inquiry{flex-direction:column;align-items:flex-start}.cx-inquiry .acts{margin-left:0}
+  .cx-suggest{flex-direction:column;align-items:flex-start}.cx-suggest .btn{margin-left:0}
+  .cx-split h2{font-size:26px}
+  .cx-fields{grid-template-columns:1fr}
+  .cx-dialog{padding:20px 18px;max-height:92vh}
+  .cx-overlay{align-items:flex-end;padding:0}.cx-dialog{border-radius:var(--radius-lg) var(--radius-lg) 0 0}
+}
+@media(prefers-reduced-motion:reduce){
+  .cx-row.in,.book-desc .bd-copy,.cx-dialog,.cx-ok{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body
+  data-page-eyebrow="CORPORATE ACCESS"
+  data-page-title="세미나·컨퍼런스"
+  data-page-desc="Corporate Day부터 WM 세미나까지 — 책을 골라 카테고리를 살펴보고, 아래 캘린더·목록에서 일정을 찾아 신청해주세요.">
+
+<main id="main">
+<section class="section" style="padding:24px 0 72px">
+<div class="wrap">
+
+
+  <div class="cx-topbar">
+    <div class="tabs" id="cxTabs" aria-label="행사 메뉴">
+      <button data-tab="internal" class="is-active" aria-controls="panel-internal">기업행사/컨퍼런스</button>
+      <button data-tab="seminar" aria-controls="panel-seminar">세미나/탐방 요청</button>
+      <button data-tab="external" aria-controls="panel-external">외부 행사</button>
+    </div>
+    <button class="btn btn--secondary btn--sm cx-my" data-my>내 신청·문의 <span class="n" id="myCount" data-zero>0</span></button>
+  </div>
+
+  <!-- ═══════════ 컨퍼런스·기업행사 ═══════════ -->
+  <div id="panel-internal" role="tabpanel">
+
+    <section class="cx-hero" aria-label="행사 카테고리">
+      <div class="shelf" id="shelf">
+        <div class="orbit-intro">
+          <div class="cap">EUGENE INSIGHT LAB / LIVE ACCESS</div>
+          <h2>Conferences</h2>
+          <p style="word-break:keep-all">현재 신청 가능/진행 예정 중인 행사를 확인해주세요</p>
+          <div class="idx">SIX WAYS TO CONNECT</div>
+        </div>
+        <div class="orbit-center" aria-hidden="true">Insight.</div>
+        <div class="orbit-ring" aria-hidden="true"></div>
+        <div class="orbit-ring two" aria-hidden="true"></div>
+        <i class="orbit-star" aria-hidden="true"></i><i class="orbit-star two" aria-hidden="true"></i>
+        <button class="orbit-toggle" type="button" id="orbitToggle" aria-pressed="false">Ⅱ 공전 멈추기</button>
+        <div class="book-track" id="bookTrack" role="group" aria-label="행사 카테고리 선택"></div>
+      </div>
+      <div class="book-desc" id="bookDesc"></div>
+      <p class="cx-live" id="cxLive" aria-live="polite"></p>
+    </section>
+
+    <section class="cx-explore" id="explore" aria-labelledby="exploreTitle">
+      <div class="cx-explore-head">
+        <div>
+          <h2 id="exploreTitle">행사 일정</h2>
+          <p class="sub">카테고리·참여 대상으로 좁히고, 목록과 캘린더를 오가며 확인해주세요.</p>
+        </div>
+        <label class="cx-search">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/></svg>
+          <input id="q" type="search" placeholder="행사명·기업·주제 검색" aria-label="행사명, 기업, 주제 검색" />
+        </label>
+      </div>
+
+      <div class="cx-controls">
+        <div class="tabs" id="phaseTabs" aria-label="진행 상태">
+          <button data-phase="upcoming" class="is-active">예정 행사</button>
+          <button data-phase="past">지난 행사</button>
+        </div>
+        <select class="cx-select" id="elig" aria-label="참여 대상">
+          <option value="all">참여 대상 전체</option>
+          <option value="inst">기관투자자</option>
+          <option value="corp">법인 고객</option>
+          <option value="wm">WM 고객</option>
+        </select>
+        <select class="cx-select" id="analyst" aria-label="담당 애널리스트"><option value="all">담당 전체</option></select>
+        <label class="cx-toggle"><input type="checkbox" id="openOnly" /> 신청 가능만</label>
+        <span class="grow"></span>
+        <div class="cx-view" role="group" aria-label="일정 보기 방식">
+          <button data-view="list" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg>목록</button>
+          <button data-view="calendar" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4m6-4v4"/></svg>캘린더</button>
+        </div>
+      </div>
+
+      <div class="cx-cats" id="cats" role="group" aria-label="행사 카테고리"></div>
+      <p class="cx-count" id="count" aria-live="polite"></p>
+      <div id="list"></div>
+      <div id="calendar" hidden></div>
+
+      <div class="cx-inquiry">
+        <div>
+          <h3>원하는 행사가 없나요?</h3>
+          <p>관심 섹터·애널리스트를 골라 개별 세미나를 요청하거나, 외부 행사 주선을 문의할 수 있어요.</p>
+        </div>
+        <div class="acts">
+          <button class="btn btn--primary btn--sm" data-tab="seminar">세미나 요청</button>
+          <button class="btn btn--secondary btn--sm" data-tab="external">외부 행사 문의</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ═══════════ 세미나 요청 ═══════════ -->
+  <div id="panel-seminar" role="tabpanel" hidden></div>
+
+  <!-- ═══════════ 외부 행사 ═══════════ -->
+  <div id="panel-external" role="tabpanel" hidden>
+    <div class="cx-split" style="grid-template-columns:1fr;gap:0">
+      <div>
+        <div class="eyebrow">EXTERNAL EVENTS</div>
+        <h2>관심사에 맞는 외부 행사</h2>
+        <p class="lead">산업·테마 세미나부터 기업 인사이트 세션, 연사 초청까지.<br>기관에 필요한 외부 행사 연결과 주선을 지원해요.</p>
+      </div>
+    </div>
+    <div class="cx-ext-grid">
+      <article class="cx-ext"><span class="ix">01 / INDUSTRY</span><h3>산업·테마 세미나</h3><p>반도체 업황, AI 밸류체인 등 관심 산업을 다루는 외부 전문가 세미나예요.</p><div class="tags"><span class="badge badge--neutral">반도체</span><span class="badge badge--neutral">AI</span><span class="badge badge--neutral">산업전망</span></div><button class="btn btn--secondary" data-ext="산업·테마 세미나">주선 문의 →</button></article>
+      <article class="cx-ext"><span class="ix">02 / COMPANY</span><h3>기업 인사이트 세션</h3><p>기업 관계자와 함께 AI 도입 사례나 산업 현장의 변화를 살펴보는 자리예요.</p><div class="tags"><span class="badge badge--neutral">기업 관점</span><span class="badge badge--neutral">사업 현황</span><span class="badge badge--neutral">현장 사례</span></div><button class="btn btn--secondary" data-ext="기업 인사이트 세션">주선 문의 →</button></article>
+      <article class="cx-ext"><span class="ix">03 / COLLABORATION</span><h3>연사 초청·행사 협업</h3><p>기관 행사에 필요한 외부 연사 초청과 공동 프로그램 구성을 함께 논의해요.</p><div class="tags"><span class="badge badge--neutral">외부 연사</span><span class="badge badge--neutral">공동 행사</span><span class="badge badge--neutral">기관 교육</span></div><button class="btn btn--secondary" data-ext="연사 초청·행사 협업">주선 문의 →</button></article>
+    </div>
+    <div class="cx-suggest">
+      <div><h3>찾는 행사가 없으신가요?</h3><p>“반도체 기업의 현장 이야기를 듣고 싶어요”처럼 원하는 행사를 제안할 수 있어요.</p></div>
+      <button class="btn btn--primary btn--sm" data-ext-mode="suggest">원하는 행사 제안 →</button>
+    </div>
+    <div class="cx-split">
+      <div>
+        <div class="eyebrow">LET’S CONNECT</div>
+        <h2>새로운 행사 제안 및 문의</h2>
+        <p class="lead">희망하는 세미나를 제안해주세요!</p>
+        <ol class="cx-steps"><li><b>01</b>행사 선택 또는 희망 주제 제안</li><li><b>02</b>주선 가능 여부·내용 검토</li><li><b>03</b>전화·이메일로 개별 안내</li></ol>
+        <div class="cx-svc"><strong>진행 전 개별 협의</strong><p>행사 주선과 제안의 진행 여부는 관계자와 협의한 뒤 안내해 드려요. 문의만으로 참가나 일정이 확정되지는 않아요.</p></div>
+      </div>
+      <div class="cx-card" id="extFormArea"></div>
+    </div>
+  </div>
+
+</div>
+</section>
+</main>
+
+<div class="cx-overlay" id="cxOverlay" hidden>
+  <section class="cx-dialog" role="dialog" aria-modal="true" aria-labelledby="dlgTitle">
+    <div class="cx-dhead"><span class="lbl" id="dlgLabel">SEMINARS &amp; CONFERENCES</span><button class="auth-x" data-close aria-label="닫기">×</button></div>
+    <div id="dlgBody"></div>
+  </section>
+</div>
+
+<script src="assets/partials.js?v=20261029a"></script>
+<script src="assets/events-data.js?v=20261029a"></script>
+<script src="assets/orbit-books.js?v=20261029a"></script>
+<script>
+/* 행사 데이터(CATS · EVENTS 등)는 assets/events-data.js */
+/* ═════════ 유틸 ═════════ */
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const WD='일월화수목금토';
+const wd=iso=>WD[new Date(iso+'T00:00:00').getDay()];
+const md=iso=>iso.slice(5).replace('-','.');
+const dot=iso=>iso.replaceAll('-','.');
+const diffDays=iso=>Math.round((Date.parse(iso+'T00:00:00Z')-Date.parse(TODAY+'T00:00:00Z'))/864e5);
+const endOf=e=>e.end||e.start;
+const catOf=id=>CATS.find(c=>c.id===id);
+const reduced=matchMedia('(prefers-reduced-motion: reduce)');
+const mobileMQ=matchMedia('(max-width:760px)');
+const scrollBehavior=()=>reduced.matches?'auto':'smooth';
+const ARROW='<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>';
+
+const where=e=>!e.place?(e.format||''):e.place.includes(e.format)||e.format==='미정'||!e.format?e.place:`${e.place} · ${e.format}`;
+/* 출처 표시: 사내 행사내역 · 안내문은 표시 없음, 반복 일정 예정은 '예정', 그 외는 '예시' */
+const isReal=e=>e.source==='roster'||e.source==='notice';
+const srcTag=e=>isReal(e)?'':e.source==='pattern'?'<span class="cx-sample">예정</span>':'<span class="cx-sample">예시</span>';
+const srcLabel=e=>e.source==='roster'?' · 2026 행사내역':e.source==='notice'?' · 안내문 기준':e.source==='pattern'?' · 예정(일정 미확정)':' · 예시 일정';
+/* 담당 · 시간 · 장소처럼 있는 정보만 이어 붙인다 (시트에 없는 정보는 만들지 않음) */
+const metaOf=e=>[e.analysts&&e.analysts.length?`담당 ${e.analysts.join(', ')}`:'',e.time,where(e)].filter(Boolean).join(' · ')||'세부 정보 추후 안내';
+/* 반복 행사(시리즈) 진행 횟수 — 데이터에서 계산 */
+const seriesCount=e=>e.series?EVENTS.filter(x=>x.series===e.series&&isReal(x)&&x.start.startsWith('2026')).length:0;
+const SERIES_NAME={mna:'매월 진행',corpday:'분기마다 진행'};
+function phaseOf(e){ if(e.tba) return 'upcoming'; return endOf(e)<TODAY?'past':e.start<=TODAY?'current':'upcoming'; }
+function dateLabel(e){ if(e.tba) return `${e.start.slice(0,4)}년 ${e.tba}`; const s=`${dot(e.start)} (${wd(e.start)})`; return e.end&&e.end!==e.start?`${s} – ${md(e.end)} (${wd(e.end)})`:s; }
+
+/* 신청 가능 여부 — 날짜·마감·정원·운영 방식으로 계산 */
+function regOf(e){
+  const ph=phaseOf(e);
+  if(ph==='past') return {key:'closed',label:'종료',tone:'muted'};
+  if(e.mode==='tba') return {key:'tba',label:'예정 · 일정 미확정',tone:'muted'};
+  if(e.mode==='invite') return {key:'invite',label:'초청 전용 · 문의',tone:'neutral',ask:true};
+  if(ph==='current') return {key:'live',label:'진행 중',tone:'point'};
+  if(e.openAt&&e.openAt>TODAY) return {key:'soon',label:`${md(e.openAt)} 신청 오픈`,tone:'muted'};
+  if(!e.deadline) return {key:'tba',label:'일정 예고',tone:'muted'};
+  if(e.deadline<TODAY) return {key:'ended',label:'신청 마감',tone:'muted'};
+  if(e.cap&&e.seats===0) return {key:'full',label:'정원 마감',tone:'muted'};
+  const d=diffDays(e.deadline);
+  if(d<=3) return {key:'urgent',label:d===0?'오늘 마감':`마감 D-${d}`,tone:'warn',can:true};
+  return {key:'open',label:'신청 가능',tone:'brand',can:true};
+}
+
+/* ═════════ 내 신청·문의 (이 브라우저에만 저장) ═════════ */
+const STORE='il-conf-records-v1';
+let records=[];
+try{ records=JSON.parse(localStorage.getItem(STORE)||'[]'); if(!Array.isArray(records)) records=[]; }catch(e){ records=[]; }
+function saveRecords(){ try{ localStorage.setItem(STORE,JSON.stringify(records)); }catch(e){} syncMyCount(); }
+const mineFor=id=>records.find(r=>r.eventId===id);
+function syncMyCount(){ const n=$('#myCount'); n.textContent=records.length; n.toggleAttribute('data-zero',!records.length); }
+const user=()=>(typeof getUser==='function'?getUser():null);
+
+/* ═════════ 상태 ═════════ */
+const state={tab:'internal',cat:'all',phase:'upcoming',elig:'all',analyst:'all',openOnly:false,q:'',view:'list',calY:0,calM:0};
+
+function filtered({anyPhase=false}={}){
+  const q=state.q.toLowerCase();
+  return EVENTS.filter(e=>{
+    const past=phaseOf(e)==='past';
+    if(!anyPhase&&past!==(state.phase==='past')) return false;
+    if(state.cat!=='all'&&e.cat!==state.cat) return false;
+    if(state.elig!=='all'&&!e.elig.includes(state.elig)) return false;
+    if(state.analyst!=='all'&&!(e.analysts||[]).includes(state.analyst)) return false;
+    if(state.openOnly&&!regOf(e).can) return false;
+    if(q){ const c=catOf(e.cat); const hay=[e.title,c.label,c.ko,e.place,e.format,e.cond,...(e.tags||[]),...(e.analysts||[])].join(' ').toLowerCase(); if(!hay.includes(q)) return false; }
+    return true;
+  }).sort((a,b)=>state.phase==='past'?b.start.localeCompare(a.start):a.start.localeCompare(b.start));
+}
+const upcomingOf=cat=>EVENTS.filter(e=>e.cat===cat&&phaseOf(e)!=='past').sort((a,b)=>a.start.localeCompare(b.start));
+
+/* ═════════ 상단: 카테고리 책 ═════════ */
+function renderBooks(){
+  $('#bookTrack').innerHTML=CATS.map(c=>{
+    const up=upcomingOf(c.id); return OrbitBooks.bookHTML(c,{up,open:up.filter(e=>regOf(e).can).length,next:up[0],md,wd,esc});
+  }).join('');
+}
+
+function renderBookDesc(){
+  const box=$('#bookDesc');
+  if(state.cat==='all'){
+    const up=EVENTS.filter(e=>phaseOf(e)!=='past'), open=up.filter(e=>regOf(e).can).length;
+    box.innerHTML=`<div class="bd-copy"><div class="eyebrow">6개 카테고리 · 예정 ${up.length}건</div>
+      <h3>책을 골라 행사 카테고리를 펼쳐보세요</h3>
+      <p>지금 신청 가능한 행사 ${open}건 · 아래 캘린더·목록에서 전체 일정을 바로 확인할 수 있어요.</p></div>
+      <div class="acts"><button class="btn btn--primary btn--sm" data-jump>전체 일정 보기 ${ARROW}</button></div>`;
+    return;
+  }
+  const c=catOf(state.cat), up=upcomingOf(c.id), open=up.filter(e=>regOf(e).can).length, next=up[0];
+  const extra={
+    corp:`<button class="btn btn--secondary btn--sm" data-detail="corp-26q3">Q3 참여기업 보기</button>`,
+    earnings:`<button class="btn btn--secondary btn--sm" data-request="earnings">실적발표 문의</button>`,
+    ndr:`<button class="btn btn--secondary btn--sm" data-request="ndr">NDR 참여 문의</button>`,
+    wm:`<button class="btn btn--secondary btn--sm" data-tab="seminar">맞춤 세미나 요청</button>`,
+  }[c.id]||'';
+  box.innerHTML=`<div class="bd-copy"><div class="eyebrow">${c.label} · 예정 ${up.length}건 · 신청 가능 ${open}건</div>
+    <h3>${next?esc(next.title):c.ko+' — 예정된 일정 없음'}</h3>
+    <p>${next?`${dateLabel(next)} · ${esc(next.place)} — `:''}${c.desc}</p></div>
+    <div class="acts">
+      <button class="btn btn--primary btn--sm" data-jump>${c.ko} 일정 ${up.length}건 보기 ${ARROW}</button>
+      ${extra}
+      <button class="btn btn--text" style="font-size:var(--text-micro)" data-cat="all">전체 보기</button>
+    </div>`;
+}
+
+/* ═════════ 하단: 카테고리 칩 · 목록 · 캘린더 ═════════ */
+/* 하단 필터는 배너 책(CATS 6개)과 이름 · 순서가 다르다. Earnings Call은 필터에서만 뺐다(행사는 '전체'와 책에서 그대로 보임) */
+const FILTERS=[['corp','콥데이'],['ndr','NDR'],['ipo','IPO'],['ai','Conference'],['wm','WM특화세미나']];
+const filterLabel=id=>(FILTERS.find(f=>f[0]===id)||[])[1]||(CATS.find(c=>c.id===id)||{}).label||'';
+function renderCats(){
+  const base=EVENTS.filter(e=>(phaseOf(e)==='past')===(state.phase==='past'));
+  const chip=(id,label,n,dotc)=>`<button class="chip${state.cat===id?' is-active':''}" data-cat="${id}" aria-pressed="${state.cat===id}"${dotc?` style="--dot:${dotc}"`:''}>${dotc?'<i></i>':''}${label} <span class="c">${n}</span></button>`;
+  $('#cats').innerHTML=chip('all','전체',base.length)+FILTERS.map(([id,label])=>chip(id,label,base.filter(e=>e.cat===id).length,DOT[id])).join('');
+}
+
+function badgesOf(e){
+  const r=regOf(e), mine=mineFor(e.id), out=[];
+  if(mine) out.push(`<span class="badge badge--mine">✓ ${esc(mine.kind==='apply'?'신청 완료':'문의 접수')}</span>`);
+  out.push(`<span class="badge badge--${r.tone==='warn'?'warn':r.tone}">${r.label}</span>`);
+  if(e.cap&&phaseOf(e)!=='past'&&r.key!=='full'&&r.key!=='soon') out.push(`<span class="badge badge--muted">잔여 ${e.seats}/${e.cap}석</span>`);
+  out.push(...e.elig.map(k=>`<span class="badge badge--neutral">${ELIG[k]}</span>`));
+  return out.join('');
+}
+function ctaOf(e,cls='btn--sm'){
+  const r=regOf(e), mine=mineFor(e.id);
+  if(mine) return `<button class="btn btn--secondary ${cls}" data-my>신청 내역</button>`;
+  if(r.can) return `<button class="btn btn--primary ${cls}" data-apply="${e.id}">신청하기 ${ARROW}</button>`;
+  if(r.ask) return `<button class="btn btn--secondary ${cls}" data-request="ndr" data-for="${e.id}">참여 문의</button>`;
+  if(e.days) return `<button class="btn btn--secondary ${cls}" data-detail="${e.id}">참여기업 보기</button>`;
+  return `<button class="btn btn--secondary ${cls}" disabled>${r.key==='full'?'정원 마감':r.key==='closed'?'종료된 행사':r.key==='ended'?'신청 마감':'신청 준비 중'}</button>`;
+}
+
+function renderList(){
+  const rows=filtered(); let prev='';
+  $('#count').innerHTML=`<b>${rows.length}</b>개의 ${state.phase==='past'?'지난':'예정'} 일정${state.cat!=='all'?` · ${catOf(state.cat).label}`:''}`;
+  if(!rows.length){
+    $('#list').innerHTML=`<div class="cx-empty">조건에 맞는 일정이 없어요.<br><button class="btn btn--secondary btn--sm" data-reset>필터 초기화</button></div>`;
+    return;
+  }
+  $('#list').innerHTML=rows.map((e,i)=>{
+    const [y,m,d]=e.start.split('-'), c=catOf(e.cat), ph=phaseOf(e);
+    const mon=`${y}년 ${+m}월`, head=mon!==prev?`<div class="cx-month">${mon}<span>${state.phase==='past'?'지난 행사':'예정 행사'}</span></div>`:''; prev=mon;
+    return `${head}<article class="cx-row${ph==='past'?' is-past':''}" style="--dot:${DOT[e.cat]};--d:${Math.min(i,6)*45}ms">
+      <div class="cx-date" aria-label="${dateLabel(e)}"><div class="m">${m}월</div><div class="d">${e.tba?'–':+d}</div><div class="w">${e.tba?'일정 미정':wd(e.start)+'요일'}</div>${e.end&&e.end!==e.start?`<div class="r">~${md(e.end)}</div>`:''}</div>
+      <div>
+        <span class="cx-cat"><i></i>${c.label}${srcTag(e)}</span>
+        <button class="cx-title" data-detail="${e.id}">${esc(e.title)}</button>
+        <div class="cx-meta">${esc(metaOf(e))}</div>
+        ${e.cond?`<div class="cx-meta" style="margin-top:2px">자격 · ${esc(e.cond)}${e.deadline&&ph!=='past'?` · 마감 ${md(e.deadline)}`:''}</div>`:''}
+        ${e.series&&seriesCount(e)>1?`<div class="cx-meta" style="margin-top:2px">${SERIES_NAME[e.series]||'정기 행사'} · 2026년 ${seriesCount(e)}회</div>`:''}
+        <div class="cx-badges">${badgesOf(e)}</div>
+      </div>
+      <div class="cx-acts">${ctaOf(e)}<button class="more" data-detail="${e.id}">상세 보기</button></div>
+    </article>`;
+  }).join('');
+  if(!reduced.matches) $$('#list .cx-row').forEach(r=>r.classList.add('in'));
+}
+
+function focusMonth(){
+  const first=filtered()[0]||EVENTS.filter(e=>(phaseOf(e)==='past')===(state.phase==='past'))[0];
+  const iso=first?first.start:TODAY;
+  state.calY=+iso.slice(0,4); state.calM=+iso.slice(5,7)-1;
+}
+function renderCalendar(){
+  const y=state.calY, m=state.calM, ym=`${y}-${String(m+1).padStart(2,'0')}`;
+  const first=new Date(y,m,1).getDay(), last=new Date(y,m+1,0).getDate();
+  const rows=filtered({anyPhase:true}).filter(e=>!e.tba&&e.start<=`${ym}-31`&&endOf(e)>=`${ym}-01`).sort((a,b)=>a.start.localeCompare(b.start));   // 캘린더는 지난·예정 모두 표시 (지난 일정은 흐리게)
+  let cells=[...WD].map(d=>`<div class="dow">${d}</div>`).join('')+'<div class="cx-cell blank" aria-hidden="true"></div>'.repeat(first);
+  for(let d=1;d<=last;d++){
+    const iso=`${ym}-${String(d).padStart(2,'0')}`, inDay=rows.filter(e=>e.start<=iso&&endOf(e)>=iso);
+    cells+=`<div class="cx-cell${iso===TODAY?' today':''}"><span class="n">${d}</span>${inDay.map(e=>`<button class="cx-ev${phaseOf(e)==='past'?' past':''}" style="--dot:${DOT[e.cat]}" data-detail="${e.id}" aria-label="${dot(iso)} ${esc(e.title)} 상세"><b>${catOf(e.cat).label}</b><span>${esc(e.title)}</span></button>`).join('')}</div>`;
+  }
+  const tail=(7-(first+last)%7)%7; cells+='<div class="cx-cell blank" aria-hidden="true"></div>'.repeat(tail);
+  $('#count').innerHTML=`<b>${rows.length}</b>개의 일정 · ${y}년 ${m+1}월`;
+  $('#calendar').innerHTML=`<div class="cx-cal">
+    <div class="cx-cal-bar"><h3>${y}년 ${m+1}월</h3><div class="cx-cal-nav"><button data-month="-1" aria-label="이전 달">‹</button><button data-month="0">이번 일정</button><button data-month="1" aria-label="다음 달">›</button></div></div>
+    <div class="cx-grid">${cells}</div>
+    <div class="cx-agenda"><h4>이 달의 일정</h4>${rows.length?rows.map(e=>`<button class="cx-ag" data-detail="${e.id}"><time>${md(e.start)}${e.end&&e.end!==e.start?'~':''}</time><span class="t">${esc(e.title)}</span><span class="badge badge--${regOf(e).tone==='warn'?'warn':regOf(e).tone}">${regOf(e).label}</span></button>`).join(''):'<p class="cx-meta" style="padding:10px 0">선택한 조건에 맞는 일정이 없는 달이에요. ‹ › 로 다른 달을 확인해주세요.</p>'}</div>
+  </div>`;
+}
+
+function renderExplore(){
+  renderCats();
+  $('#list').hidden=state.view!=='list'; $('#calendar').hidden=state.view!=='calendar';
+  if(state.view==='list') renderList(); else renderCalendar();
+}
+function renderAll(){ renderBookDesc(); renderExplore(); syncBooks(); syncUrl(); }
+/* 필터 상태를 주소에 반영 — 공유 · 뒤로가기 · Home의 '달력 보기' 링크가 같은 상태로 열린다 */
+function syncUrl(){
+  if(!history.replaceState||state.tab!=='internal') return;
+  const q=new URLSearchParams(location.search);
+  state.cat==='all'?q.delete('category'):q.set('category',state.cat);
+  state.view==='list'?q.delete('view'):q.set('view',state.view);
+  state.phase==='upcoming'?q.delete('phase'):q.set('phase',state.phase);
+  q.delete('event');
+  const qs=q.toString(); history.replaceState(null,'',location.pathname+(qs?'?'+qs:''));
+}
+
+/* 카테고리 선택 — 책·칩이 같은 상태를 공유 */
+function setCat(id){
+  state.cat=id;
+  if(state.view==='calendar') focusMonth();
+  renderAll();
+  orbit.dock(id==='all'?null:id);
+  const c=catOf(id);
+  $('#cxLive').textContent=id==='all'?'전체 일정을 표시해요.':`${filterLabel(id)||c.label} 일정 ${filtered().length}건으로 목록을 정리했어요.`;
+}
+function syncBooks(){
+  $$('.book').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.book===state.cat)));
+  const chip=$(`#cats [data-cat="${state.cat}"]`), row=$('#cats');
+  if(chip&&row.scrollWidth>row.clientWidth) row.scrollTo({left:chip.offsetLeft-(row.clientWidth-chip.clientWidth)/2});
+}
+function jumpToExplore(){ $('#explore').scrollIntoView({behavior:scrollBehavior(),block:'start'}); }
+
+/* ═════════ 오비트 모션 (데스크톱 전용 · 모바일은 스와이프 카드) ═════════ */
+/* 공전 모션은 assets/orbit-books.js (Home Access Hub와 공용) */
+const orbit=OrbitBooks.engine($('#shelf'),{toggle:$('#orbitToggle'),isCurrent:id=>state.cat===id});
+
+/* ═════════ 다이얼로그 ═════════ */
+let lastFocus=null, draft=null, detailEv=null;
+function showDialog(html,label='SEMINARS & CONFERENCES'){
+  if($('#cxOverlay').hidden) lastFocus=document.activeElement;
+  $('#dlgLabel').textContent=label; $('#dlgBody').innerHTML=html;
+  $('#cxOverlay').hidden=false; document.body.style.overflow='hidden';
+  $('.cx-dialog').scrollTop=0; $('.cx-dialog [data-close]').focus();
+}
+function closeDialog(){
+  $('#cxOverlay').hidden=true; $('#dlgBody').innerHTML=''; document.body.style.overflow='';
+  if(lastFocus&&lastFocus.isConnected) lastFocus.focus();
+}
+
+function detail(id){
+  const e=EVENTS.find(x=>x.id===id); if(!e) return; detailEv=e;
+  const c=catOf(e.cat), mine=mineFor(e.id);
+  const prog=e.days
+    ? `<h3>참여기업·일정 <small style="font-weight:500;color:var(--color-muted)">· 안내문 기준 A/B 동시 진행</small></h3>
+       <div class="cx-daytabs" role="tablist" aria-label="행사 날짜">${e.days.map((d,i)=>`<button role="tab" data-day="${i}" aria-selected="${i===0}">${md(d.date)} ${wd(d.date)}</button>`).join('')}</div>
+       <div id="dayTable"></div>`
+    : `<h3>프로그램</h3><div class="cx-prog">${e.program?e.program.map(p=>`<div><time>${p[0]}</time><span>${esc(p[1])}${p[2]?`<small>${esc(p[2])}</small>`:''}</span></div>`).join(''):'<p class="cx-meta">프로그램 확정 후 안내 예정</p>'}</div>`;
+  showDialog(`
+    <span class="badge badge--neutral" style="--dot:${DOT[e.cat]}">${c.label}${srcLabel(e)}</span>
+    <h2 id="dlgTitle">${esc(e.title)}</h2>
+    <p class="lead">${esc(e.intro||'')}</p>
+    <div class="cx-badges" style="margin-top:12px">${badgesOf(e)}</div>
+    <dl class="cx-dl">
+      <dt>일시</dt><dd>${dateLabel(e)}${e.time?`<br>${e.time}`:''}</dd>
+      ${e.analysts&&e.analysts.length?`<dt>담당</dt><dd>${esc(e.analysts.join(', '))}</dd>`:''}
+      ${e.series&&seriesCount(e)>1?`<dt>정기 행사</dt><dd>${SERIES_NAME[e.series]||'정기 행사'} · 2026년 ${seriesCount(e)}회 진행</dd>`:''}
+      <dt>장소·방식</dt><dd>${esc(where(e))||'추후 안내'}</dd>
+      <dt>참여 대상</dt><dd>${e.elig.length?e.elig.map(k=>ELIG[k]).join(' · '):'추후 안내'}</dd>
+      ${e.cond?`<dt>자격 조건</dt><dd>${esc(e.cond)}</dd>`:''}
+      <dt>신청 방식</dt><dd>${e.howTo?esc(e.howTo):e.mode==='invite'?'초청 기반 · 담당 애널리스트 문의':e.openAt&&e.openAt>TODAY?`${dot(e.openAt)} 신청 오픈 예정`:e.deadline?`온라인 신청 · 마감 ${dot(e.deadline)} 18:00`:'추후 안내'}</dd>
+      ${e.cap?`<dt>정원</dt><dd>${e.cap}명 · ${phaseOf(e)==='past'?'행사 종료':`잔여 ${e.seats}석`}</dd>`:''}
+      <dt>내 신청 상태</dt><dd>${mine?`${mine.kind==='apply'?'신청 완료':'문의 접수'} · ${dot(mine.at.slice(0,10))} (시연 기록)`:'미신청'}</dd>
+    </dl>
+    ${prog}
+    ${e.notes?`<h3>참여 안내</h3><div class="cx-prog">${e.notes.map((n,i)=>`<div><time>0${i+1}</time><span>${esc(n)}</span></div>`).join('')}</div>`:''}
+    <div class="cx-dfoot"><span class="meta">문의 · 유진투자증권 법인영업팀 · 리서치센터</span>${ctaOf(e,'')}</div>`,c.label.toUpperCase());
+  if(e.days) selectDay(e,0);
+}
+function selectDay(e,i){
+  $$('[data-day]').forEach(b=>b.setAttribute('aria-selected',String(+b.dataset.day===i)));
+  const d=e.days[i];
+  $('#dayTable').innerHTML=`<table class="cx-ab"><caption class="cx-live">${dot(d.date)} 참여기업</caption><thead><tr><th scope="col">시작</th><th scope="col">A</th><th scope="col">B</th></tr></thead><tbody>${d.slots.map(s=>`<tr><th scope="row">${s[0]}</th><td>${esc(s[1])}</td><td>${esc(s[2])}</td></tr>`).join('')}</tbody></table>`;
+}
+
+/* 신청 — 로그인 연결(partials.js openAuth) → 폼 → 확인 → 완료 */
+function personFields(p='',v={}){
+  const u=user();
+  return `<div class="field"><label for="${p}name">이름<span class="req">*</span></label><input class="cx-in" id="${p}name" name="name" required maxlength="50" value="${esc(v.name||'')}" placeholder="테스트 이름" autocomplete="off"></div>
+  <div class="field"><label for="${p}org">소속 기관<span class="req">*</span></label><input class="cx-in" id="${p}org" name="org" required maxlength="80" value="${esc(v.org||'')}" placeholder="테스트 기관명" autocomplete="off"></div>
+  <div class="field"><label for="${p}email">업무용 이메일<span class="req">*</span></label><input class="cx-in" id="${p}email" name="email" type="email" required maxlength="100" value="${esc(v.email||u?.email||'')}" placeholder="test@example.com" autocomplete="off"></div>
+  <div class="field"><label for="${p}phone">연락처<small>선택</small></label><input class="cx-in" id="${p}phone" name="phone" type="tel" maxlength="30" value="${esc(v.phone||'')}" placeholder="회신받을 전화번호" autocomplete="off"></div>`;
+}
+const consent='<label class="cx-check"><input type="checkbox" name="demo" required><span>실제 접수·전송이 없는 시연 화면임을 확인했어요. 테스트 값으로 입력해주세요.</span></label>';
+
+function apply(id,{skipLogin=false,values={}}={}){
+  const e=EVENTS.find(x=>x.id===id); if(!e||!regOf(e).can) return;
+  if(!user()&&!skipLogin){
+    showDialog(`<h2 id="dlgTitle">로그인하고 신청할까요?</h2>
+      <p class="lead">로그인하면 이메일이 자동으로 채워지고 신청 내역을 계정 기준으로 확인할 수 있어요.</p>
+      <div class="cx-mini">${esc(e.title)} · ${dateLabel(e)}</div>
+      <div class="cx-formacts"><button class="btn btn--secondary btn--sm" data-apply="${id}" data-guest>비회원으로 계속</button><button class="btn btn--primary btn--sm" data-login="${id}">로그인</button></div>`,'REGISTRATION');
+    return;
+  }
+  const c=catOf(e.cat);
+  showDialog(`<span class="badge badge--brand">참가 신청</span>
+    <h2 id="dlgTitle">${esc(e.title)}</h2>
+    <p class="lead">${dateLabel(e)} · ${e.time} · ${esc(e.place)}</p>
+    <div class="cx-mini">자격 조건 · ${esc(e.cond)}${e.cap?` · 잔여 ${e.seats}석`:''}</div>
+    <form id="applyForm" data-kind="apply" data-event="${e.id}">
+      <div class="cx-fields">${personFields('ap-',values)}
+        ${e.format==='하이브리드'?`<div class="field full"><label for="ap-attend">참석 방식<span class="req">*</span></label><select class="cx-in" id="ap-attend" name="attend"><option>현장 참석</option><option>온라인 시청</option></select></div>`:''}
+        <div class="field full"><label for="ap-q">사전 질문<small>선택</small></label><textarea class="cx-in" id="ap-q" name="question" maxlength="1000" placeholder="행사에서 확인하고 싶은 내용을 적어주세요.">${esc(values.question||'')}</textarea></div>
+      </div>
+      <label class="cx-check"><input type="checkbox" name="eligible" required><span>${e.elig.map(k=>ELIG[k]).join('·')} 대상이며 위 자격 조건에 해당해요.</span></label>
+      ${consent}
+      <div class="cx-formacts"><button class="btn btn--secondary btn--sm" type="button" data-detail="${e.id}">이전</button><button class="btn btn--primary btn--sm" type="submit">신청 내용 확인 ${ARROW}</button></div>
+    </form>`,c.label.toUpperCase()+' · REGISTRATION');
+}
+
+const SECTORS=['반도체 · IT','모빌리티 · 산업재','금융 · 디지털자산','소비재 · 유통','매크로 · 투자전략','기타 / 담당자 상담'];
+const ANALYSTS=['반도체 담당 애널리스트','자동차 담당 애널리스트','디지털자산 담당 애널리스트','투자전략 담당 애널리스트'];
+function requestFields(kind,p='',v={}){
+  const by=v.selectBy||'sector';
+  return `<div class="cx-fields">
+    <div class="field full"><label for="${p}by">${kind==='earnings'?'실적발표 문의 기준':kind==='ndr'?'NDR 문의 기준':'세미나 요청 기준'}<span class="req">*</span></label>
+      <select class="cx-in" id="${p}by" name="selectBy"><option value="sector"${by==='sector'?' selected':''}>섹터로 선택</option><option value="analyst"${by==='analyst'?' selected':''}>애널리스트로 선택</option></select></div>
+    <div class="field full" data-by="sector"${by==='analyst'?' hidden':''}><label for="${p}sector">섹터<span class="req">*</span></label><select class="cx-in" id="${p}sector" name="sector"${by==='analyst'?' disabled':' required'}><option value="">섹터 선택</option>${SECTORS.map(s=>`<option${v.sector===s?' selected':''}>${s}</option>`).join('')}</select></div>
+    <div class="field full" data-by="analyst"${by==='sector'?' hidden':''}><label for="${p}analyst">애널리스트<span class="req">*</span></label><select class="cx-in" id="${p}analyst" name="analyst"${by==='sector'?' disabled':' required'}><option value="">애널리스트 선택</option>${ANALYSTS.map(s=>`<option${v.analyst===s?' selected':''}>${s}</option>`).join('')}</select></div>
+    ${kind==='earnings'?`<div class="field full"><label for="${p}company">관심 기업<span class="req">*</span></label><input class="cx-in" id="${p}company" name="company" required maxlength="100" value="${esc(v.company||'')}" placeholder="문의할 기업명"></div>`:''}
+    ${kind==='ndr'?`<div class="field full"><label for="${p}event">관심 NDR<small>선택</small></label><select class="cx-in" id="${p}event" name="eventTitle"><option value="">일정 선택</option>${EVENTS.filter(e=>e.cat==='ndr'&&phaseOf(e)!=='past').map(e=>`<option${v.eventTitle===e.title?' selected':''}>${e.title}</option>`).join('')}</select></div>`:''}
+    <div class="field"><label for="${p}date">희망 일정<small>선택</small></label><input class="cx-in" id="${p}date" name="preferred" type="date" min="${TODAY}" value="${esc(v.preferred||'')}"></div>
+    <div class="field"><label for="${p}fmt">희망 방식</label><select class="cx-in" id="${p}fmt" name="format">${['담당자와 협의','대면','온라인'].map(s=>`<option${v.format===s?' selected':''}>${s}</option>`).join('')}</select></div>
+    ${personFields(p,v)}
+    <div class="field full"><label for="${p}question">${kind==='earnings'?'문의 내용':'궁금한 내용 · 희망 주제'}<span class="req">*</span></label><textarea class="cx-in" id="${p}question" name="question" required maxlength="1200" placeholder="${kind==='earnings'?'확인하고 싶은 기업·분기 및 문의 내용':'예: 반도체 업황과 주요 기업 전망, AI 투자 흐름 등'}">${esc(v.question||'')}</textarea></div>
+  </div>`;
+}
+const scheduleNote='<div class="cx-svc"><strong>유리를 통한 일정 조율 안내</strong><p>유리가 요청 내용을 담당 애널리스트에게 전달하고, 입력한 이메일로 일정 조율과 확정 여부를 안내해 드려요. 요청만으로 일정이 확정되지는 않아요.</p></div>';
+function request(kind='earnings',values={},forId=''){
+  const ev=forId&&EVENTS.find(e=>e.id===forId);
+  if(ev&&!values.eventTitle) values={...values,eventTitle:ev.title};
+  showDialog(`<h2 id="dlgTitle">${kind==='ndr'?'NDR 참여 문의':kind==='earnings'?'실적발표 문의':'애널리스트 세미나 요청'}</h2>
+    <p class="lead">${kind==='ndr'?'NDR은 초청을 통해 참여하는 방식이에요. 관심 섹터를 남기면 담당 애널리스트가 미팅 가능 시간을 안내해요.':'희망 주제와 담당자를 선택해 문의해주세요.'}</p>
+    ${kind==='ndr'?'':`<div class="cx-seg" role="group" aria-label="문의 유형"><button type="button" data-kind="seminar" aria-pressed="${kind==='seminar'}">애널리스트 세미나</button><button type="button" data-kind="earnings" aria-pressed="${kind==='earnings'}">실적발표</button></div>`}
+    <form id="requestForm" data-kind="${kind}">${requestFields(kind,'rq-',values)}${kind==='seminar'?scheduleNote:''}${consent}
+      <div class="cx-formacts"><button type="button" class="btn btn--secondary btn--sm" data-close>닫기</button><button class="btn btn--primary btn--sm" type="submit">문의 내용 확인 ${ARROW}</button></div>
+      <p class="cx-formnote">공개 일정에 게시하지 않는 개별 문의 · 시연에서는 서버로 전송하지 않아요.</p>
+    </form>`,'INDIVIDUAL INQUIRY');
+}
+
+/* 세미나 요청 탭 (인라인) */
+function renderSeminarPanel(){
+  const panel=$('#panel-seminar'); if(panel.children.length) return;
+  panel.innerHTML=`<div class="cx-split">
+    <div>
+      <div class="eyebrow">ANALYST SEMINAR</div>
+      <h2>섹터별/애널리스트별 세미나 신청</h2>
+      <p class="lead">유리가 요청 내용을 확인하고, 이메일로 일정 조율을 안내해 드려요. 애널리스트 일정에 따라 희망 날짜와 실제 진행 가능한 날짜가 다를 수 있어요.</p>
+      <ol class="cx-steps"><li><b>01</b>세미나 요청 신청</li><li><b>02</b>애널리스트에게 전달</li><li><b>03</b>일정 조율·확정</li></ol>
+      <div class="cx-faq"><h3>자주 묻는 질문</h3>
+        <details><summary>애널리스트를 몰라도 요청할 수 있나요?</summary><p>네. ‘섹터로 선택’에서 관심 산업을 고르고 궁금한 내용을 남기면 해당 섹터 담당 애널리스트와 연결해 드려요.</p></details>
+        <details><summary>요청하면 일정이 바로 확정되나요?</summary><p>유리가 담당 애널리스트와 진행 가능 여부를 확인한 뒤, 이메일로 일정 조율과 확정 여부를 안내해 드려요. 희망 날짜와 실제 진행 가능한 날짜가 다를 수 있어요.</p></details>
+        <details><summary>행사 참가 신청과 어떻게 다른가요?</summary><p>기업행사/컨퍼런스는 정해진 일정에 참여하는 방식이고, 개별 세미나는 기관에 필요한 내용과 참석 대상에 맞춰 별도로 협의해요.</p></details>
+        <details><summary>실적발표 관련 문의도 가능한가요?</summary><p>네. 관심 기업과 확인하고 싶은 분기·내용을 남겨주세요.</p><button class="btn btn--secondary btn--sm" data-request="earnings" style="margin-top:8px">실적발표 문의</button></details>
+      </div>
+    </div>
+    <section class="cx-card"><form id="seminarForm" data-kind="seminar" data-inline><h3>애널리스트 세미나 요청</h3>${requestFields('seminar','sm-')}
+      <div class="cx-fields"><div class="field"><label for="sm-aud">참석 대상<small>선택</small></label><select class="cx-in" id="sm-aud" name="audience"><option>담당자와 협의</option><option>기관 리서치 · 운용팀</option><option>법인 임직원 · 경영진</option><option>내부 교육 대상자</option><option>WM 고객 모임</option></select></div>
+      <div class="field"><label for="sm-cnt">예상 인원<small>선택</small></label><input class="cx-in" id="sm-cnt" name="attendees" type="number" min="1" max="10000" placeholder="예: 10"></div></div>
+      ${scheduleNote}${consent}
+      <div class="cx-formacts"><button class="btn btn--primary btn--sm" type="submit">요청 내용 확인 ${ARROW}</button></div>
+      <p class="cx-formnote">시연용 폼 · 실제 접수·일정 확정·연락 없음</p></form></section>
+  </div>`;
+}
+
+/* 외부 행사 탭 (인라인) */
+function renderExternalForm(){
+  if($('#externalForm')) return;
+  $('#extFormArea').innerHTML=`<form id="externalForm" data-kind="external" data-inline>
+    <h3 id="extTitle">행사 주선 문의</h3>
+    <div class="cx-seg" role="group" aria-label="요청 방식"><button type="button" data-ext-mode="inquiry" aria-pressed="true">행사 주선 문의</button><button type="button" data-ext-mode="suggest" aria-pressed="false">희망 행사 제안</button></div>
+    <input type="hidden" name="requestMode" value="행사 주선 문의">
+    <div class="cx-fields">
+      <div class="field full"><label for="ex-type">관심 행사 유형<span class="req">*</span></label><select class="cx-in" id="ex-type" name="inquiryType" required><option value="">행사 유형 선택</option><option>산업·테마 세미나</option><option>기업 인사이트 세션</option><option>연사 초청·행사 협업</option><option>외부 행사 참가</option><option>기타 / 담당자와 협의</option></select></div>
+      <div class="field full"><label for="ex-title" id="exTitleLbl">관심 행사 또는 주제<span class="req">*</span></label><input class="cx-in" id="ex-title" name="eventTitle" required maxlength="100" placeholder="예: 반도체 산업전망 세미나"></div>
+      <div class="field"><label for="ex-date">희망 일정<small>선택</small></label><input class="cx-in" id="ex-date" name="preferred" type="date" min="${TODAY}"></div>
+      <div class="field"><label for="ex-loc">장소 또는 방식<small>선택</small></label><input class="cx-in" id="ex-loc" name="location" maxlength="100" placeholder="대면 / 온라인 / 협의"></div>
+      ${personFields('ex-')}
+      <div class="field full"><label for="ex-q" id="exQLbl">필요한 내용<span class="req">*</span></label><textarea class="cx-in" id="ex-q" name="question" required maxlength="1200" placeholder="행사 목적, 참석 대상, 궁금한 내용 등을 남겨주세요."></textarea></div>
+    </div>
+    <div class="cx-svc"><strong>전화·이메일로 개별 안내</strong><p>요청 내용을 확인한 뒤 행사 관계자와 주선 가능 여부를 검토해요.</p></div>
+    ${consent}
+    <div class="cx-formacts"><button class="btn btn--primary btn--sm" type="submit"><span id="exSubmit">문의 내용 확인</span> ${ARROW}</button></div>
+  </form>`;
+}
+function setExtMode(mode,focus){
+  renderExternalForm(); const f=$('#externalForm'), s=mode==='suggest';
+  f.elements.requestMode.value=s?'희망 행사 제안':'행사 주선 문의';
+  $$('[data-ext-mode]',f).forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.extMode===mode)));
+  $('#extTitle').textContent=s?'원하는 행사 제안':'행사 주선 문의';
+  $('#exTitleLbl').innerHTML=(s?'원하는 행사 · 주제':'관심 행사 또는 주제')+'<span class="req">*</span>';
+  $('#exQLbl').innerHTML=(s?'듣고 싶은 내용 · 만나고 싶은 기업':'필요한 내용')+'<span class="req">*</span>';
+  $('#exSubmit').textContent=s?'제안 내용 확인':'문의 내용 확인';
+  if(focus){ $('#extFormArea').scrollIntoView({behavior:scrollBehavior(),block:'start'}); $('#ex-title').focus({preventScroll:true}); }
+}
+
+/* 확인 → 완료 */
+const NAMES={name:'이름',org:'소속 기관',email:'이메일',phone:'연락처',attend:'참석 방식',question:'질문·문의',sector:'섹터',analyst:'애널리스트',company:'관심 기업',eventTitle:'행사·주제',preferred:'희망 일정',format:'희망 방식',audience:'참석 대상',attendees:'예상 인원',requestMode:'요청 방식',inquiryType:'행사 유형',location:'장소·방식'};
+function confirmDraft(form){
+  const data=Object.fromEntries(new FormData(form)); delete data.demo; delete data.eligible;
+  if(data.selectBy==='analyst') delete data.sector; else delete data.analyst; delete data.selectBy;
+  const kind=form.dataset.kind, ev=form.dataset.event&&EVENTS.find(e=>e.id===form.dataset.event);
+  const type=kind==='apply'?'참가 신청':kind==='seminar'?'세미나 요청':kind==='earnings'?'실적발표 문의':kind==='ndr'?'NDR 참여 문의':data.requestMode==='희망 행사 제안'?'희망 행사 제안':'외부 행사 주선 문의';
+  const title=ev?ev.title:kind==='external'?data.eventTitle:data.eventTitle||type;
+  draft={kind,type,title,eventId:ev?ev.id:'',data,inline:form.hasAttribute('data-inline'),raw:Object.fromEntries(new FormData(form))};
+  showDialog(`<span class="badge badge--brand">내용 확인</span><h2 id="dlgTitle">${esc(type)} 내용 확인</h2><p class="lead">${esc(title)}</p>
+    <dl class="cx-sum">${Object.entries(data).filter(([k,v])=>NAMES[k]&&v).map(([k,v])=>`<dt>${NAMES[k]}</dt><dd>${esc(v)}</dd>`).join('')}</dl>
+    <div class="cx-mini">입력 내용은 이 브라우저의 시연 기록으로만 남고 실제로 전송되지 않아요.</div>
+    <div class="cx-formacts"><button class="btn btn--secondary btn--sm" data-edit>수정</button><button class="btn btn--primary btn--sm" data-complete>${kind==='apply'?'신청하기':kind==='seminar'?'세미나 요청하기':'문의하기'} ${ARROW}</button></div>`,'REVIEW');
+}
+function editDraft(){
+  if(!draft) return; const d=draft;
+  if(d.inline){ closeDialog(); return; }
+  if(d.kind==='apply') apply(d.eventId,{skipLogin:true,values:d.raw}); else request(d.kind,d.raw);
+}
+function complete(){
+  if(!draft) return; const d=draft; draft=null;
+  records.unshift({id:Date.now()+'-'+Math.random().toString(36).slice(2,7),kind:d.kind==='apply'?'apply':'request',type:d.type,title:d.title,eventId:d.eventId,at:new Date().toISOString(),email:user()?.email||''});
+  if(d.kind==='apply'){ const e=EVENTS.find(x=>x.id===d.eventId); if(e&&e.cap&&e.seats>0) e.seats--; }
+  saveRecords();
+  if(d.inline){ const f=d.kind==='external'?$('#externalForm'):$('#seminarForm'); f&&f.reset(); if(d.kind==='external') setExtMode('inquiry'); else toggleBy(f,'sector'); }
+  renderAll();
+  showDialog(`<div class="cx-center"><div class="cx-ok" aria-hidden="true">✓</div><h2 id="dlgTitle">${esc(d.type)} 완료 (시연)</h2><p class="lead">${esc(d.title)}</p></div>
+    ${d.kind==='seminar'?scheduleNote:''}
+    <div class="cx-mini">‘내 신청·문의’와 일정 목록의 신청 상태에 바로 반영했어요. 실제 접수·이메일 발송은 일어나지 않았어요.</div>
+    <div class="cx-formacts"><button class="btn btn--secondary btn--sm" data-my>내 신청·문의</button><button class="btn btn--primary btn--sm" data-close>확인</button></div>`,'COMPLETE');
+  if(typeof toast==='function') toast(`${d.type}이(가) 기록됐어요.`);
+}
+function myRecords(){
+  const u=user();
+  showDialog(`<h2 id="dlgTitle">내 신청·문의</h2><p class="lead">${u?`${esc(u.email)} 계정으로 로그인 중 · `:''}이 브라우저에서 진행한 시연 기록이에요.</p>
+    ${records.length?records.map(r=>`<div class="cx-myitem"><div class="b"><span class="badge ${r.kind==='apply'?'badge--brand':'badge--neutral'}">${esc(r.type)}</span><h4>${esc(r.title)}</h4><p>${dot(r.at.slice(0,10))} · ${r.kind==='apply'?'신청 완료':'접수 · 담당자 검토 대기'} · 시연 기록</p></div>${r.eventId?`<button data-detail="${r.eventId}">상세</button>`:''}<button data-remove="${r.id}">삭제</button></div>`).join(''):'<div class="cx-empty">아직 신청·문의 기록이 없어요.</div>'}
+    ${u?'':'<div class="cx-mini">로그인하면 신청 폼의 이메일이 자동으로 채워져요. <button class="btn btn--text" style="font-size:inherit" data-login>로그인</button></div>'}`,'MY REQUESTS');
+}
+function toggleBy(form,val){
+  $$('[data-by]',form).forEach(f=>{ const on=f.dataset.by===val, s=$('select',f); f.hidden=!on; s.disabled=!on; s.required=on; });
+}
+
+/* ═════════ 탭 · 이벤트 바인딩 ═════════ */
+function setTab(tab,{scroll=true}={}){
+  state.tab=tab;
+  $$('#cxTabs button').forEach(b=>b.classList.toggle('is-active',b.dataset.tab===tab));
+  $$('#cxTabs button').forEach(b=>{ b.setAttribute('aria-selected',String(b.dataset.tab===tab)); b.tabIndex=b.dataset.tab===tab?0:-1; });
+  ['internal','seminar','external'].forEach(t=>$('#panel-'+t).hidden=t!==tab);
+  if(tab==='seminar') renderSeminarPanel();
+  if(tab==='external') renderExternalForm();
+  if(history.replaceState) history.replaceState(null,'',tab==='internal'?location.pathname:'#'+tab);
+  if(scroll) $('#cxTabs').scrollIntoView({behavior:scrollBehavior(),block:'nearest'});
+}
+
+document.addEventListener('click',ev=>{
+  const b=ev.target.closest('button'); if(!b) return;
+  if(b.dataset.book){ const id=b.dataset.book; if(state.cat===id&&!mobileMQ.matches) orbit.toggleOpen(id); else setCat(id); return; }
+  if(b.dataset.cat){ setCat(b.dataset.cat); return; }
+  if(b.hasAttribute('data-jump')){ jumpToExplore(); return; }
+  if(b.dataset.tab&&!b.closest('#cxTabs')){ if(!$('#cxOverlay').hidden) closeDialog(); setTab(b.dataset.tab); return; }
+  if(b.closest('#cxTabs')&&b.dataset.tab){ setTab(b.dataset.tab,{scroll:false}); return; }
+  if(b.dataset.phase){ state.phase=b.dataset.phase; $$('#phaseTabs button').forEach(x=>{ x.classList.toggle('is-active',x===b); x.setAttribute('aria-selected',String(x===b)); x.tabIndex=x===b?0:-1; }); focusMonth(); renderExplore(); syncUrl(); return; }
+  if(b.dataset.view){ state.view=b.dataset.view; $$('[data-view]').forEach(x=>x.setAttribute('aria-pressed',String(x===b))); if(state.view==='calendar') focusMonth(); renderExplore(); syncUrl(); return; }
+  if(b.hasAttribute('data-month')){ const d=+b.dataset.month; if(d===0) focusMonth(); else { state.calM+=d; if(state.calM<0){state.calM=11;state.calY--;} if(state.calM>11){state.calM=0;state.calY++;} } renderCalendar(); return; }
+  if(b.hasAttribute('data-reset')){ state.analyst='all'; $('#analyst').value='all'; state.cat='all'; state.elig='all'; state.openOnly=false; state.q=''; $('#q').value=''; $('#elig').value='all'; $('#openOnly').checked=false; setCat('all'); return; }
+  if(b.dataset.day){ if(detailEv&&detailEv.days) selectDay(detailEv,+b.dataset.day); return; }
+  if(b.dataset.detail){ detail(b.dataset.detail); return; }
+  if(b.dataset.apply){ apply(b.dataset.apply,{skipLogin:b.hasAttribute('data-guest')}); return; }
+  if(b.hasAttribute('data-login')){ const id=b.dataset.login; closeDialog(); pendingApply=id||null; if(typeof openAuth==='function') openAuth('login'); return; }
+  if(b.dataset.request){ request(b.dataset.request,{},b.dataset.for||''); return; }
+  if(b.dataset.kind&&b.closest('.cx-seg')){ request(b.dataset.kind); return; }
+  if(b.dataset.ext){ setExtMode('inquiry'); $('#ex-type').value=b.dataset.ext; $('#ex-title').value=b.dataset.ext; $('#extFormArea').scrollIntoView({behavior:scrollBehavior(),block:'start'}); $('#ex-q').focus({preventScroll:true}); return; }
+  if(b.dataset.extMode){ setExtMode(b.dataset.extMode,!b.closest('#externalForm')); return; }
+  if(b.hasAttribute('data-my')){ myRecords(); return; }
+  if(b.hasAttribute('data-edit')){ editDraft(); return; }
+  if(b.hasAttribute('data-complete')){ complete(); return; }
+  if(b.dataset.remove){ records=records.filter(r=>r.id!==b.dataset.remove); saveRecords(); renderAll(); myRecords(); return; }
+  if(b.hasAttribute('data-close')){ closeDialog(); return; }
+});
+document.addEventListener('submit',ev=>{ const f=ev.target; if(!f.dataset.kind) return; ev.preventDefault(); if(f.reportValidity()) confirmDraft(f); });
+document.addEventListener('change',ev=>{
+  const t=ev.target;
+  if(t.name==='selectBy') toggleBy(t.form,t.value);
+  if(t.id==='elig'){ state.elig=t.value; renderExplore(); }
+  if(t.id==='analyst'){ state.analyst=t.value; renderExplore(); }
+  if(t.id==='openOnly'){ state.openOnly=t.checked; renderExplore(); }
+});
+$('#q').addEventListener('input',e=>{ state.q=e.target.value.trim(); renderExplore(); });
+$('#cxOverlay').addEventListener('click',e=>{ if(e.target.id==='cxOverlay') closeDialog(); });
+document.addEventListener('keydown',ev=>{
+  if($('#cxOverlay').hidden) return;
+  if(ev.key==='Escape'){ ev.preventDefault(); closeDialog(); }
+  if(ev.key==='Tab'){ const f=$$('button,input,select,textarea,[tabindex="0"]',$('.cx-dialog')).filter(x=>!x.disabled&&x.getClientRects().length); const a=f[0],z=f.at(-1);
+    if(ev.shiftKey&&document.activeElement===a){ev.preventDefault();z.focus();} else if(!ev.shiftKey&&document.activeElement===z){ev.preventDefault();a.focus();} }
+});
+/* 책 사이 ←→ 이동 */
+$('#bookTrack').addEventListener('keydown',ev=>{
+  if(!['ArrowLeft','ArrowRight'].includes(ev.key)) return; const bs=$$('.book'), i=bs.indexOf(document.activeElement); if(i<0) return;
+  ev.preventDefault(); const n=bs[(i+(ev.key==='ArrowRight'?1:-1)+bs.length)%bs.length]; n.focus(); n.click();
+});
+
+/* 로그인 후 대기 중이던 신청을 이어서 진행 */
+let pendingApply=null;
+if(typeof onAuth==='function') onAuth(u=>{ if(u&&pendingApply){ const id=pendingApply; pendingApply=null; if(typeof closeAuth==='function') closeAuth(); apply(id); } });
+
+/* ═════════ 시작 ═════════ */
+renderBooks(); orbit.init(); syncMyCount();
+$('#analyst').insertAdjacentHTML('beforeend',[...new Set(EVENTS.flatMap(e=>e.analysts||[]))].sort((a,b)=>a.localeCompare(b,'ko')).map(n=>`<option>${esc(n)}</option>`).join(''));
+const initTab=location.hash.slice(1), init=new URLSearchParams(location.search);
+setTab(['seminar','external'].includes(initTab)?initTab:'internal',{scroll:false});
+if(CATS.some(c=>c.id===init.get('category'))) state.cat=init.get('category');
+if(init.get('view')==='calendar'){ state.view='calendar'; $$('[data-view]').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.view==='calendar'))); }
+if(init.get('phase')==='past'){ state.phase='past'; $$('#phaseTabs button').forEach(x=>{ const on=x.dataset.phase==='past'; x.classList.toggle('is-active',on); x.setAttribute('aria-selected',String(on)); x.tabIndex=on?0:-1; }); }
+const initEvent=init.get('event');
+focusMonth(); renderAll();
+if(state.cat!=='all') orbit.dock(state.cat);
+if(initEvent&&EVENTS.some(e=>e.id===initEvent)) detail(initEvent);
+else if(init.has('view')||init.has('category')) jumpToExplore();
+if(initTab==='my') myRecords();   // 프로필 메뉴의 '내 행사 (My Events)'
+</script>
+</body>
+</html>

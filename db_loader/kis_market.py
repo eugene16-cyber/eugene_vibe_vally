@@ -61,6 +61,9 @@ def crawl(days=7):
             print(f"  ({name} 업종 생략: {e})")
     num2 = lambda v: f"{v:,.2f}"
     pct = lambda v: f"{v:+.2f}%"
+    now = kis.now_kst()
+    if now.hour * 60 + now.minute < 15 * 60 + 40:              # 장 마감(15:30) 전이면 오늘은 '마감' 시황이 아니므로 뺀다
+        kospi.pop(now.date().isoformat(), None)
     rows = []
     for i, d in enumerate(sorted(kospi, reverse=True)[:days]):
         fk, fq = _flows(cli, "KSP", d), _flows(cli, "KSQ", d)

@@ -54,6 +54,15 @@ def _std(x):
 def _monthly(cli, code, start, end, index=False):
     """{YYYY-MM: 종가} — 이번 달(미완성 월)은 뺀다."""
     _, bars = (cli.index_chart if index else cli.stock_chart)(code, start, end, "M")
+    while index and len(bars) % 50 == 0 and bars:              # 지수 월봉은 한 번에 50개까지 → 앞쪽을 이어 받는다
+        last = bars[-1]["stck_bsop_date"]
+        upto = dt.date(int(last[:4]), int(last[4:6]), 1) - dt.timedelta(days=1)
+        if upto < start:
+            break
+        more = cli.index_chart(code, start, upto, "M")[1]
+        if not more:
+            break
+        bars += more
     key = "bstp_nmix_prpr" if index else "stck_clpr"
     cur = end.strftime("%Y-%m")
     return {_mkey(b["stck_bsop_date"]): float(b[key]) for b in bars

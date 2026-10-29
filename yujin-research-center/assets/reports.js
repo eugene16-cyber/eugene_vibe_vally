@@ -176,7 +176,10 @@
   }
 
   /* ---------- 시작 · Supabase 덮어쓰기 ---------- */
-  var want = new URLSearchParams(location.search).get('id');
+  var params = new URLSearchParams(location.search);
+  var want = params.get('id');
+  // ?q=<검색어> — 종목 이벤트 모달의 "관련 리포트 →" 등에서 넘어올 때
+  if (params.get('q')) { f.q = params.get('q').trim(); $('[data-q]').value = f.q; }
   wire(); fillOptions(); render();
   if (want && /^S\d+$/.test(want)) openReport(want);
 
