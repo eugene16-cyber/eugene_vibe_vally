@@ -14,19 +14,14 @@
   var profile = null;   // 고른 고객 정보 — 로그인 단계에서 세션이 된다
   var lastForm = 's-type';
 
-  var main = $('#main'), video = $('#reel-video');
+  var main = $('#main');
 
   function go(id) {
-    // 쇼릴 단계만 전체 화면, 나머지는 줄어든 프레임에서 반복 재생
-    var reel = id === 's-reel';
-    main.setAttribute('data-phase', reel ? 'reel' : 'pick');
-    video.loop = !reel;
-    if (!reel && video.paused) video.play().catch(function () {});
     $$('.step').forEach(function (s) { s.classList.toggle('is-on', s.id === id); });
-    $('#entry-foot').hidden = id === 's-reel';
+    if (id === 's-login' && profile) showWho();
     window.scrollTo(0, 0);
     var h = $('#' + id + ' h1, #' + id + ' h2');
-    if (h && id !== 's-reel') { h.tabIndex = -1; h.focus({ preventScroll: true }); }
+    if (h) { h.tabIndex = -1; h.focus({ preventScroll: true }); }
   }
 
   function buildProfile(form, persona) {
@@ -63,11 +58,6 @@
   }
 
   /* ---------- 이벤트 ---------- */
-  // 쇼릴 진행 바 · 끝나면 고객 유형 선택으로
-  video.addEventListener('timeupdate', function () {
-    if (video.duration) $('#reel-progress').style.width = (video.currentTime / video.duration * 100) + '%';
-  });
-  video.addEventListener('ended', function () { if (main.getAttribute('data-phase') === 'reel') go('s-type'); });
   document.addEventListener('click', function (e) {
     var t = e.target.closest('[data-go]');
     if (t) go(t.getAttribute('data-go'));
@@ -94,13 +84,12 @@
     finish(Object.assign(s, { status: 'approved' }));
   });
 
-  window.ILEntry = { go: go, finish: finish, showWait: showWait, getProfile: function () { return profile; }, DEMO: DEMO };
+  window.ILEntry = { go: go, finish: finish, showWait: showWait, getProfile: function () { return profile; }, setProfile: function (p) { profile = p; }, DEMO: DEMO };
 
   /* ---------- 시작 화면 ---------- */
   var q = new URLSearchParams(location.search);
   var demoStatus = q.get('demo_status');
   if (demoStatus === 'pending' || demoStatus === 'rejected') showWait(demoStatus);
-  else go(q.get('start') === '1' ? 's-type' : 's-reel');
-  // 첫 화면은 애니메이션 없이 자리 잡고, 이후 단계 전환부터 줄어드는 모션을 쓴다
-  requestAnimationFrame(function () { requestAnimationFrame(function () { main.classList.remove('is-instant'); }); });
+  // 대화 상담은 첫 화면(index.html · 유리). 여기는 유형 직접 선택 · 이메일 로그인 · 승인 대기
+  else go('s-type');
 })();

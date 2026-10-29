@@ -1,0 +1,65 @@
+// Cloudflare Pages Function — POST /api/yuri
+// 유리 가입 상담의 AI 부분만 맡는다. Gemini 키는 Pages 시크릿 GEMINI_API_KEY에만 둔다(클라이언트 · git에 넣지 않음).
+//   task 'ask'     : 어드민이 정한 질문(base)을 고객 프로필에 맞게 한두 문장으로 다듬는다. 보기(칩)는 바꾸지 않는다.
+//   task 'extract' : 자유 입력 한 문장에서 여러 슬롯을 한 번에 뽑는다(정해진 보기 안에서만).
+const MODEL = 'gemini-3.5-flash';            // 2026-10 기준 이 키로 호출되는 Flash 모델
+const FALLBACK = 'gemini-3.5-flash-lite';     // 혼잡(5xx)일 때 한 번 더
+const RULES = [
+  '너는 유진투자증권 리서치센터의 법인 고객 가입 상담 AI "유리"다.',
+  '말투는 해요체(~해요, ~세요). 한국어로만 답한다.',
+  '특정 종목 매수 · 매도 권유, 수익 보장, 목표 수익률처럼 투자 권유로 읽힐 표현은 절대 쓰지 않는다.',
+  '공시나 DB로 이미 확인된 정보는 다시 묻지 않는다.',
+  '반드시 JSON 하나만 출력한다.'
+].join('\n');
+
+function prompt(body) {
+  if (body.task === 'ask') {
+    return [
+      `다음 질문을 이 고객에게 맞게 자연스럽게 다듬어 줘. 의미와 묻는 항목(${body.slot})은 그대로, 2문장 이내, 220자 이내.`,
+      `기본 질문: ${body.base}`,
+      `고객이 고를 보기(바꾸지 말 것): ${(body.options || []).join(' / ')}`,
+      `고객 프로필: ${JSON.stringify(body.profile || {})}`,
+      body.offers ? `지금 안내할 수 있는 행사 · 리포트(이 안에서만 언급): ${JSON.stringify(body.offers)}` : '',
+      '출력 형식: {"question": "..."}'
+    ].filter(Boolean).join('\n');
+  }
+  if (body.task === 'extract') {
+    return [
+      '고객의 답변에서 아래 항목을 찾아 줘. 각 항목은 주어진 보기 중에서만 고르고, 없으면 빼.',
+      `답변: "${String(body.text || '').slice(0, 400)}"`,
+      `보기: ${JSON.stringify(body.schema || {})}`,
+      'services는 콜론 앞 id로 적어. scale은 금액이 나오면 "약 N억 원" 형식. 자주 · 정기적으로 원하면 freq: true.',
+      '출력 형식: {"slots": {"identity": "", "purpose": "", "sectors": [], "services": [], "scale": "", "freq": false}}'
+    ].join('\n');
+  }
+  return null;
+}
+
+// GET — 키가 있는지만 알려 준다(클라이언트가 실패 요청 없이 규칙 기반으로 넘어가게)
+export async function onRequestGet({ env }) {
+  return new Response(JSON.stringify({ ai: !!env.GEMINI_API_KEY, model: MODEL }), { headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' } });
+}
+
+export async function onRequestPost({ request, env }) {
+  const json = (o, status = 200) => new Response(JSON.stringify(o), { status, headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' } });
+  if (!env.GEMINI_API_KEY) return json({ error: 'no_key' }, 503);
+  let body;
+  try { body = await request.json(); } catch { return json({ error: 'bad_json' }, 400); }
+  const text = prompt(body);
+  if (!text) return json({ error: 'bad_task' }, 400);
+  const call = (model) => fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-goog-api-key': env.GEMINI_API_KEY },
+    body: JSON.stringify({
+      systemInstruction: { parts: [{ text: RULES }] },
+      contents: [{ role: 'user', parts: [{ text }] }],
+      generationConfig: { responseMimeType: 'application/json', temperature: 0.4, maxOutputTokens: 400, thinkingConfig: { thinkingBudget: 0 } }
+    })
+  });
+  let r = await call(MODEL);
+  if (r.status >= 500) r = await call(FALLBACK);
+  if (!r.ok) return json({ error: 'upstream', status: r.status }, 502);
+  const data = await r.json();
+  const out = data?.candidates?.[0]?.content?.parts?.map((p) => p.text || '').join('') || '';
+  try { return json(JSON.parse(out)); } catch { return json({ error: 'parse' }, 502); }
+}

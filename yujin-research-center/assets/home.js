@@ -6,6 +6,34 @@
   var Q_KEY = 'il.home-questions';
   var hero = $('#assistant');
 
+  /* ---------- 내 추천 서비스 — 가입 상담 결과(session.recs), 없으면 유형별 기본 추천 ---------- */
+  var BASIC = {
+    inst: [
+      { name: 'Corporate Day', href: 'conferences.html?cat=corp', pillar: '행사', why: ['분기마다 상장사 경영진을 소규모로 만나요'] },
+      { name: '섹터 인뎁스 리스트', href: 'reports.html', pillar: '리서치', why: ['관심 섹터의 심층 리포트를 모아 봐요'] },
+      { name: '카드뉴스', href: 'desk.html#cardnews', pillar: '리서치', why: ['리포트 핵심을 카드 한 장으로 받아요'] },
+      { name: '섹터 세미나 요청', href: 'conferences.html#seminar', pillar: '행사', why: ['원하는 섹터로 세미나를 요청해요'] }
+    ],
+    wm: [
+      { name: 'WM 세미나', href: 'conferences.html?cat=wm', pillar: '행사', why: ['자산배분 · 절세 · 연금 세미나예요'] },
+      { name: '카드뉴스', href: 'desk.html#cardnews', pillar: '리서치', why: ['리포트 핵심을 카드 한 장으로 받아요'] },
+      { name: '근거형 Q&A', href: '#assistant', pillar: '리서치', why: ['리포트를 근거로 답해요'] },
+      { name: '테마 로테이션', href: '#theme', pillar: '리서치', why: ['지금 돈이 몰리는 테마를 봐요'] }
+    ]
+  };
+  (function renderRecs() {
+    var mine = s.recs && s.recs.length, list = mine ? s.recs : BASIC[s.persona === 'hnw' ? 'wm' : 'inst'];
+    var p = s.profile;
+    $('#hm-recs-title').textContent = mine ? (s.org || p.company) + ' 맞춤 추천' : '추천 서비스';
+    $('#hm-recs-meta').textContent = mine
+      ? '가입 상담 답변 기준 · ' + [p.type, p.aum, (p.sectors || []).slice(0, 2).join('·')].filter(Boolean).join(' · ')
+      : '가입 상담을 하면 회사에 맞춰 바뀌어요 · 기본 추천';
+    $('#hm-recs').innerHTML = list.slice(0, 4).map(function (c, i) {
+      return '<li><a href="' + esc(c.href) + '"><span class="hm-recs__top"><span class="hm-recs__rank">' + (i + 1) + '</span><span class="hm-recs__pill">' + esc(c.pillar) + '</span></span>' +
+        '<b>' + esc(c.name) + '</b>' + (c.why && c.why.length ? '<small>' + esc(c.why[0]) + '</small>' : '') + '</a></li>';
+    }).join('');
+  })();
+
   /* ---------- 검수 완료 질문 ---------- */
   var PRESETS = [
     { id: 'semi', tag: '반도체', q: '이번 주 반도체 관련 리포트를 요약해 줘', keys: /반도체|메모리|HBM|파운드리|D램|DRAM/i, lead: '최근 반도체 관련 리포트에서 짚은 내용이에요.' },

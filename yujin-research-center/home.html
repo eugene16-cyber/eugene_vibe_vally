@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="assets/orbit-books.css?v=20261029c">
 <link rel="stylesheet" href="assets/cardnews/cardnews.css?v=20261029c">
 <link rel="stylesheet" href="assets/theme-rotation.css?v=20261029a">
-<link rel="stylesheet" href="assets/home.css?v=20261029e">
+<link rel="stylesheet" href="assets/home.css?v=20261029f">
 <script src="assets/config.js?v=20261029a"></script>
 <script src="assets/config.local.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" defer></script>
@@ -22,13 +22,34 @@
 <script src="assets/anchor.js?v=20261029a" defer></script>
 <script src="assets/cardnews/cardnews.js?v=20261029c" defer></script>
 <script src="assets/theme-rotation.js?v=20261029a" defer></script>
-<script src="assets/home.js?v=20261029e" defer></script>
+<script src="assets/home.js?v=20261029f" defer></script>
 <script src="assets/home-feed.js?v=20261029e" defer></script>
 </head>
 <body data-no-crumb data-nav="dark">
 <main id="main">
 
-  <!-- 1. AI 리서치 어시스턴트 -->
+  <!-- 0. VIP Lounge 메인 — 메인 카피 · 홀로그램(web effect/eugene-hologram-v3) · 내 추천 서비스 -->
+  <section class="hm-top" id="lounge" aria-labelledby="hm-main">
+    <div class="wrap hm-top__in">
+      <p class="hm-top__k">EUGENE VIP LOUNGE</p>
+      <h1 class="hm-top__title" id="hm-main">법인 맞춤형 추천 서비스</h1>
+      <p class="hm-top__sub">행사로 만나고 리서치로 이어 가는, 유진투자증권 리서치센터의 법인 고객 라운지예요.</p>
+    </div>
+    <div class="hm-holo">
+      <iframe src="index.html" title="유진 홀로그램 — 유리와 대화" allow="microphone; autoplay" loading="eager"></iframe>
+    </div>
+    <div class="wrap">
+      <div class="hm-recs" aria-labelledby="hm-recs-title">
+        <div class="hm-recs__head">
+          <h2 class="hm-recs__title" id="hm-recs-title">추천 서비스</h2>
+          <p class="hm-recs__meta" id="hm-recs-meta"></p>
+        </div>
+        <ul class="hm-recs__list" id="hm-recs"></ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 1. 근거형 Q&A — AI 리서치 어시스턴트 -->
   <section class="hh" id="assistant" aria-labelledby="hh-title">
     <div class="hh__orb" aria-hidden="true">
       <span class="hh__ring hh__ring--1"></span><span class="hh__ring hh__ring--2"></span><span class="hh__ring hh__ring--3"></span>
@@ -36,8 +57,8 @@
     </div>
 
     <div class="hh__intro">
-      <p class="hh__eyebrow">AI RESEARCH ASSISTANT · 유리</p>
-      <h1 class="hh__title" id="hh-title">리서치센터 자료로 답하는<br>AI 어시스턴트, 유리예요.</h1>
+      <p class="hh__eyebrow">RESEARCH Q&amp;A · 유리</p>
+      <h2 class="hh__title" id="hh-title">리서치센터 자료로 답하는<br>근거형 Q&amp;A, 유리예요.</h2>
       <p class="hh__desc">애널리스트가 검수한 질문부터 물어보세요. 답변마다 근거 리포트를 함께 보여드려요.</p>
     </div>
 

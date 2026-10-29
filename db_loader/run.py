@@ -15,6 +15,7 @@
   events   DART 공시 + KIS 공시 후 주가 변동                         events.py
   quant    KIS 월봉 · 배당 + DART 사업보고서                        quant.py
   예전 네이버 리포트 수집기(reports.py)는 --only reports_naver 로 따로 돌릴 수 있다.
+  가입 상담용 법인 디렉터리(DART 기업개황 · 약 3천 건 호출)는 자주 바뀌지 않아 --only corps 로 따로 돌린다.  corp_directory.py
 """
 import argparse
 import time
@@ -25,6 +26,7 @@ import stocks
 import kis_market
 import themes
 import kis_global
+import corp_directory
 import events
 import quant
 from common import save_preview
@@ -74,6 +76,7 @@ def main():
     step("global", kis_global.crawl, kis_global.push,
          lambda d: {"global_indices": d[0], "global_sectors": d[1], "global_research": d[2], "global_quotes": d[3], "global_highs": d[4]})
     step("events", lambda: events.crawl(a.days), events.push, lambda d: {"events": d})
+    step("corps", corp_directory.crawl, corp_directory.push, lambda d: {"corp_directory": d})
     step("quant", quant.crawl, quant.push,
          lambda d: {"quant_stock_stats": d[0], "quant_factor_returns": d[1], "quant_factor_meta": d[2]} if d else {})
     if "cardnews" in only and a.cardnews > 0:

@@ -1,7 +1,29 @@
 /* Home (7-3) — 다크 히어로 · Event · AI 앵커 · 카드뉴스 스크롤 · 유형별 · 이어서 보기 */
 :root{--home-ink:#06122b;--home-ink-2:#0b2e6b;--home-line:rgba(255,255,255,.12);--home-soft:rgba(255,255,255,.66)}
 
-/* ---------- 1. AI 리서치 어시스턴트 ---------- */
+/* ---------- 0. VIP Lounge 메인 — 정보 위계: 메인 카피 > 서브 카피 > 홀로그램 > 내 추천 ---------- */
+.hm-top{background:linear-gradient(180deg,var(--home-ink) 0%,#081a3f 100%);color:#fff;padding:56px 0 48px}
+.hm-top__k{font-size:var(--text-micro);font-weight:700;letter-spacing:.16em;color:var(--blue-point)}
+.hm-top__title{margin-top:10px;font-size:clamp(36px,5.2vw,60px);font-weight:800;letter-spacing:-.035em;line-height:1.12;text-wrap:balance}
+.hm-top__sub{margin-top:14px;max-width:620px;font-size:clamp(16px,1.5vw,19px);font-weight:500;color:var(--home-soft);line-height:1.6}
+.hm-holo{max-width:1200px;margin:32px auto 0;padding:0 24px}
+.hm-holo iframe{display:block;width:100%;height:min(760px,calc(100vh - 120px));min-height:560px;border:0;border-radius:var(--radius-lg);background:#000;
+  box-shadow:0 40px 90px -40px rgba(0,0,0,.8),0 0 0 1px rgba(140,200,255,.18)}
+.hm-recs{margin-top:32px}
+.hm-recs__head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.hm-recs__title{font-size:var(--text-lg);font-weight:700}
+.hm-recs__meta{font-size:13px;color:var(--home-soft)}
+.hm-recs__list{list-style:none;margin:14px 0 0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.hm-recs__list a{display:flex;flex-direction:column;gap:6px;height:100%;padding:16px;border-radius:var(--radius-md);background:rgba(255,255,255,.06);
+  border:1px solid var(--home-line);transition:background var(--dur-micro),transform var(--dur-toggle) var(--ease-out)}
+.hm-recs__list a:hover{background:rgba(255,255,255,.1);transform:translateY(-2px)}
+.hm-recs__top{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--home-soft)}
+.hm-recs__rank{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:11px;background:var(--blue-cta);color:#fff}
+.hm-recs__pill{padding:1px 7px;border-radius:var(--radius-full);font-size:11px;font-weight:700;background:rgba(255,255,255,.1)}
+.hm-recs__list b{font-size:16px;line-height:1.35}
+.hm-recs__list small{font-size:12.5px;color:#9fd0ff;line-height:1.5}
+
+/* ---------- 1. 근거형 Q&A — AI 리서치 어시스턴트 ---------- */
 .hh{position:relative;min-height:calc(100vh - var(--nav-h));min-height:calc(100svh - var(--nav-h));overflow:hidden;color:#fff;
   background:radial-gradient(80% 70% at 50% 42%,#14408f 0%,#0a2558 38%,var(--home-ink) 78%);
   display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:1fr auto;padding:40px 24px 32px}
@@ -157,6 +179,7 @@
   .hh__presets ul{display:flex;overflow-x:auto;scrollbar-width:none;padding-bottom:4px}
   .hh__presets li{flex:none;width:240px}
   .hm-anchor__in,.hm-quant__in{grid-template-columns:1fr}
+  .hm-recs__list{grid-template-columns:repeat(2,minmax(0,1fr))}
   .cnx{height:auto}
   .cnx__stage{position:relative;top:auto;height:auto;grid-template-columns:1fr;justify-items:center;text-align:center;padding:var(--space-section) 16px;gap:28px}
   .cnx__phone{width:min(260px,64vw)}
@@ -166,6 +189,10 @@
 }
 @media (max-width:768px){
   .hh{padding:28px 16px 24px}
+  .hm-top{padding:36px 0 32px}
+  .hm-holo{padding:0 16px}
+  .hm-holo iframe{height:640px;min-height:0}
+  .hm-recs__list{grid-template-columns:1fr}
   .hm-orbit{padding:0 16px}
   .hm-cont{grid-template-columns:1fr}
   .hh__answer{top:auto;bottom:220px;transform:translateX(-50%);max-height:52%}

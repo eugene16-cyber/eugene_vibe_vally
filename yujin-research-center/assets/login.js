@@ -38,6 +38,7 @@
       ILEntry.finish({
         role: 'customer', name: src.name, seg: src.seg, cust_type: src.cust_type, persona: src.persona,
         org: src.org || undefined, branch: src.branch || undefined,
+        profile: p && p.profile, recs: p && p.recs,   // 채팅 가입 상담 결과(있을 때)
         status: (m && m.status) || 'pending', via: 'email'
       });
     }).catch(function (e) { console.warn('[IL] 회원 정보 확인 실패', e); });

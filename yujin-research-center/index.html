@@ -3,129 +3,1421 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>유진 Insight Lab</title>
+<title>Yuri Onboarding</title>
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
-<link rel="stylesheet" href="assets/app.css?v=20261029e">
-<link rel="stylesheet" href="assets/entry.css?v=20261029b">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+  :root {
+    --bg: #020910;
+    --panel: rgba(4, 22, 34, 0.58);
+    --panel-line: rgba(63, 243, 255, 0.16);
+    --text: #e4fbff;
+    --muted: #7fa9b8;
+    --faint: #4c7180;
+    --holo: #3ff3ff;
+    --holo-2: #00b8ff;
+    --home: #ffb547;
+    --good: #3ddc97;
+    --mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+    --hud: Orbitron, var(--mono);
+    --header-h: 64px;
+    --banner-h: 36px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bg); color: var(--text); }
+  body {
+    font-family: Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+    overflow-x: hidden;
+    background:
+      radial-gradient(1100px 700px at 50% 48%, rgba(0, 170, 220, 0.16), transparent 70%),
+      var(--bg);
+  }
+  .num { font-variant-numeric: tabular-nums; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .mono { font-family: var(--mono); }
+
+  /* 시연용 가상 화면 배너 */
+  .demo-banner {
+    min-height: var(--banner-h);
+    padding: 9px 16px;
+    line-height: 1.45;
+    text-align: center;
+    background: rgba(255, 181, 71, 0.1);
+    border-bottom: 1px solid rgba(255, 181, 71, 0.25);
+    color: #ffd59a; font-size: 12.5px;
+  }
+  .demo-banner b { color: var(--home); font-weight: 700; }
+
+  header {
+    height: var(--header-h);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 24px;
+  }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand-mark {
+    position: relative; width: 30px; height: 30px; border-radius: 50%;
+    border: 1px solid rgba(63, 243, 255, 0.6);
+    box-shadow: 0 0 18px rgba(63, 243, 255, 0.45), inset 0 0 10px rgba(63, 243, 255, 0.35);
+  }
+  .brand-mark::after {
+    content: ""; position: absolute; inset: 9px; border-radius: 50%;
+    background: radial-gradient(circle at 40% 35%, #e9feff, var(--holo) 45%, #0077a8 80%);
+    box-shadow: 0 0 10px var(--holo);
+  }
+  .brand-title { font-weight: 700; font-size: 16px; letter-spacing: -0.01em; }
+  .brand-sub { color: var(--holo); font-family: var(--hud); font-size: 10px; letter-spacing: 0.22em; margin-top: 2px; opacity: 0.8; }
+  .header-right { display: flex; align-items: center; gap: 14px; color: var(--muted); font-size: 12px; font-family: var(--mono); }
+  .live {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 5px 10px; border-radius: 4px;
+    background: rgba(63, 243, 255, 0.08); border: 1px solid rgba(63, 243, 255, 0.35);
+    color: var(--holo); font-weight: 600; font-size: 11px; letter-spacing: 0.08em;
+    font-family: Pretendard, sans-serif;
+  }
+  .live::before {
+    content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--holo);
+    box-shadow: 0 0 8px var(--holo);
+    animation: blink 1.6s ease-in-out infinite;
+  }
+  @keyframes blink { 50% { opacity: 0.2; } }
+
+  .layout { padding: 0 16px 16px; }
+
+  .badge {
+    display: inline-block; padding: 2px 7px; border-radius: 4px;
+    font-size: 10.5px; font-weight: 700; letter-spacing: 0.02em; vertical-align: 1px;
+    color: var(--home); background: rgba(255, 181, 71, 0.12); border: 1px solid rgba(255, 181, 71, 0.3);
+  }
+  .eyebrow { font-family: var(--hud); font-size: 10px; font-weight: 700; letter-spacing: 0.22em; color: var(--holo); text-shadow: 0 0 8px rgba(63, 243, 255, 0.5); }
+
+  /* 무대 — 가운데 구 하나. 유리 대화창이 열리면 구가 남은 자리로 비켜 선다 */
+  #stage {
+    position: relative; overflow: hidden; isolation: isolate; border-radius: 8px;
+    height: calc(100vh - var(--header-h) - var(--banner-h) - 16px); min-height: 640px;
+    border: 1px solid rgba(63, 243, 255, 0.08);
+  }
+  .grid {
+    position: absolute; inset: 0; z-index: -1; pointer-events: none;
+    background:
+      linear-gradient(rgba(63, 243, 255, 0.05) 1px, transparent 1px) 0 0 / 44px 44px,
+      linear-gradient(90deg, rgba(63, 243, 255, 0.05) 1px, transparent 1px) 0 0 / 44px 44px;
+    -webkit-mask-image: radial-gradient(ellipse at center, #000 45%, transparent 90%);
+    mask-image: radial-gradient(ellipse at center, #000 45%, transparent 90%);
+  }
+  #stage canvas {
+    position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: grab; touch-action: pan-y;
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 5%, #000 95%, transparent), linear-gradient(to bottom, transparent, #000 5%, #000 95%, transparent);
+    -webkit-mask-composite: source-in;
+    mask-image: linear-gradient(to right, transparent, #000 5%, #000 95%, transparent), linear-gradient(to bottom, transparent, #000 5%, #000 95%, transparent);
+    mask-composite: intersect;
+  }
+  #stage canvas:active { cursor: grabbing; }
+  .scanlines {
+    position: absolute; inset: 0; pointer-events: none;
+    background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.18) 0 1px, transparent 1px 3px);
+    mix-blend-mode: multiply;
+  }
+  .scan {
+    position: absolute; left: 0; right: 0; top: 0; height: 2px; pointer-events: none;
+    background: linear-gradient(90deg, transparent, rgba(63, 243, 255, 0.75) 20%, rgba(63, 243, 255, 0.75) 80%, transparent);
+    box-shadow: 0 0 14px rgba(63, 243, 255, 0.7);
+    opacity: 0.55;
+    will-change: transform;
+  }
+  .corner { position: absolute; width: 34px; height: 34px; border: 0 solid var(--holo); pointer-events: none; filter: drop-shadow(0 0 6px rgba(63, 243, 255, 0.9)); }
+  .corner.tl { top: 14px; left: 14px; border-width: 2px 0 0 2px; }
+  .corner.tr { top: 14px; right: 14px; border-width: 2px 2px 0 0; }
+  .corner.bl { bottom: 14px; left: 14px; border-width: 0 0 2px 2px; }
+  .corner.br { bottom: 14px; right: 14px; border-width: 0 2px 2px 0; }
+  .hud-readout {
+    position: absolute; top: 22px; left: 58px; pointer-events: none;
+    font-family: var(--mono); font-size: 10.5px; color: var(--holo); opacity: 0.65; line-height: 1.6; letter-spacing: 0.05em;
+  }
+  .hud-readout.right { left: auto; right: 58px; text-align: right; }
+  .holo-status { position: absolute; left: 58px; top: 86px; pointer-events: none; white-space: nowrap; }
+  .holo-status b {
+    display: block; font-family: var(--hud); font-weight: 700; font-size: 13px; letter-spacing: 0.38em;
+    color: var(--holo);
+    text-shadow: -1px 0 rgba(255, 40, 120, 0.45), 1px 0 rgba(0, 255, 255, 0.6), 0 0 14px rgba(63, 243, 255, 0.9);
+    animation: flicker 5s infinite;
+  }
+  .holo-status span { display: block; margin-top: 5px; font-family: var(--mono); font-size: 10.5px; color: var(--muted); letter-spacing: 0.12em; }
+  @keyframes flicker { 0%, 92%, 100% { opacity: 1; } 93% { opacity: 0.35; } 95% { opacity: 0.9; } 96% { opacity: 0.5; } }
+  .stage-error {
+    position: absolute; inset: 0; display: none; align-items: center; justify-content: center;
+    color: var(--muted); text-align: center; padding: 16px;
+  }
+
+  /* 구 아래 첫 안내 — 대화창이 열리면 사라진다 */
+  .intro {
+    position: absolute; left: 0; right: 0; bottom: 28px; z-index: 2;
+    display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 0 16px; text-align: center;
+    transition: opacity 0.4s, transform 0.4s;
+  }
+  .intro h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.02em; text-shadow: 0 0 20px rgba(2, 9, 16, 0.9); }
+  .intro p { color: #a9cbd6; font-size: 14px; line-height: 1.6; }
+  .intro-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 4px; }
+  #stage.chat-open .intro { opacity: 0; transform: translateY(12px); pointer-events: none; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px; height: 42px; padding: 0 18px; border-radius: 6px;
+    font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; text-decoration: none;
+    color: #021018; background: var(--holo); border: 1px solid var(--holo);
+    box-shadow: 0 0 22px rgba(63, 243, 255, 0.35);
+  }
+  .btn:hover, .btn:focus-visible { box-shadow: 0 0 30px rgba(63, 243, 255, 0.6); outline: none; }
+  .btn.ghost { color: var(--text); background: rgba(4, 22, 34, 0.6); border-color: var(--panel-line); box-shadow: none; }
+  .btn.ghost:hover, .btn.ghost:focus-visible { border-color: rgba(63, 243, 255, 0.55); }
+
+  /* 유리 대화창 — 넓은 화면은 오른쪽 팝업, 좁은 화면은 아래에서 올라오는 시트 */
+  .yuri {
+    position: absolute; z-index: 4; top: 28px; right: clamp(28px, 5vw, 80px); bottom: 28px; width: 440px;  /* 오른쪽 가장자리에서 띄움 */
+    display: flex; flex-direction: column;
+    background: rgba(3, 16, 26, 0.86); border: 1px solid rgba(63, 243, 255, 0.32); border-radius: 10px;
+    box-shadow: 0 0 40px rgba(63, 243, 255, 0.14), inset 0 0 30px rgba(63, 243, 255, 0.04);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    opacity: 0; transform: translateX(24px) scale(0.98); visibility: hidden;
+    transition: opacity 0.35s, transform 0.35s, visibility 0s 0.35s;
+  }
+  #stage.chat-open .yuri { opacity: 1; transform: none; visibility: visible; transition: opacity 0.35s, transform 0.35s; }
+  #stage.chat-open .hud-readout.right, #stage.chat-open .corner.tr, #stage.chat-open .corner.br { opacity: 0; }
+  .yuri::before {
+    content: ""; position: absolute; top: -1px; left: -1px; width: 14px; height: 14px; border-top-left-radius: 10px;
+    border: 0 solid var(--holo); border-width: 2px 0 0 2px; filter: drop-shadow(0 0 5px rgba(63, 243, 255, 0.9));
+  }
+  .yuri-head { display: flex; align-items: center; gap: 11px; padding: 14px 14px 12px 16px; border-bottom: 1px solid var(--panel-line); }
+  .yuri-avatar {
+    position: relative; flex: none; width: 34px; height: 34px; border-radius: 50%;
+    border: 1px solid rgba(63, 243, 255, 0.6);
+    box-shadow: 0 0 14px rgba(63, 243, 255, 0.45), inset 0 0 10px rgba(63, 243, 255, 0.35);
+  }
+  .yuri-avatar::after {
+    content: ""; position: absolute; inset: 10px; border-radius: 50%;
+    background: radial-gradient(circle at 40% 35%, #e9feff, var(--holo) 45%, #0077a8 80%);
+    box-shadow: 0 0 10px var(--holo);
+  }
+  .yuri[data-busy="1"] .yuri-avatar::after { animation: pulse 0.9s ease-in-out infinite; }
+  @keyframes pulse { 50% { transform: scale(1.35); opacity: 0.7; } }
+  .yuri-who { flex: 1; min-width: 0; }
+  .yuri-who b { display: block; font-size: 15px; }
+  .yuri-who span { display: block; margin-top: 1px; font-size: 11.5px; color: var(--muted); }
+  .icon-btn {
+    flex: none; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center;
+    border: 1px solid var(--panel-line); background: transparent; color: var(--muted); cursor: pointer; font: inherit; font-size: 13px;
+  }
+  .icon-btn:hover, .icon-btn:focus-visible { color: var(--holo); border-color: var(--holo); outline: none; }
+  .progress { height: 2px; background: rgba(63, 243, 255, 0.1); }
+  .progress i { display: block; height: 100%; width: 0; background: var(--holo); box-shadow: 0 0 8px var(--holo); transition: width 0.4s; }
+
+  .log { flex: 1; min-height: 0; overflow-y: auto; padding: 16px 16px 8px; display: flex; flex-direction: column; gap: 10px; scrollbar-width: thin; scrollbar-color: rgba(63, 243, 255, 0.3) transparent; }
+  .msg { max-width: 88%; padding: 10px 13px; border-radius: 10px; font-size: 14px; line-height: 1.6; animation: rise 0.28s ease-out; }
+  .msg.bot { align-self: flex-start; background: rgba(63, 243, 255, 0.07); border: 1px solid rgba(63, 243, 255, 0.18); border-top-left-radius: 3px; }
+  .msg.me { align-self: flex-end; background: rgba(63, 243, 255, 0.85); color: #021018; font-weight: 600; border-top-right-radius: 3px; }
+  .msg small { display: block; margin-top: 4px; color: var(--muted); font-size: 11.5px; }
+  .msg.typing { display: flex; gap: 5px; padding: 13px 14px; }
+  .msg.typing i { width: 6px; height: 6px; border-radius: 50%; background: var(--holo); animation: dot 1s infinite; }
+  .msg.typing i:nth-child(2) { animation-delay: 0.15s; }
+  .msg.typing i:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes dot { 0%, 60%, 100% { opacity: 0.25; transform: none; } 30% { opacity: 1; transform: translateY(-3px); } }
+  @keyframes rise { from { opacity: 0; transform: translateY(6px); } }
+
+  /* 분석 결과 카드 */
+  .result { align-self: stretch; max-width: none; padding: 14px; background: rgba(4, 26, 40, 0.9); border-color: rgba(63, 243, 255, 0.4); }
+  .result .eyebrow { font-size: 9.5px; }
+  .result h3 { margin-top: 6px; font-size: 17px; line-height: 1.4; }
+  .result h3 em { font-style: normal; color: var(--holo); }
+  .result .why { margin-top: 6px; font-size: 13px; color: #b9d6df; }
+  .bars { margin-top: 10px; display: grid; gap: 5px; }
+  .bar { display: grid; grid-template-columns: 112px 1fr 38px; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
+  .bar.top { color: var(--text); font-weight: 600; }
+  .bar .track { height: 5px; border-radius: 3px; background: rgba(63, 243, 255, 0.1); overflow: hidden; }
+  .bar .track i { display: block; height: 100%; background: var(--holo); box-shadow: 0 0 6px var(--holo); transition: width 0.8s ease-out; }
+  .bar:not(.top) .track i { background: rgba(63, 243, 255, 0.45); box-shadow: none; }
+  .bar .pct { text-align: right; font-variant-numeric: tabular-nums; }
+  .pf { margin-top: 10px; display: grid; gap: 5px; }
+  .pf div { display: flex; justify-content: space-between; gap: 12px; font-size: 12.5px; color: var(--muted); }
+  .pf b { color: var(--text); font-weight: 600; text-align: right; }
+  .src-tag { margin-left: 6px; padding: 1px 6px; border-radius: 4px; font-style: normal; font-size: 10px; font-weight: 600; color: var(--muted); border: 1px solid var(--panel-line); }
+  .src-tag.db { color: var(--holo); border-color: rgba(63, 243, 255, 0.45); }
+  .src-tag.ai { color: #ffd166; border-color: rgba(255, 209, 102, 0.45); }
+  .svc-list { margin-top: 12px; display: grid; gap: 7px; }
+  .svc {
+    display: block; padding: 10px 12px; border-radius: 7px; text-decoration: none; color: inherit;
+    background: rgba(63, 243, 255, 0.05); border: 1px solid var(--panel-line);
+  }
+  .svc:hover, .svc:focus-visible { border-color: rgba(63, 243, 255, 0.6); box-shadow: 0 0 14px rgba(63, 243, 255, 0.18); outline: none; }
+  .svc-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .svc-top b { font-size: 14px; }
+  .svc-top span { font-family: var(--mono); font-size: 10px; color: var(--holo); letter-spacing: 0.08em; }
+  .svc p { margin-top: 3px; font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+  .result-actions { margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .result-actions .btn { height: 38px; font-size: 13.5px; }
+  .method { margin-top: 10px; font-size: 11px; color: var(--faint); line-height: 1.5; }
+
+  /* 입력부 — 빠른 답변 칩 + 직접 입력 */
+  .composer { border-top: 1px solid var(--panel-line); padding: 10px 12px 12px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chips:empty { display: none; }
+  .chips + .ask { margin-top: 9px; }
+  .qchip {
+    padding: 7px 12px; border-radius: 16px; cursor: pointer; font: inherit; font-size: 13px; font-weight: 600;
+    color: var(--holo); background: rgba(63, 243, 255, 0.06); border: 1px solid rgba(63, 243, 255, 0.35);
+  }
+  .qchip:hover, .qchip:focus-visible { background: rgba(63, 243, 255, 0.16); outline: none; }
+  .qchip[aria-pressed="true"] { color: #021018; background: var(--holo); }
+  .qchip.done { color: #021018; background: var(--good); border-color: var(--good); }
+  .qchip.done:disabled { opacity: 0.4; cursor: default; }
+  .qchip.plain { color: var(--muted); border-color: var(--panel-line); background: transparent; }
+  .ask { display: flex; gap: 8px; }
+  .ask input {
+    flex: 1; min-width: 0; height: 40px; padding: 0 12px; border-radius: 7px;
+    font: inherit; font-size: 14px; color: var(--text); background: rgba(0, 10, 18, 0.7); border: 1px solid var(--panel-line);
+  }
+  .ask input:focus { outline: none; border-color: rgba(63, 243, 255, 0.6); box-shadow: 0 0 0 3px rgba(63, 243, 255, 0.12); }
+  .ask input::placeholder { color: var(--faint); }
+  .ask button { flex: none; width: 40px; height: 40px; border-radius: 7px; cursor: pointer; font-size: 16px; color: #021018; background: var(--holo); border: 0; }
+  .ask button:disabled, .ask input:disabled { opacity: 0.45; cursor: default; }
+  .privacy { margin-top: 8px; font-size: 11px; color: var(--faint); }
+
+  @media (max-width: 900px) {
+    .yuri { top: auto; left: 10px; right: 10px; bottom: 10px; width: auto; height: 64%; transform: translateY(24px); }
+  }
+  @media (max-width: 700px) {
+    header { padding: 0 16px; }
+    .layout { padding: 0 8px 8px; }
+    #stage { height: calc(100svh - var(--header-h) - 52px); min-height: 620px; }
+    .holo-status { left: 50%; top: 22px; transform: translateX(-50%); text-align: center; }
+    #stage.chat-open .holo-status { opacity: 0; }
+    .intro h1 { font-size: 20px; }
+    .intro p { font-size: 13px; }
+    .bar { grid-template-columns: 96px 1fr 34px; }
+  }
+  @media (max-width: 480px) {
+    .brand-sub, .clock, .hud-readout { display: none; }
+    .demo-banner { font-size: 11.5px; padding: 7px 12px; }
+    .holo-status b { font-size: 11px; }
+    .corner { width: 22px; height: 22px; }
+    .yuri { left: 6px; right: 6px; bottom: 6px; height: 66%; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .holo-status b, .live::before, .yuri[data-busy="1"] .yuri-avatar::after { animation: none; }
+    .msg, .msg.typing i { animation: none; }
+  }
+</style>
+</head>
+<body>
+  <div class="demo-banner"><b>시연용 가상 화면</b> · 대화 내용은 이 브라우저에만 저장돼요. 실명·연락처 같은 실제 개인정보는 입력하지 마세요. 투자 권유가 아닙니다.</div>
+
+  <header>
+    <div class="brand">
+      <div class="brand-mark"></div>
+      <div>
+        <div class="brand-title">유진 Insight Lab</div>
+        <div class="brand-sub">EUGENE HOLOGRAM</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <span class="clock num" id="clock">--:--:-- KST</span>
+      <span class="live">LIVE · 가상</span>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section id="stage" aria-label="유진 Insight Lab 시작 화면">
+      <div class="grid"></div>
+      <div class="scanlines"></div>
+      <div class="scan" id="scan"></div>
+      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+      <div class="hud-readout" id="readout-l">YAW --<br>PITCH --<br>NODES --</div>
+      <div class="hud-readout right" id="readout-r">LINK --<br>PKT --<br>SYNC 00.0%</div>
+      <div class="holo-status"><b id="status-main">YURI STANDBY</b><span id="status-sub">◦ waiting for a new member</span></div>
+      <div class="stage-error" id="stage-error">이 브라우저에서는 3D 지구본을 표시할 수 없습니다.</div>
+
+      <div class="intro" id="intro">
+        <span class="eyebrow">EUGENE INSIGHT LAB</span>
+        <h1>유리가 몇 가지만 여쭤볼게요</h1>
+        <p>대화로 고객 유형을 파악해 필요한 리서치 서비스를 골라 드려요. 1분이면 충분해요.</p>
+        <div class="intro-actions">
+          <button type="button" class="btn" id="open-chat">유리와 대화로 가입하기</button>
+          <a class="btn ghost" href="signup.html?pick=1" target="_top">직접 유형 고르기</a>
+        </div>
+      </div>
+
+      <!-- 유리 대화창 -->
+      <aside class="yuri" id="yuri" role="dialog" aria-labelledby="yuri-name" aria-describedby="yuri-role">
+        <div class="yuri-head">
+          <div class="yuri-avatar" aria-hidden="true"></div>
+          <div class="yuri-who"><b id="yuri-name">유리</b><span id="yuri-role">유진 리서치센터 AI 어시스턴트 · <span id="step-label">가입 상담</span></span></div>
+          <button type="button" class="icon-btn" id="chat-restart" aria-label="처음부터 다시" title="처음부터 다시">↺</button>
+          <button type="button" class="icon-btn" id="chat-close" aria-label="대화창 닫기" title="닫기">✕</button>
+        </div>
+        <div class="progress" aria-hidden="true"><i id="progress"></i></div>
+        <div class="log" id="log" role="log" aria-live="polite"></div>
+        <div class="composer">
+          <div class="chips" id="chips"></div>
+          <form class="ask" id="ask">
+            <label for="ask-input" class="sr-only">유리에게 답하기</label>
+            <input id="ask-input" autocomplete="off" placeholder="직접 입력해도 돼요">
+            <button type="submit" aria-label="보내기">↑</button>
+          </form>
+          <div class="privacy">시연용 · 가상 이름과 가상 소속을 써 주세요</div>
+        </div>
+      </aside>
+    </section>
+  </main>
+
 <script src="assets/config.js?v=20261029a"></script>
 <script src="assets/config.local.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" defer></script>
-<script src="assets/partials.js?v=20261029a" defer></script>
-<script src="assets/entry.js?v=20261029b" defer></script>
-<script src="assets/login.js?v=20261029a" defer></script>
-</head>
-<body data-chrome="none">
-<main class="entry is-instant" id="main" data-phase="reel">
+<script src="assets/disclosure-data.js?v=20261029g"></script>
+<script src="assets/events-data.js?v=20261029c"></script>
+<script src="assets/yuri-flow.js?v=20261029g"></script>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from "three";
+// 유진투자증권 심볼(구)의 빨간 무늬 비트마스크: 앞면 원판을 MASK_SIZE×MASK_SIZE 격자로 나눈 값.
+// assets/eugene-logo.png에서 추출. file://로 열면 PNG 픽셀을 읽을 수 없어 미리 뽑아 둔다.
+const MASK_SIZE = 192;
+const LOGO_MASK = "AAAAAAAAAAAAAID/HwAAAAAAAAAAAAAAAAAAAAAAAAAAAPz//w8AAAAAAAAAAAAAAAAAAAAAAAAA4P////8DAAAAAAAAAAAAAAAAAAAAAAAA/v////8fAAAAAAAAAAAAAAAAAAAAAADw////////DwAAAAAAAAAAAAAAAAAAAAD+////////PwAAAAAAAAAAAAAAAAAAAID//////////wAAAAAAAAAAAAAAAAAAAPj//////////x8AAAAAAAAAAAAAAAAAAP7//////////38AAAAAAAAAAAAAAAAAgP////////////8AAAAAAAAAAAAAAAAA4P////////////8DAAAAAAAAAAAAAAAA/P////////////8fAAAAAAAAAAAAAAAA/P////////////8/AAAAAAAAAAAAAAAA//////////////9/AAAAAAAAAAAAAADg////////////////AwAAAAAAAAAAAADw////////////////DwAAAAAAAAAAAAD4////////////////HwAAAAAAAAAAAAD8////////////////PwAAAAAAAAAAAID//////////////////wEAAAAAAAAAAMD//////////////////wEAAAAAAAAAAOD//////////////////wMAAAAAAAAAAPj//////////////////w8AAAAAAAAAAPz//////////////////x8AAAAAAAAAAP7//////////////////z8AAAAAAAAAAP///////////////////38AAAAAAAAAgP////////////////////8BAAAAAAAAwP////////////////////8DAAAAAAAA4P////////////////////8HAAAAAAAA8P////////////////////8PAAAAAAAA+P////////////////////8fAAAAAAAA/P////////////////////8/AAAAAAAA/g/4//////////////////9/AAAAAAAAAAAA/////////////x/w////AAAAAAAAAAAA/v///////////weA////AQAAAAAAAAAA/P///////////wEA/v//AQAAAAAAAAAA/P///////////wAA/P//AwAAAAAAAAAA+P//////////PwAA4P//BwAAAAAAAAAA8P//////////PwAAwP//DwAAAAAAAAAA8P//////////HwAAgP//DwAAAAAAAAAA4P//////////DwAAAP7/PwAAAAAAAAAA4P//////////DwAAAP7/PwAAAAAAAAAA4P//////////DwAAAPz/PwAAAAAAAAAA4P//////////DwAAAPj/fwAAAAAAAAAA4P//////////DwAAAPD//wAAAAAAAAAA4P//////////DwAAAPD//wEAAAAAAAAA4P//////////DwAAAOD//wMAAAAAAAAA8P//////////DwAAAMD//wMAAAAAAAAA8P//////////DwAAAID//wMAAAAAAAAA8P//////////DwAAAID//wcAAAAAAAAA8P//////////DwAAAAD//wcAAAAAAAAA+P//////////DwAAAAD//x8AAAAAAAAA/P//////////HwAAAAD//x8AAAAAAAAA/P//////////HwAAAAD//x8AAAAAAAAA/P//////////PwAAAAD+/z8AAAAAAAAA/v//////////PwAAAAD+/z8AAAAAAAAA////////////fwAAAAD+/38AAAAAAACA////////////fwAAAAD8/38AAAAAAADA/////////////wAAAAD8//8AAAAAAADg/////////////wEAAAD8//8AAAAAAADw/////////////wEAAAD8//8BAAAAAAD8/////////////wcAAAD8//8BAAAAAID//////////////w8AAAD+//8BAAAAAMD//////////////x8AAAD+//8BAAAAAPD//////////////z8AAAD+//8DAAAAAP7///////////////8AAAD///8HAAAAAP////////////////8DAAD///8HAAAAwP////////////////8HAID///8HAAAA4P////////////////8fAMD///8PAAAA+P//////////////////A/z///8PAAAA/P////////////////////////8PAAAA/v////////////////////////8PAAAA//////////////////////////8fAAAA//////////////////////////8fAACA//////////////////////////8fAADA//////////////////////////8fAADg/////////////////////wHw//8/AADg////////////////////PwCA//8/AADw////////////////////HwAA//8/AAD4////P4D/////////////AwAA+P8/AAD4////BwD+////////////AQAA8P9/AAD4////AwDw////////////AAAAwP9/AAD8////AADg//////////9/AAAAwP9/AAD8//8/AACA//////////8/AAAAAP9/AAD8//8fAAAA//////////8fAAAAAPx/AAD8//8PAAAA/v////////8fAAAAAPx/AAD+//8HAAAA+P////////8PAAAAAPB/AAD+//8DAAAA+P////////8HAAAAAOD/AAD+//8DAAAA+P////////8HAAAAAOD/AAD+//8BAAAA8P////////8HAAAAAMD/AAD///8AAAAA4P////////8HAAAAAAD/AAD///8AAAAAwP////////8HAAAAAAD+AAD///8AAAAAwP////////8HAAAAAAD+AAD//38AAAAAwP////////8DAAAAAAD8AAD//38AAAAAgP////////8DAAAAAAD4AAD//38AAAAAgP////////8DAAAAAADwAAD+/38AAAAAgP////////8DAAAAAADwAAD+/38AAAAAAP////////8DAAAAAADgAAD+/38AAAAAAP////////8DAAAAAADAAAD+/38AAAAAAP////////8DAAAAAACAAAD8/38AAAAAAP////////8DAAAAAACAAAD8/38AAAAAAP////////8DAAAAAAAAAAD8/38AAAAAAP////////8DAAAAAAAAAAD8/38AAAAAAP////////8DAAAAAAAAAAD8/38AAAAAAP////////8DAAAAAAAAAAD4/38AAAAAgP////////8DAAAAAAAAAAD4/38AAAAAgP////////8DAAAAAAAAAADw/38AAAAAgP////////8DAAAAAAAAAADg/38AAAAAwP////////8DAAAAAAAAAADg/38AAAAAwP////////8HAAAAAAAAAADg/38AAAAAwP////////8HAAAAAAAAAACA/z8AAAAA4P////////8HAAAAAAAAAAAA/x8AAAAA8P////////8HAAAAAAAAAAAA/g8AAAAA8P////////8HAAAAAAAAAAAA/A8AAAAA+P////////8HAAAAAAAAAAAAAAAAAAAA/P////////8HAAAAAAAAAAAAAAAAAAAA/v////////8HAAAAAAAAAAAAAAAAAAAA//////////8HAAAAAAAAAAAAAAAAAACA//////////8HAAAAAAAAAAAAAAAAAADA//////////8HAAAAAAAAAAAAAAAAAADw//////////8HAAAAAAAAAAAAAAAAAADw//////////8HAAAAAAAAAAAAAAAAAAD///////////8DAAAAAAAAAAAAAAAAAAD///////////8DAAAAAAAAAAAAAAAAAID///////////8DAAAAAAAAAAAAAAAAAPD///////////8DAAAAAAAAAAAAAAAAAPD///////////8DAAAAAAAAAAAAAAAAAPj///////////8DAAAAAAAAAAAAAAAAAPz///////////8DAAAAAAAAAAAAAAAAAP7///////////8BAAAAAAAAAAAAAAAAAP////////////8BAAAAAAAAAAAAAAAAgP////////////8BAAAAAAAAAAAAAAAAwP////////////8BAAAAAAAAAAAAAAAA4P////////////8BAAAAAAAAAAAAAAAA4P////////////8BAAAAAAAAAAAAAAAA8P////////////8AAAAAAAAAAAAAAAAA+P////////////8AAAAAAAAAAAAAAAAA+P////////////8AAAAAAAAAAAAAAAAA/P////////////8AAAAAAAAAAAAAAAAA/P////////////8AAAAAAAAAAAAAAAAA/P///////////38AAAAAAAAAAAAAAAAA/P///////////38AAAAAAAAAAAAAAAAA/P///////////38AAAAAAAAAAAAAAAAA/v///////////38AAAAAAAAAAAAAAAAA/v///////////38AAAAAAAAAAAAAAAAA/v///////////z8AAAAAAAAAAAAAAAAA/v///////////z8AAAAAAAAAAAAAAAAA/v///////////z8AAAAAAAAAAAAAAAAA/v///////////x8AAAAAAAAAAAAAAAAA/v///////////x8AAAAAAAAAAAAAAAAA/P///////////w8AAAAAAAAAAAAAAAAA/P///////////w8AAAAAAAAAAAAAAAAA/P///////////w8AAAAAAAAAAAAAAAAA/P///////////w8AAAAAAAAAAAAAAAAA/P///////////wcAAAAAAAAAAAAAAAAA+P///////////wcAAAAAAAAAAAAAAAAA+P///////////wMAAAAAAAAAAAAAAAAA8P///////////wEAAAAAAAAAAAAAAAAA4P///////////wEAAAAAAAAAAAAAAAAA4P///////////wAAAAAAAAAAAAAAAAAA4P///////////wAAAAAAAAAAAAAAAAAAgP//////////fwAAAAAAAAAAAAAAAAAAAP//////////fwAAAAAAAAAAAAAAAAAAAP7/////////PwAAAAAAAAAAAAAAAAAAAP7/////////PwAAAAAAAAAAAAAAAAAAAPj/////////DwAAAAAAAAAAAAAAAAAAAPD/////////DwAAAAAAAAAAAAAAAAAAAPD/////////DwAAAAAAAAAAAAAAAAAAAID/////////AwAAAAAAAAAAAAAAAAAAAAD/////////AQAAAAAAAAAAAAAAAAAAAAD+////////AQAAAAAAAAAAAAAAAAAAAAD8////////AAAAAAAAAAAAAAAAAAAAAADg//////8fAAAAAAAAAAAAAAAAAAAAAACA//////8fAAAAAAAAAAAAAAAAAAAAAACA//////8HAAAAAAAAAAAAAAAAAAAAAAAA+P////8BAAAAAAAAAAAAAAAAAAAAAAAA4P///38AAAAAAAAAAAAAAAAAAAAAAAAAgP///x8AAAAAAAAAAAAAAAAAAAAAAAAAAPz//wcAAAAAAAAAAAAAAAAAAAAAAAAAAADwAwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+const D2R = Math.PI / 180;
+const R2D = 180 / Math.PI;
+const TAU = Math.PI * 2;
+const FOV = 35;
+const HOLO = new THREE.Color("#3ff3ff");
+const isSmall = () => window.innerWidth < 700;
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  <!-- 브랜드 쇼릴 — 처음엔 화면 전체, 고객 유형 선택부터는 오른쪽(모바일은 위) 프레임으로 줄어든다 -->
-  <div class="reel-media">
-    <video id="reel-video" src="assets/media/showreel.mp4" poster="assets/media/showreel-poster.jpg"
-      muted playsinline autoplay preload="auto" aria-label="유진 Insight Lab 브랜드 필름"></video>
-  </div>
+// 가상 거점 (시연용) — 실제 지도 대신 로고 구의 앞면 좌표(u: 좌우, v: 상하, -1~1)에 배치한다
+const HUBS = [
+  { id: "SEL", name: "서울", u: 0.02, v: 0.08, region: "아시아", home: true },
+  { id: "TYO", name: "도쿄", u: 0.38, v: 0.22, region: "아시아" },
+  { id: "SHA", name: "상하이", u: -0.22, v: 0.4, region: "아시아" },
+  { id: "HKG", name: "홍콩", u: 0.12, v: -0.34, region: "아시아" },
+  { id: "SIN", name: "싱가포르", u: -0.08, v: -0.62, region: "아시아" },
+  { id: "DXB", name: "두바이", u: -0.5, v: 0.02, region: "중동" },
+  { id: "FRA", name: "프랑크푸르트", u: -0.4, v: 0.58, region: "유럽" },
+  { id: "LON", name: "런던", u: -0.68, v: 0.32, region: "유럽" },
+  { id: "NYC", name: "뉴욕", u: 0.62, v: -0.12, region: "북미" },
+  { id: "SFO", name: "샌프란시스코", u: 0.55, v: 0.52, region: "북미" },
+  { id: "SYD", name: "시드니", u: 0.42, v: -0.58, region: "오세아니아" },
+];
 
-  <!-- 1. 쇼릴 위 조작부 -->
-  <section class="step reel" id="s-reel" aria-label="유진 Insight Lab 소개">
-    <button class="reel__skip" type="button" data-go="s-type">건너뛰기 →</button>
-    <div class="reel__bar">
-      <div>
-        <h1 class="reel__title">시장의 내일을 먼저 읽는 곳, <em>유진 Insight Lab</em></h1>
-      </div>
-      <button class="btn btn--primary reel__cta" type="button" data-go="s-type">시작하기</button>
+function latLngToVec(lat, lng, r = 1) {
+  const la = lat * D2R, ln = lng * D2R;
+  return new THREE.Vector3(Math.cos(la) * Math.sin(ln) * r, Math.sin(la) * r, Math.cos(la) * Math.cos(ln) * r);
+}
+const rand = (a, b) => a + Math.random() * (b - a);
+const pick = (arr) => arr[(Math.random() * arr.length) | 0];
+
+/* ---------------- 3D 홀로그램 지구본 ---------------- */
+const stage = document.getElementById("stage");
+const scanEl = document.getElementById("scan");
+
+let renderer;
+try {
+  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+} catch (e) {
+  document.getElementById("stage-error").style.display = "flex";
+  throw e;
+}
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+stage.prepend(renderer.domElement);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(FOV, 1, 0.1, 200);
+camera.position.set(0, 0, 5);
+const globe = new THREE.Group();
+scene.add(globe);
+
+// 빛 방향(뷰 공간)·다가오는 빛의 세기·흡수된 빛(충전) — 구·대기광·점 셰이더가 같은 값을 공유한다
+const LIGHT = {
+  uLight: { value: new THREE.Vector3(-0.6, 0.5, -0.4).normalize() },
+  uSun: { value: 0 },
+  uCharge: { value: 0 },
+};
+
+const FRESNEL_VERT = `
+  varying vec3 vN; varying vec3 vV;
+  void main(){
+    vec4 mv = modelViewMatrix * vec4(position, 1.0);
+    vN = normalize(normalMatrix * normal);
+    vV = normalize(-mv.xyz);
+    gl_Position = projectionMatrix * mv;
+  }`;
+
+// 반투명 코어 + 가장자리 림
+const core = new THREE.Mesh(
+  new THREE.SphereGeometry(0.995, 72, 72),
+  new THREE.ShaderMaterial({
+    uniforms: { uBase: { value: new THREE.Color("#021019") }, uRim: { value: new THREE.Color("#0f6f8c") }, ...LIGHT },
+    vertexShader: FRESNEL_VERT,
+    fragmentShader: `
+      uniform vec3 uBase, uRim, uLight; uniform float uSun, uCharge;
+      varying vec3 vN; varying vec3 vV;
+      void main(){
+        float ndv = max(dot(vN, vV), 0.0);
+        float ndl = dot(vN, uLight);
+        vec3 col = mix(uBase, uRim, pow(1.0 - ndv, 2.6));
+        // 빛이 다가오는 쪽 가장자리만 밝아진다
+        col += vec3(0.85, 0.95, 1.0) * pow(1.0 - ndv, 4.0) * smoothstep(-0.15, 0.75, ndl) * 1.2 * uSun;
+        // 흡수된 빛: 테두리 전체가 고르게 빛나고 안쪽이 은은하게 차오른다
+        col += vec3(0.75, 0.92, 1.0) * pow(1.0 - ndv, 3.0) * uCharge * 0.85;
+        col += vec3(0.08, 0.30, 0.42) * pow(ndv, 1.5) * uCharge * 0.55;
+        gl_FragColor = vec4(col, 1.0);
+      }`,
+  })
+);
+globe.add(core);
+
+// 대기광
+const atmosphere = new THREE.Mesh(
+  new THREE.SphereGeometry(1.15, 72, 72),
+  new THREE.ShaderMaterial({
+    uniforms: { uColor: { value: new THREE.Color("#19c7ff") }, ...LIGHT },
+    vertexShader: FRESNEL_VERT,
+    fragmentShader: `
+      uniform vec3 uColor, uLight; uniform float uSun, uCharge;
+      varying vec3 vN; varying vec3 vV;
+      void main(){
+        float d = clamp(-dot(vN, vV), 0.0, 1.0);
+        float i = pow(smoothstep(0.0, 0.5, d), 3.2);
+        // 다가오는 빛 쪽 대기광이 하얗게 번지고, 흡수 후에는 둘레 전체가 밝아진다
+        float lit = smoothstep(-0.35, 0.85, dot(vN, uLight)) * uSun;
+        vec3 col = mix(uColor, vec3(0.92, 0.97, 1.0), clamp(lit * 0.75 + uCharge * 0.35, 0.0, 1.0));
+        gl_FragColor = vec4(col, i * 0.5 * (1.0 + 1.6 * lit + 1.3 * uCharge));
+      }`,
+    side: THREE.BackSide,
+    transparent: true,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+  })
+);
+scene.add(atmosphere);
+
+// 지오데식 와이어프레임 껍질 (홀로그램 구체)
+const shell = new THREE.LineSegments(
+  new THREE.WireframeGeometry(new THREE.IcosahedronGeometry(1.085, 3)),
+  new THREE.LineBasicMaterial({ color: HOLO, transparent: true, opacity: 0.09, depthWrite: false, blending: THREE.AdditiveBlending })
+);
+scene.add(shell);
+
+/* ---- 화면 밖에서 들어와 구에 흡수되는 빛 + 역광 + 별 ---- */
+function canvasTexture(size, draw) {
+  const c = document.createElement("canvas");
+  c.width = c.height = size;
+  draw(c.getContext("2d"), size);
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+const radialTexture = (stops, size = 256) => canvasTexture(size, (g, s) => {
+  const gr = g.createRadialGradient(s / 2, s / 2, 0, s / 2, s / 2, s / 2);
+  for (const [o, col] of stops) gr.addColorStop(o, col);
+  g.fillStyle = gr;
+  g.fillRect(0, 0, s, s);
+});
+const spriteMat = (map, color = 0xffffff, onTop = false) => {
+  const m = new THREE.SpriteMaterial({ map, color, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending });
+  m.depthTest = !onTop;
+  return m;
+};
+const glowTex = radialTexture([[0, "#ffffff"], [0.22, "rgba(235,250,255,0.85)"], [0.55, "rgba(170,225,255,0.22)"], [1, "rgba(120,190,255,0)"]]);
+const softTex = radialTexture([[0, "rgba(190,230,255,0.38)"], [0.35, "rgba(150,205,255,0.13)"], [0.7, "rgba(120,180,255,0.03)"], [1, "rgba(120,180,255,0)"]]);
+const ringTex = radialTexture([[0, "rgba(200,240,255,0)"], [0.8, "rgba(200,240,255,0.05)"], [0.93, "rgba(220,248,255,0.6)"], [1, "rgba(200,240,255,0)"]]);
+
+// 화면 밖에서 들어오는 빛 덩어리 + 꼬리 — 구 위를 지나 안으로 들어가므로 깊이 검사 없이 위에 그린다
+const orb = new THREE.Group();
+scene.add(orb);
+const orbHalo = new THREE.Sprite(spriteMat(softTex, 0xffffff, true));
+const orbCore = new THREE.Sprite(spriteMat(glowTex, 0xffffff, true));
+orbHalo.scale.setScalar(5.5);
+orbCore.scale.setScalar(0.42);
+for (const s of [orbHalo, orbCore]) { s.renderOrder = 15; orb.add(s); }
+const TRAIL = 28;
+const trail = Array.from({ length: TRAIL }, () => {
+  const s = new THREE.Sprite(spriteMat(glowTex, 0xbfe9ff, true));
+  s.renderOrder = 14;
+  scene.add(s);
+  return s;
+});
+const trailPts = [];
+
+// 빛을 흡수한 뒤 구 뒤에서 배경으로 번지는 역광 (구가 가운데를 가려 테두리로만 새어 나온다)
+const backHalo = new THREE.Sprite(spriteMat(softTex));
+const backWash = new THREE.Sprite(spriteMat(softTex));
+backHalo.scale.setScalar(7.5);
+backWash.scale.setScalar(22);
+for (const s of [backHalo, backWash]) { s.position.set(0, 0, -2.5); scene.add(s); }
+
+// 흡수 순간 구 테두리에서 퍼지는 파동
+const ripple = new THREE.Sprite(spriteMat(ringTex, 0xffffff, true));
+ripple.renderOrder = 16;
+scene.add(ripple);
+
+// 별
+const starMaterial = new THREE.ShaderMaterial({
+  uniforms: { uSize: { value: 1 }, uTime: { value: 0 } },
+  vertexShader: `
+    uniform float uSize;
+    attribute float aRand;
+    varying float vRand;
+    void main(){
+      vec4 mv = modelViewMatrix * vec4(position, 1.0);
+      vRand = aRand;
+      gl_PointSize = uSize * (0.4 + aRand) / -mv.z;
+      gl_Position = projectionMatrix * mv;
+    }`,
+  fragmentShader: `
+    uniform float uTime; varying float vRand;
+    void main(){
+      float d = length(gl_PointCoord - 0.5);
+      if (d > 0.5) discard;
+      float tw = 0.55 + 0.45 * sin(uTime * (0.6 + vRand * 1.8) + vRand * 90.0);
+      vec3 col = mix(vec3(0.62, 0.78, 1.0), vec3(1.0), vRand);
+      gl_FragColor = vec4(col, smoothstep(0.5, 0.0, d) * tw * (0.25 + 0.65 * vRand));
+    }`,
+  transparent: true,
+  depthWrite: false,
+  blending: THREE.AdditiveBlending,
+});
+{
+  const n = isSmall() ? 600 : 1200;
+  const pos = [], rnd = [];
+  for (let i = 0; i < n; i++) {
+    pos.push(rand(-48, 48), rand(-30, 30), rand(-75, -40));
+    rnd.push(Math.pow(Math.random(), 2.2));
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+  g.setAttribute("aRand", new THREE.Float32BufferAttribute(rnd, 1));
+  scene.add(new THREE.Points(g, starMaterial));
+}
+
+// 화면 좌표(NDC)를 깊이 z 평면 위 월드 좌표로
+function ndcToWorld(nx, ny, z, out) {
+  const h = (camera.position.z - z) * Math.tan((FOV * D2R) / 2);
+  return out.set(nx * h * camera.aspect, ny * h, z);
+}
+// 빛은 화면 밖(NDC 범위 바깥)에서 출발해 곡선을 그리며 구 중심으로 들어간다. 한 번 들어온 뒤로는 주기마다 다른 방향에서 다시 채운다
+const INFLOW = [[-1.3, 1.1], [1.35, 0.85], [-1.35, -0.55], [0.85, 1.3]];
+const FIRST = 0.6;
+const TRAVEL = reduceMotion ? 1.2 : 3.0;
+const CYCLE = 11;
+const P0 = new THREE.Vector3(), P1 = new THREE.Vector3();
+let beamIdx = -1, beamStart = 0, beamDur = TRAVEL, nextAuto = FIRST;
+let absorbed = true, everAbsorbed = false;
+let base = 0, flash = 0, rippleT = 1;
+let onFirstAbsorb = null;
+// 빛 하나를 바깥에서 출발시킨다. 저절로는 CYCLE마다, 고객이 답하면 바로(beamIn)
+function startBeam(t, dur) {
+  beamIdx += 1;
+  beamStart = t;
+  beamDur = dur;
+  nextAuto = t + CYCLE;
+  absorbed = false;
+  trailPts.length = 0;
+  const [nx, ny] = INFLOW[beamIdx % INFLOW.length];
+  ndcToWorld(nx, ny, 0.5, P0);
+  // 제어점을 옆으로 비켜 직선이 아니라 휘어 들어오게 한다
+  P1.set(P0.x * 0.45 - P0.y * 0.35, P0.y * 0.45 + P0.x * 0.35, 0.6);
+}
+const beamIn = () => startBeam(elapsed, reduceMotion ? 0.6 : 1.3);
+// 유리가 분석하는 동안: HUD 링이 빨라지고 빛이 연달아 들어온다
+let thinking = false, thinkBeamIn = 0;
+const setThinking = (on) => { thinking = on; thinkBeamIn = 0; };
+function updateLight(t, dt) {
+  if (thinking) {
+    thinkBeamIn -= dt;
+    if (thinkBeamIn <= 0) { startBeam(t, 0.8); thinkBeamIn = 0.55; }
+  } else if (t >= nextAuto) startBeam(t, TRAVEL);
+
+  let approach = 0;
+  if (!absorbed) {
+    const k = THREE.MathUtils.clamp((t - beamStart) / beamDur, 0, 1);
+    // 처음엔 천천히 날아오다 구에 닿을 즈음 빨려 들어가도록
+    const e = Math.pow(k, 1.6);
+    const u = 1 - e;
+    orb.position.set(0, 0, 0).addScaledVector(P0, u * u).addScaledVector(P1, 2 * u * e);
+    trailPts.unshift(orb.position.clone());
+    if (trailPts.length > TRAIL) trailPts.pop();
+    const r = orb.position.length();
+    // 구 테두리를 넘어 안으로 들어가면서 작아지고 사라진다
+    const outside = THREE.MathUtils.smoothstep(r, 0.35, 1.15);
+    const appear = Math.min(1, k * 6);
+    orbCore.material.opacity = appear * outside;
+    orbHalo.material.opacity = appear * outside * 0.9;
+    orb.scale.setScalar(0.55 + 0.45 * outside);
+    approach = appear * (1 - THREE.MathUtils.smoothstep(r, 1.0, 4.0));
+    LIGHT.uLight.value.set(orb.position.x, orb.position.y, orb.position.z * 0.35 + 0.15).normalize();
+    if (k >= 1) {
+      absorbed = true;
+      if (!everAbsorbed && onFirstAbsorb) setTimeout(onFirstAbsorb, 500);
+      everAbsorbed = true;
+      flash = 1;
+      rippleT = 0;
+      hudFlash = 1;
+    }
+  } else {
+    orbCore.material.opacity = orbHalo.material.opacity = 0;
+    trailPts.splice(-2, 2);
+  }
+
+  for (let i = 0; i < TRAIL; i++) {
+    const s = trail[i];
+    if (i >= trailPts.length) { s.material.opacity = 0; continue; }
+    const f = 1 - i / TRAIL;
+    s.position.copy(trailPts[i]);
+    s.scale.setScalar(0.06 + 0.3 * f);
+    s.material.opacity = 0.55 * Math.pow(f, 1.5) * THREE.MathUtils.smoothstep(trailPts[i].length(), 0.5, 1.1);
+  }
+
+  // 방향성 테두리 빛은 다가올 때만, 구 안쪽 빛(충전)은 흡수 후 남는다
+  LIGHT.uSun.value = Math.max(approach, LIGHT.uSun.value * Math.exp(-dt * 1.2));
+  base += ((everAbsorbed ? 0.7 : 0) - base) * (1 - Math.exp(-dt * 1.1));
+  flash *= Math.exp(-dt * 1.8);
+  const charge = base + flash * 0.9;
+  LIGHT.uCharge.value = charge;
+
+  backHalo.material.opacity = Math.min(1, charge * 0.95);
+  backWash.material.opacity = Math.min(1, charge * 0.7);
+
+  rippleT = Math.min(1, rippleT + dt / 1.3);
+  ripple.scale.setScalar(2.15 + rippleT * 1.5);
+  ripple.material.opacity = Math.pow(1 - rippleT, 1.5) * 0.9;
+}
+
+// 경위선
+{
+  const pts = [];
+  const push = (a, b) => pts.push(a.x, a.y, a.z, b.x, b.y, b.z);
+  for (let lat = -60; lat <= 60; lat += 30) {
+    for (let lng = -180; lng < 180; lng += 4) push(latLngToVec(lat, lng, 1.001), latLngToVec(lat, lng + 4, 1.001));
+  }
+  for (let lng = -180; lng < 180; lng += 30) {
+    for (let lat = -88; lat < 88; lat += 4) push(latLngToVec(lat, lng, 1.001), latLngToVec(lat + 4, lng, 1.001));
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute("position", new THREE.Float32BufferAttribute(pts, 3));
+  globe.add(new THREE.LineSegments(g, new THREE.LineBasicMaterial({ color: HOLO, transparent: true, opacity: 0.08, depthWrite: false })));
+}
+
+// 로고 무늬 점 — 빨간 무늬 자리는 밝게, 회색 바탕은 흐리게. 스캔라인이 지나가면 밝아진다
+const dotMaterial = new THREE.ShaderMaterial({
+  uniforms: {
+    uSize: { value: 1 },
+    uTime: { value: 0 },
+    uScan: { value: -1000 },
+    uColorA: { value: new THREE.Color("#0b6f8f") },
+    uColorB: { value: new THREE.Color("#8ff8ff") },
+    ...LIGHT,
+  },
+  vertexShader: `
+    uniform float uSize;
+    uniform vec3 uLight;
+    attribute float aRand;
+    attribute float aKind;
+    varying float vFacing; varying float vRand; varying float vKind; varying float vLit;
+    void main(){
+      vec4 mv = modelViewMatrix * vec4(position, 1.0);
+      vec3 n = normalize(normalMatrix * position);
+      vFacing = dot(n, normalize(-mv.xyz));
+      vLit = dot(n, uLight);
+      vRand = aRand;
+      vKind = aKind;
+      gl_PointSize = uSize * mix(0.8, 1.15, aKind) / -mv.z;
+      gl_Position = projectionMatrix * mv;
+    }`,
+  fragmentShader: `
+    uniform vec3 uColorA, uColorB; uniform float uTime; uniform float uScan; uniform float uSun; uniform float uCharge;
+    varying float vFacing; varying float vRand; varying float vKind; varying float vLit;
+    void main(){
+      float d = length(gl_PointCoord - 0.5);
+      if (d > 0.5) discard;
+      float a = smoothstep(0.5, 0.25, d);
+      float facing = smoothstep(-0.05, 0.7, vFacing);
+      float twinkle = 0.78 + 0.22 * sin(uTime * 1.4 + vRand * 40.0);
+      float scan = exp(-abs(gl_FragCoord.y - uScan) / 22.0);
+      vec3 col = mix(uColorA, uColorB, max(vKind * (0.55 + 0.45 * facing) * (0.7 + 0.3 * vRand), 0.25));
+      col += vec3(0.6, 1.0, 1.0) * scan * 0.9;
+      float strength = mix(0.42, 1.0, vKind);
+      // 다가오는 빛을 받는 쪽은 밝게, 흡수된 빛은 무늬 전체를 밝힌다
+      strength *= 1.0 + 0.35 * smoothstep(-0.2, 0.7, vLit) * uSun + 0.4 * uCharge;
+      gl_FragColor = vec4(col, a * (0.15 + 0.85 * facing) * twinkle * strength + scan * 0.4);
+    }`,
+  transparent: true,
+  depthWrite: false,
+  blending: THREE.AdditiveBlending,
+});
+
+function buildDots() {
+  const bits = Uint8Array.from(atob(LOGO_MASK), (c) => c.charCodeAt(0));
+  // 앞면(z>0)은 정사영으로 심볼 원판에 대응시키고, 뒷면은 좌우를 뒤집어 뒤에서 봐도 로고로 읽히게 한다
+  const isRed = (u, v) => {
+    const i = Math.min(MASK_SIZE - 1, Math.floor(((u + 1) / 2) * MASK_SIZE));
+    const j = Math.min(MASK_SIZE - 1, Math.floor(((1 - v) / 2) * MASK_SIZE));
+    const n = j * MASK_SIZE + i;
+    return (bits[n >> 3] >> (n & 7)) & 1;
+  };
+
+  // 피보나치 구면 분포로 고르게 샘플링
+  const N = isSmall() ? 30000 : 56000;
+  const golden = Math.PI * (3 - Math.sqrt(5));
+  const pos = [], rnd = [], kind = [];
+  for (let i = 0; i < N; i++) {
+    const y = 1 - ((i + 0.5) / N) * 2;
+    const r = Math.sqrt(1 - y * y);
+    const th = golden * i;
+    const x = Math.cos(th) * r, z = Math.sin(th) * r;
+    const red = isRed(z >= 0 ? x : -x, y);
+    // 회색 바탕은 절반만 찍어 무늬가 더 또렷하게 보이게 한다
+    if (!red && i % 2) continue;
+    pos.push(x * 1.002, y * 1.002, z * 1.002);
+    rnd.push(Math.random());
+    kind.push(red);
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+  g.setAttribute("aKind", new THREE.Float32BufferAttribute(kind, 1));
+  g.setAttribute("aRand", new THREE.Float32BufferAttribute(rnd, 1));
+  globe.add(new THREE.Points(g, dotMaterial));
+}
+
+// 주변을 떠도는 입자 구름 (두 겹이 서로 반대로 돈다)
+const particleMaterial = new THREE.ShaderMaterial({
+  uniforms: { uSize: { value: 1 }, uTime: { value: 0 }, uColor: { value: HOLO } },
+  vertexShader: `
+    uniform float uSize;
+    attribute float aRand;
+    varying float vRand;
+    void main(){
+      vec4 mv = modelViewMatrix * vec4(position, 1.0);
+      vRand = aRand;
+      gl_PointSize = uSize * (0.6 + aRand) / -mv.z;
+      gl_Position = projectionMatrix * mv;
+    }`,
+  fragmentShader: `
+    uniform vec3 uColor; uniform float uTime;
+    varying float vRand;
+    void main(){
+      vec2 p = abs(gl_PointCoord - 0.5);
+      if (p.x > 0.42 || p.y > 0.28) discard;
+      float tw = 0.5 + 0.5 * sin(uTime * (1.0 + vRand * 2.0) + vRand * 60.0);
+      gl_FragColor = vec4(uColor, (0.25 + 0.6 * tw) * (0.4 + 0.6 * vRand));
+    }`,
+  transparent: true,
+  depthWrite: false,
+  blending: THREE.AdditiveBlending,
+});
+const particleLayers = [];
+for (const dir of [1, -1]) {
+  const n = isSmall() ? 260 : 520;
+  const pos = [], rnd = [];
+  for (let i = 0; i < n; i++) {
+    const v = new THREE.Vector3(rand(-1, 1), rand(-1, 1), rand(-1, 1)).normalize();
+    const r = 1.22 + Math.pow(Math.random(), 1.6) * 0.75;
+    pos.push(v.x * r * 1.12, v.y * r * 0.9, v.z * r);
+    rnd.push(Math.random());
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+  g.setAttribute("aRand", new THREE.Float32BufferAttribute(rnd, 1));
+  const pts = new THREE.Points(g, particleMaterial);
+  pts.userData.dir = dir;
+  scene.add(pts);
+  particleLayers.push(pts);
+}
+
+// HUD 링 — 항상 카메라를 향하는 평면 위에 그린다
+const hud = new THREE.Group();
+scene.add(hud);
+const hudMat = (opacity, color = HOLO) => new THREE.MeshBasicMaterial({
+  color, transparent: true, opacity, depthTest: false, depthWrite: false,
+  blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
+});
+// [안쪽 반지름, 바깥 반지름, 시작 각, 끝 각] 목록을 하나의 메시로 묶는다
+function arcMesh(quads, opacity, color) {
+  const pos = [];
+  const p = (r, a) => [Math.cos(a) * r, Math.sin(a) * r, 0];
+  for (const [r0, r1, a0, a1] of quads) {
+    const k = Math.max(1, Math.ceil((a1 - a0) / 0.04));
+    for (let j = 0; j < k; j++) {
+      const b0 = a0 + ((a1 - a0) * j) / k, b1 = a0 + ((a1 - a0) * (j + 1)) / k;
+      pos.push(...p(r0, b0), ...p(r1, b0), ...p(r1, b1), ...p(r0, b0), ...p(r1, b1), ...p(r0, b1));
+    }
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+  const m = new THREE.Mesh(g, hudMat(opacity, color));
+  m.renderOrder = 10;
+  hud.add(m);
+  return m;
+}
+const hudParts = {
+  inner: arcMesh([[1.215, 1.221, 0, TAU]], 0.4),
+  dashes: arcMesh(Array.from({ length: 72 }, (_, i) => [1.285, 1.292, (i / 72) * TAU, ((i + 0.55) / 72) * TAU]), 0.3),
+  sweep: arcMesh([[1.255, 1.268, 0.25, 1.35], [1.255, 1.268, 0.25 + Math.PI, 1.35 + Math.PI]], 0.75),
+  ticks: arcMesh(Array.from({ length: 180 }, (_, i) => {
+    const a = (i / 180) * TAU;
+    return i % 15 === 0 ? [1.34, 1.4, a - 0.004, a + 0.004] : [1.355, 1.372, a - 0.003, a + 0.003];
+  }), 0.32),
+  outer: arcMesh([[1.47, 1.474, 0, TAU]], 0.12),
+  // 아래쪽 바깥 눈금은 상태 문구와 겹치므로 뺀다
+  cross: arcMesh([0, 0.5, 1, 1.5].flatMap((q) => {
+    const a = q * Math.PI;
+    const inner = [1.16, 1.2, a - 0.004, a + 0.004];
+    return q === 1.5 ? [inner] : [[1.42, 1.56, a - 0.003, a + 0.003], inner];
+  }), 0.45),
+};
+// 안쪽 링 위의 노드
+for (const a of [Math.PI / 2, 0, Math.PI * 1.25]) {
+  const n = new THREE.Mesh(new THREE.CircleGeometry(0.014, 16), hudMat(0.9));
+  n.position.set(Math.cos(a) * 1.218, Math.sin(a) * 1.218, 0);
+  n.renderOrder = 11;
+  hudParts.inner.add(n);
+}
+let hudFlash = 0;
+
+// 거점 마커 + 펄스 링 + 라벨
+const Z_AXIS = new THREE.Vector3(0, 0, 1);
+const ringGeo = new THREE.RingGeometry(0.75, 1, 48);
+function placeOnSurface(obj, normal, r) {
+  obj.position.copy(normal).multiplyScalar(r);
+  obj.quaternion.setFromUnitVectors(Z_AXIS, normal);
+}
+for (const hub of HUBS) {
+  hub.normal = new THREE.Vector3(hub.u, hub.v, Math.sqrt(Math.max(0, 1 - hub.u * hub.u - hub.v * hub.v)));
+  const color = new THREE.Color(hub.home ? "#ffb547" : "#3ff3ff");
+
+  const dot = new THREE.Mesh(new THREE.CircleGeometry(hub.home ? 0.016 : 0.011, 24), new THREE.MeshBasicMaterial({ color }));
+  placeOnSurface(dot, hub.normal, 1.004);
+  globe.add(dot);
+
+  hub.pulse = new THREE.Mesh(ringGeo, new THREE.MeshBasicMaterial({
+    color, transparent: true, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending,
+  }));
+  placeOnSurface(hub.pulse, hub.normal, 1.005);
+  hub.pulsePhase = Math.random();
+  globe.add(hub.pulse);
+
+}
+
+// 거점 간 호(arc)
+const arcs = [];
+const bursts = [];
+const MAX_ARCS = () => (isSmall() ? 5 : 8);
+
+function makeArc(from, to) {
+  const angle = from.normal.angleTo(to.normal);
+  const lift = 0.06 + angle * 0.16;
+  const q = new THREE.Quaternion().setFromUnitVectors(from.normal, to.normal);
+  const qi = new THREE.Quaternion();
+  const qt = new THREE.Quaternion();
+  const pts = [];
+  const SEG = 64;
+  for (let i = 0; i <= SEG; i++) {
+    const t = i / SEG;
+    qt.slerpQuaternions(qi, q, t);
+    pts.push(from.normal.clone().applyQuaternion(qt).multiplyScalar(1.004 + lift * Math.sin(Math.PI * t)));
+  }
+  const geo = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 140, 0.0032, 6, false);
+  const mat = new THREE.ShaderMaterial({
+    uniforms: {
+      uHead: { value: 0 },
+      uFade: { value: 1 },
+      uColor: { value: new THREE.Color("#1ac8ff") },
+      uHeadColor: { value: new THREE.Color("#eaffff") },
+    },
+    vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+    fragmentShader: `
+      uniform float uHead, uFade; uniform vec3 uColor, uHeadColor; varying vec2 vUv;
+      void main(){
+        float d = uHead - vUv.x;
+        float behind = step(0.0, d);
+        float trail = behind * exp(-d * 10.0);
+        // 지나간 자리는 점선으로 남겨 홀로그램 데이터 링크처럼 보이게 한다
+        float dash = step(0.45, fract(vUv.x * 60.0));
+        float a = (behind * 0.28 * dash + trail) * uFade;
+        vec3 col = mix(uColor, uHeadColor, smoothstep(0.6, 1.0, trail));
+        gl_FragColor = vec4(col, a);
+      }`,
+    transparent: true,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+  });
+  const mesh = new THREE.Mesh(geo, mat);
+  globe.add(mesh);
+  arcs.push({ mesh, mat, from, to, t: 0, dur: 1.4 + angle * 0.9, arrived: false, fade: 1 });
+}
+
+function spawnArc() {
+  if (arcs.length >= MAX_ARCS()) return;
+  const home = HUBS[0];
+  let from, to;
+  if (Math.random() < 0.6) {
+    from = home;
+    to = pick(HUBS.slice(1));
+  } else {
+    from = pick(HUBS);
+    do { to = pick(HUBS); } while (to === from);
+  }
+  makeArc(from, to);
+}
+
+function burstAt(hub) {
+  const mesh = new THREE.Mesh(ringGeo, new THREE.MeshBasicMaterial({
+    color: 0xeaffff, transparent: true, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending,
+  }));
+  placeOnSurface(mesh, hub.normal, 1.006);
+  globe.add(mesh);
+  bursts.push({ mesh, t: 0 });
+}
+
+const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+// 크기 맞추기 — 구(테두리 빛 포함)가 비어 있는 자리에 잘리지 않게 들어가도록 한다.
+// 처음엔 아래 안내 문구 위 공간 전체, 유리 대화창이 열리면 대화창을 뺀 나머지(넓은 화면은 왼쪽, 좁은 화면은 위)
+const SPHERE_R = 1.12;   // 구 반지름 1 + 테두리 빛 여유 (월드 단위)
+const GAP = 16;
+const introEl = document.getElementById("intro");
+const yuriEl = document.getElementById("yuri");
+let viewW = 1, viewH = 1;
+const fit = { z: 6, ox: 0, oy: 0 };       // 목표
+const cur = { z: 0, ox: 0, oy: 0 };       // 지금 (목표로 부드럽게 따라간다)
+function freeRect() {
+  if (stage.classList.contains("chat-open")) {
+    const sheet = yuriEl.offsetWidth > viewW * 0.7;   // 좁은 화면: 아래 시트
+    if (sheet) return { x: 0, y: 0, w: viewW, h: yuriEl.offsetTop };
+    return { x: 0, y: 0, w: yuriEl.offsetLeft, h: viewH };
+  }
+  return { x: 0, y: 0, w: viewW, h: introEl.offsetTop };
+}
+function resize() {
+  viewW = Math.max(stage.clientWidth, 1);
+  viewH = Math.max(stage.clientHeight, 1);
+  renderer.setSize(viewW, viewH, false);
+  camera.aspect = viewW / viewH;
+  const tanHalf = Math.tan((FOV * D2R) / 2);
+  const r = freeRect();
+  const availH = Math.max(r.h - GAP * 2, 120), availW = Math.max(r.w - GAP * 2, 120);
+  // z=0 평면의 화면 절반 높이(h)를 구가 빈 자리 높이·너비 안에 들어오도록 고른다
+  // 대화창이 열려 있으면 HUD 글자와 겹치지 않게 조금 작게
+  const shrink = stage.classList.contains("chat-open") ? 0.84 : 1;
+  const h = Math.max((SPHERE_R * viewH) / availH, (SPHERE_R * viewH) / availW) / shrink;
+  fit.z = h / tanHalf;
+  // 빈 자리의 가운데가 구의 중심이 되도록 화면을 민다
+  fit.ox = viewW / 2 - (r.x + r.w / 2);
+  fit.oy = viewH / 2 - (r.y + r.h / 2);
+  if (!cur.z) Object.assign(cur, fit);
+  applyView();
+  const px = (viewH * renderer.getPixelRatio()) / (2 * tanHalf);
+  dotMaterial.uniforms.uSize.value = (isSmall() ? 0.012 : 0.0095) * px;
+  particleMaterial.uniforms.uSize.value = 0.016 * px;
+  starMaterial.uniforms.uSize.value = 0.13 * px;
+}
+function applyView() {
+  camera.position.z = cur.z;
+  camera.setViewOffset(viewW, viewH, Math.round(cur.ox), Math.round(cur.oy), viewW, viewH);
+  camera.updateProjectionMatrix();
+}
+// 대화창이 열리고 닫힐 때 구가 비켜 서는 움직임
+function easeView(dt) {
+  const k = reduceMotion ? 1 : 1 - Math.exp(-dt * 4);
+  let moved = false;
+  for (const key of ["z", "ox", "oy"]) {
+    const d = fit[key] - cur[key];
+    if (Math.abs(d) > 0.001) { cur[key] += d * k; moved = true; }
+  }
+  if (moved) applyView();
+}
+const stageRO = new ResizeObserver(resize);
+stageRO.observe(stage);
+resize();
+
+
+// 드래그 회전 — 놓으면 로고가 다시 정면을 향하도록 천천히 돌아온다
+let dragY = 0, dragX = 0;
+let rotY = 0, rotX = 0;
+let velY = 0, velX = 0;
+let dragging = false, lastX = 0, lastY = 0;
+const canvas = renderer.domElement;
+canvas.addEventListener("pointerdown", (e) => {
+  dragging = true; lastX = e.clientX; lastY = e.clientY;
+  velY = velX = 0;
+  canvas.setPointerCapture(e.pointerId);
+});
+canvas.addEventListener("pointermove", (e) => {
+  if (!dragging) return;
+  const s = 3.2 / viewH;
+  velY = (e.clientX - lastX) * s;
+  velX = (e.clientY - lastY) * s;
+  dragY += velY;
+  dragX = THREE.MathUtils.clamp(dragX + velX, -1.1, 1.1);
+  lastX = e.clientX; lastY = e.clientY;
+});
+const endDrag = () => { dragging = false; };
+canvas.addEventListener("pointerup", endDrag);
+canvas.addEventListener("pointercancel", endDrag);
+
+// HUD 수치 (화면 연출용)
+const readoutL = document.getElementById("readout-l");
+const readoutR = document.getElementById("readout-r");
+let packets = 0;
+function drawReadout() {
+  const yaw = ((((rotY * R2D) % 360) + 540) % 360) - 180;
+  readoutL.innerHTML = `YAW ${yaw.toFixed(2)}°<br>PITCH ${(rotX * R2D).toFixed(2)}°<br>NODES ${HUBS.length}`;
+  readoutR.innerHTML = `LINK ${String(arcs.length).padStart(2, "0")}<br>PKT ${String(packets).padStart(5, "0")}<br>SYNC ${(96 + Math.sin(elapsed * 0.7) * 3.4).toFixed(1)}%`;
+}
+
+// 루프
+const clock = new THREE.Clock();
+let spawnIn = 0.3;
+let elapsed = 0;
+let readoutIn = 0;
+
+function frame() {
+  requestAnimationFrame(frame);
+  const dt = Math.min(clock.getDelta(), 0.05);
+  elapsed += dt;
+  const motion = reduceMotion ? 0.25 : 1;
+  dotMaterial.uniforms.uTime.value = elapsed;
+  particleMaterial.uniforms.uTime.value = elapsed;
+  starMaterial.uniforms.uTime.value = elapsed;
+  updateLight(elapsed, dt);
+  easeView(dt);
+
+  if (!dragging) {
+    dragY += velY;
+    dragX = THREE.MathUtils.clamp(dragX + velX, -1.1, 1.1);
+    velY *= 0.94; velX *= 0.94;
+    // 한 바퀴 넘게 돌렸으면 가장 가까운 정면으로 돌아오게 각도를 접는다
+    dragY = Math.atan2(Math.sin(dragY), Math.cos(dragY));
+    const back = Math.exp(-dt * 1.4);
+    dragY *= back; dragX *= back;
+  }
+  rotY = dragY + Math.sin(elapsed * 0.35 * motion) * 0.32;
+  rotX = dragX + Math.sin(elapsed * 0.23 * motion) * 0.08;
+  globe.rotation.set(rotX, rotY, 0);
+  shell.rotation.set(rotX * 0.5, -elapsed * 0.05 * motion, 0);
+  for (const p of particleLayers) p.rotation.y += p.userData.dir * 0.035 * motion * dt;
+
+  // HUD 링 회전 + 전송 도착 시 번쩍임
+  hudFlash = Math.max(0, hudFlash - dt * 2.5);
+  const spin = motion * (thinking ? 5 : 1);
+  hudParts.dashes.rotation.z += 0.06 * spin * dt;
+  hudParts.ticks.rotation.z -= 0.025 * spin * dt;
+  hudParts.sweep.rotation.z -= 0.5 * spin * dt;
+  hudParts.inner.rotation.z += 0.12 * spin * dt;
+  hudParts.sweep.material.opacity = 0.65 + hudFlash * 0.35;
+  hudParts.dashes.material.opacity = 0.3 + hudFlash * 0.4;
+
+  // 스캔라인: CSS 줄과 점 밝기를 같은 위치로 맞춘다
+  const scanY = ((elapsed * 0.22 * motion) % 1) * (viewH + 160) - 80;
+  scanEl.style.transform = `translateY(${scanY.toFixed(1)}px)`;
+  dotMaterial.uniforms.uScan.value = (viewH - scanY) * renderer.getPixelRatio();
+
+  spawnIn -= dt;
+  if (spawnIn <= 0) {
+    spawnArc();
+    spawnIn = rand(0.55, 1.3) / motion;
+  }
+
+  for (let i = arcs.length - 1; i >= 0; i--) {
+    const a = arcs[i];
+    a.t += dt / a.dur;
+    if (!a.arrived) {
+      a.mat.uniforms.uHead.value = easeInOut(Math.min(a.t, 1));
+      if (a.t >= 1) {
+        a.arrived = true;
+        burstAt(a.to);
+        onArrival(a.from, a.to);
+      }
+    } else {
+      a.mat.uniforms.uHead.value = 1 + (a.t - 1) * 0.6;
+      a.fade -= dt * 0.9;
+      a.mat.uniforms.uFade.value = Math.max(a.fade, 0);
+      if (a.fade <= 0) {
+        globe.remove(a.mesh);
+        a.mesh.geometry.dispose();
+        a.mat.dispose();
+        arcs.splice(i, 1);
+      }
+    }
+  }
+
+  for (let i = bursts.length - 1; i >= 0; i--) {
+    const b = bursts[i];
+    b.t += dt / 1.1;
+    const s = 0.01 + b.t * 0.07;
+    b.mesh.scale.set(s, s, s);
+    b.mesh.material.opacity = Math.max(0, 1 - b.t);
+    if (b.t >= 1) {
+      globe.remove(b.mesh);
+      b.mesh.material.dispose();
+      bursts.splice(i, 1);
+    }
+  }
+
+  for (const hub of HUBS) {
+    const p = (elapsed * 0.45 + hub.pulsePhase) % 1;
+    const s = (hub.home ? 0.02 : 0.014) + p * (hub.home ? 0.05 : 0.035);
+    hub.pulse.scale.set(s, s, s);
+    hub.pulse.material.opacity = (1 - p) * 0.8;
+  }
+
+  readoutIn -= dt;
+  if (readoutIn <= 0) { drawReadout(); readoutIn = 0.2; }
+
+  renderer.render(scene, camera);
+}
+
+buildDots();
+frame();
+
+/* ---------------- 유리 가입 상담 ---------------- */
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const kst = () => new Date().toLocaleTimeString("en-GB", { hour12: false, timeZone: "Asia/Seoul" });
+const sleep = (ms) => new Promise((r) => setTimeout(r, reduceMotion ? Math.min(ms, 150) : ms));
+
+function onArrival() {
+  hudFlash = 1;
+  packets += 1;
+}
+
+// 질문 트리 · 슬롯 · 추천은 assets/yuri-flow.js(YuriFlow, 어드민 설정)에서 — 이 화면은 대화 UI만 맡는다
+const RC = "";  // 사이트 루트에 있음 — Home iframe에서 열려도 이동은 최상위 창에서
+let flow;
+function resetState() { flow = window.YuriFlow.create(); }
+
+const log = $("log"), chipsEl = $("chips"), form = $("ask"), input = $("ask-input"), yuriBox = $("yuri");
+let busy = false, started = false;
+
+function setBusy(on) {
+  busy = on;
+  yuriBox.dataset.busy = on ? "1" : "0";
+  input.disabled = on;
+  form.querySelector("button").disabled = on;
+  for (const b of chipsEl.querySelectorAll("button")) b.disabled = on;
+}
+function setStatus(main, sub) {
+  $("status-main").textContent = main;
+  $("status-sub").textContent = `◦ ${sub}`;
+}
+function scrollLog() { log.scrollTop = log.scrollHeight; }
+function addMsg(who, html, cls = "") {
+  const el = document.createElement("div");
+  el.className = `msg ${who} ${cls}`.trim();
+  el.innerHTML = html;
+  log.appendChild(el);
+  scrollLog();
+  return el;
+}
+// 유리가 말할 때: 입력 중 표시 → 말풍선, 홀로그램 링이 번쩍인다
+async function say(text, cls) {
+  const t = addMsg("bot", "<i></i><i></i><i></i>", "typing");
+  t.setAttribute("aria-label", "유리가 입력 중");
+  await sleep(380 + Math.min(text.length * 9, 800));
+  t.remove();
+  hudFlash = 1;
+  return addMsg("bot", esc(text).replace(/\n/g, "<br>"), cls);
+}
+// 고객 답은 빛이 되어 구로 흘러 들어간다
+function answer(text) {
+  addMsg("me", esc(text));
+  beamIn();
+}
+
+function renderChips(q) {
+  chipsEl.replaceChildren();
+  q.options.forEach((o, i) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "qchip"; b.textContent = o.label; b.dataset.i = i;
+    if (o.act) b.dataset.pick = o.act;
+    if (q.multi) b.setAttribute("aria-pressed", "false");
+    chipsEl.appendChild(b);
+  });
+  if (q.multi) {
+    const done = document.createElement("button");
+    done.type = "button"; done.className = "qchip done"; done.dataset.act = "done"; done.textContent = "선택 완료"; done.disabled = true;
+    chipsEl.appendChild(done);
+  }
+  input.placeholder = q.placeholder || (q.multi ? "골라 주시거나 직접 적어 주세요 (예: 바이오 쪽 세미나 자주 듣고 싶어요)" : "골라 주시거나 직접 적어 주세요");
+}
+function progress() {
+  $("progress").style.width = `${flow.progressRatio() * 100}%`;
+  $("step-label").textContent = flow.current() ? `가입 상담 · ${flow.progressLabel()}` : "추천 결과";
+}
+
+async function next() {
+  setBusy(true);
+  chipsEl.replaceChildren();
+  const q = await flow.next();
+  progress();
+  if (!q) return analyze();
+  setStatus("YURI LISTENING", `asking · ${q.slot}${q.byAi ? " · gemini" : ""}`);
+  await say(q.text);
+  renderChips(q);
+  setBusy(false);
+  (chipsEl.querySelector("button") || input).focus({ preventScroll: true });
+}
+
+// 공시 · DB 조회 결과 카드
+function dbCard(db) {
+  const rows = db.facts.map(([k, v]) => `<div><span>${esc(k)}</span><b>${esc(v)}</b></div>`).join("");
+  return `<span class="eyebrow">DISCLOSURE LOOKUP · ${esc(db.src)}</span>
+    <h3>${esc(db.name)}${db.virtual ? ' <em class="src-tag">가상</em>' : ""}</h3>
+    <div class="pf">${rows}</div>
+    ${db.note ? `<div class="why">${esc(db.note)}</div>` : ""}`;
+}
+
+// 답 하나 → 엔진이 슬롯을 채우고(여러 개일 수도) 다음 질문을 고른다
+async function submit(text, picks, act) {
+  if (busy || !flow.current()) return;
+  answer(text);
+  setBusy(true);
+  chipsEl.replaceChildren();
+  setStatus("YURI THINKING", "reading your answer");
+  const r = await flow.answer(text, picks, act);
+  if (r.card) { hudFlash = 1; addMsg("bot", dbCard(r.card), "result db"); }
+  for (const n of r.notes || []) await say(n);
+  if (r.retry) {
+    await say(r.retry);
+    renderChips(flow.current());
+    setBusy(false);
+    return;
+  }
+  next();
+}
+
+chipsEl.addEventListener("click", (e) => {
+  const b = e.target.closest("button");
+  const q = flow && flow.current();
+  if (!b || busy || !q) return;
+  if (b.dataset.act === "done") {
+    const sel = [...chipsEl.querySelectorAll('[aria-pressed="true"]')].map((x) => +x.dataset.i);
+    return submit(sel.map((i) => q.options[i].label).join(", "), sel);
+  }
+  if (q.multi) {
+    b.setAttribute("aria-pressed", b.getAttribute("aria-pressed") === "true" ? "false" : "true");
+    chipsEl.querySelector('[data-act="done"]').disabled = !chipsEl.querySelector('[aria-pressed="true"]');
+    return;
+  }
+  const i = +b.dataset.i;
+  submit(q.options[i].label, b.dataset.pick ? [] : [i], b.dataset.pick);
+});
+
+form.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const raw = input.value.trim();
+  const q = flow && flow.current();
+  if (busy || !raw || !q) return;
+  input.value = "";
+  // 칩을 골라 둔 채 직접 입력하면 둘 다 반영
+  const sel = q.multi ? [...chipsEl.querySelectorAll('[aria-pressed="true"]')].map((x) => +x.dataset.i) : [];
+  submit(raw, sel);
+});
+
+async function analyze() {
+  chipsEl.replaceChildren();
+  setBusy(true);
+  setStatus("YURI ANALYZING", "matching services to profile");
+  setThinking(true);
+  await say("답변을 프로필로 정리하고 있어요. 잠시만요.");
+  await sleep(1200);
+  setThinking(false);
+  renderResult();
+  setBusy(false);
+}
+
+function renderResult() {
+  const p = flow.profile(), r = flow.result();
+  const SRC = { DB: "공시·DB", "대화": "대화", AI: "AI 추출" };
+  const tag = (k) => (p.src[k] ? `<em class="src-tag ${p.src[k] === "DB" ? "db" : p.src[k] === "AI" ? "ai" : ""}">${SRC[p.src[k]]}</em>` : "");
+  const rows = [
+    ["① 고객 구분", p.segment, "segment"], ["② 고객 정체성", p.identity, "identity"], ["③ 운용 규모", p.scale, "scale"], ["③ 운용 목적", p.purpose, "purpose"],
+    ["④ 관심 분야", (p.sectors || []).join(" · "), "sectors"], ["④ 원하는 서비스", (p.services || []).join(" · "), "services"], ["⑤ 심화", p.deep, null],
+  ].map(([k, v, id]) => `<div><span>${k}</span><b>${esc(v || "—")}${id ? tag(id) : ""}</b></div>`).join("");
+  const svcs = r.items.map((s, i) => `
+    <a class="svc" href="${RC}${s.href}" target="_top">
+      <div class="svc-top"><b>${i + 1}. ${esc(s.label)}</b><span>${s.pillar === "행사" ? "EVENT" : "RESEARCH"}${s.moved === "new" ? " · AI+" : s.moved === "up" ? " · AI↑" : ""}</span></div>
+      <p>${esc(s.desc)}${s.why.length ? `<br>· ${esc(s.why.join(" / "))}` : ""}</p>
+    </a>`).join("");
+  const el = addMsg("bot", `
+    <span class="eyebrow">YURI MATCH · 고객 프로필</span>
+    <h3>${esc(p.company || "고객")}에 맞춘 <em>서비스</em>예요</h3>
+    <div class="pf">${rows}</div>
+    <div class="why" style="margin-top:12px">이 서비스부터 권해 드려요</div>
+    <div class="svc-list">${svcs}</div>
+    <div class="method">어드민 기본 순서: ${esc(r.adminOrder.join(" → "))}<br>답변 기반 판단으로 ${r.changed ? `${r.changed}개 순서를 바꿨어요.` : "기본 순서를 유지했어요."}</div>
+    <div class="result-actions">
+      <button type="button" class="btn" data-act="start">이 추천으로 시작하기</button>
+      <button type="button" class="btn ghost" data-act="restart">다시 상담하기</button>
     </div>
-    <div class="reel__progress" aria-hidden="true"><span id="reel-progress"></span></div>
-  </section>
+    <div class="method">판단 방식: ${r.ai ? "질문 문구 · 답변 해석은 Gemini, 추천 점수는 어드민 규칙" : "시연용 규칙 기반(서버 AI 미연결)"} · 서비스 안내이며 투자 권유가 아닙니다.</div>`, "result");
+  // 결과 카드는 제목부터 보이게
+  log.scrollTop = el.offsetTop - log.offsetTop - 8;
+  hudFlash = 1;
+  setStatus("YURI MATCHED", `profile ${p.segment || "-"}${r.ai ? " · gemini" : ""}`);
+  $("step-label").textContent = "추천 결과";
+  $("progress").style.width = "100%";
+  el.querySelector('[data-act="start"]').focus({ preventScroll: true });
+}
 
-  <!-- 2. 고객 유형 -->
-  <section class="step" id="s-type">
-    <div class="panel">
-      <div class="panel__brand"><span class="logo__mark" aria-hidden="true">E</span>유진투자증권 <span class="logo__sub">Insight Lab</span></div>
-      <p class="panel__step">1 / 3</p>
-      <h2 class="panel__title">어떤 고객이신가요?</h2>
-      <p class="panel__desc">고객 유형에 맞춰 메뉴와 자료 형식을 준비해 드려요.</p>
-      <div class="panel__body pick">
-        <button class="pick__card" type="button" data-seg="법인">
-          <span class="pick__icon" aria-hidden="true">🏢</span><b>법인 고객</b><span>자산운용사 · 투자자문 · DMA 전문투자자 · 연기금 · 보험 · 은행</span>
-        </button>
-        <button class="pick__card" type="button" data-seg="WM">
-          <span class="pick__icon" aria-hidden="true">💎</span><b>WM 고객</b><span>지점 PB와 함께하는 자산관리 고객</span>
-        </button>
-      </div>
-    </div>
-  </section>
+log.addEventListener("click", (e) => {
+  const b = e.target.closest("button[data-act]");
+  if (!b || busy) return;
+  if (b.dataset.act === "start") return startSession();
+  if (b.dataset.act === "restart") { log.replaceChildren(); resetState(); next(); }
+});
 
-  <!-- 3a. 법인 소속 -->
-  <section class="step" id="s-inst">
-    <div class="panel">
-      <button class="panel__back" type="button" data-go="s-type">‹ 이전</button>
-      <p class="panel__step">2 / 3</p>
-      <h2 class="panel__title">소속을 알려 주세요</h2>
-      <p class="panel__desc">시연에서는 비워 두면 예시 고객 정보로 들어가요.</p>
-      <form class="panel__body" id="f-inst" novalidate>
-        <fieldset class="radios" style="border:0;padding:0;margin:0 0 22px">
-          <legend class="sr-only">고객 유형</legend>
-          <label class="radio"><input type="radio" name="persona" value="am" checked><span><b>자산운용사</b><small>펀드·일임 운용역, 리서치 담당</small></span></label>
-          <label class="radio"><input type="radio" name="persona" value="ia"><span><b>투자자문·일임사</b><small>고객 설명자료가 필요한 자문 인력</small></span></label>
-          <label class="radio"><input type="radio" name="persona" value="dma"><span><b>DMA 이용 전문투자자</b><small>DMA 주문·수수료 상담 연결</small></span></label>
-          <label class="radio"><input type="radio" name="persona" value="etc"><span><b>기타 기관</b><small>연기금·보험·은행·공제회</small></span></label>
-        </fieldset>
-        <label class="field"><span class="field__label">소속</span><input class="input" name="org" autocomplete="organization" placeholder="예) 한빛자산운용(가상)"></label>
-        <label class="field"><span class="field__label">이름</span><input class="input" name="name" autocomplete="name" placeholder="예) 김민준"></label>
-        <button class="btn btn--primary btn--block" type="submit" style="margin-top:8px">다음</button>
-      </form>
-    </div>
-  </section>
+// 2장 세션 형식(+ 프로필 · 추천)으로 저장하고 Insight Lab 홈으로
+function startSession() {
+  const session = flow.session();
+  try { localStorage.setItem("il.session", JSON.stringify(session)); localStorage.setItem("il.profile", JSON.stringify(session.profile)); } catch (e) {}
+  setStatus("YURI WELCOME", "opening insight lab");
+  beamIn();
+  setTimeout(() => { (window.top || window).location.href = `${RC}home.html`; }, reduceMotion ? 0 : 900);
+}
 
-  <!-- 3b. WM 지점 -->
-  <section class="step" id="s-wm">
-    <div class="panel">
-      <button class="panel__back" type="button" data-go="s-type">‹ 이전</button>
-      <p class="panel__step">2 / 3</p>
-      <h2 class="panel__title">거래 지점을 알려 주세요</h2>
-      <p class="panel__desc">담당 PB에게 받은 초대 코드가 있으면 함께 넣어 주세요. 시연에서는 비워 둬도 돼요.</p>
-      <form class="panel__body" id="f-wm" novalidate>
-        <label class="field"><span class="field__label">지점</span><input class="input" name="branch" placeholder="예) 강남금융센터"></label>
-        <label class="field"><span class="field__label">초대 코드</span><input class="input" name="invite_code" autocomplete="off" placeholder="예) WM-2026-DEMO"></label>
-        <label class="field"><span class="field__label">이름</span><input class="input" name="name" autocomplete="name" placeholder="예) 최은정"></label>
-        <button class="btn btn--primary btn--block" type="submit" style="margin-top:8px">다음</button>
-      </form>
-    </div>
-  </section>
+/* 대화창 열고 닫기 — 열리면 구가 남은 자리로 비켜 선다 */
+function openChat() {
+  if (stage.classList.contains("chat-open")) return;
+  stage.classList.add("chat-open");
+  resize();
+  if (!started) { started = true; resetState(); next(); }
+  else (chipsEl.querySelector("button:not(:disabled)") || input).focus({ preventScroll: true });
+}
+function closeChat() {
+  stage.classList.remove("chat-open");
+  resize();
+  $("open-chat").textContent = "유리와 대화 이어서 하기";
+  setStatus("YURI STANDBY", "conversation paused");
+  $("open-chat").focus({ preventScroll: true });
+}
+$("open-chat").addEventListener("click", openChat);
+$("chat-close").addEventListener("click", closeChat);
+yuriBox.addEventListener("keydown", (e) => { if (e.key === "Escape") closeChat(); });
+$("chat-restart").addEventListener("click", () => {
+  if (busy) return;
+  log.replaceChildren();
+  resetState();
+  next();
+});
+// 첫 빛이 구에 흡수되면 유리가 먼저 말을 건다
+onFirstAbsorb = () => { if (!started) openChat(); };
 
-  <!-- 4. 로그인 -->
-  <section class="step" id="s-login">
-    <div class="panel">
-      <button class="panel__back" type="button" id="login-back">‹ 이전</button>
-      <p class="panel__step">3 / 3</p>
-      <h2 class="panel__title">로그인 방법을 골라 주세요</h2>
-      <div class="panel__body">
-        <div class="login-who" id="login-who" aria-live="polite"></div>
-        <button class="btn btn--block demo-btn" type="button" id="btn-demo">시연으로 둘러보기</button>
-        <p class="form-note" style="margin-top:8px;text-align:center">로그인 없이 바로 승인된 시연 계정으로 들어가요.</p>
-        <div class="divider">또는 이메일로 로그인</div>
-        <form id="f-email">
-          <label class="field"><span class="sr-only">이메일</span><input class="input" type="email" name="email" required autocomplete="email" placeholder="name@company.com"></label>
-          <button class="btn btn--secondary btn--block" type="submit">로그인 링크 받기</button>
-          <p class="form-note" style="margin-top:8px">메일로 받은 링크를 누르면 소속 확인(승인) 단계로 넘어가요. 테스트용 이메일을 써 주세요.</p>
-        </form>
-      </div>
-    </div>
-  </section>
-
-  <!-- 5. 승인 대기 -->
-  <section class="step" id="s-wait">
-    <div class="panel wait">
-      <div class="wait__icon" id="wait-icon" aria-hidden="true"><span class="wait__spin"></span></div>
-      <h2 class="panel__title" id="wait-title">소속 확인 중이에요</h2>
-      <p class="panel__desc" id="wait-desc" aria-live="polite">담당자가 소속을 확인하면 이메일로 알려드려요. 보통 영업일 기준 하루 안에 끝나요.</p>
-      <div class="panel__body">
-        <button class="btn btn--primary btn--block" type="button" id="btn-approve">시연: 바로 승인하기</button>
-        <button class="btn btn--secondary btn--block" type="button" data-go="s-type" id="btn-restart">처음으로</button>
-      </div>
-    </div>
-  </section>
-
-  <p class="entry-foot" id="entry-foot">리서치센터 직원이신가요? <a href="admin.html">관리자 로그인 →</a></p>
-</main>
+// 시계
+const tickClock = () => { $("clock").textContent = `${kst()} KST`; };
+tickClock();
+setInterval(tickClock, 1000);
+</script>
 </body>
 </html>

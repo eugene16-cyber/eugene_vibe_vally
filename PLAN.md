@@ -121,3 +121,25 @@ node tools/make-config.mjs && (cd tools && npm i)
 - 환경변수 `supabase_servide_role`(오타)도 있음 — 안 쓰는 값이면 지워도 돼요.
 - `ANTHROPIC_API_KEY` 미설정 → AI 요약·Jarvis 답변은 프리셋/스냅샷으로.
 - `2_import.py`는 `supabase_url`·`supabase_service_key`를 읽는데 실제 변수명과 달라 그대로는 실행 불가 → 사용자 크롤링 적재로 대체.
+
+## F. 회의 변경사항 (2026-10-29 · VIP Lounge)
+
+- **포지셔닝**: 법인 맞춤형 추천 서비스. VIP Lounge = 행사(유입) + 리서치(유지 — 인뎁스 리스트 · 카드뉴스 · 근거형 Q&A).
+- **첫 화면 = `index.html` = 홀로그램 v3 그대로**(`web effect/eugene-hologram-v3.html`, 경로만 수정). 쇼릴은 쓰지 않음(영상 파일 삭제).
+- **가입 = 채팅 상담** (`signup.html` `#s-chat` — v3의 "직접 유형 고르기"는 `signup.html?pick=1`, `assets/signup-chat.js/.css`, `assets/disclosure-data.js`)
+  - 회사명 → 공시 자동 반영(시연용 가상 공시 스냅샷 6개사: 황소자산운용 · A자문사 · B법인 · 한빛자산운용 · 온결투자자문 · 새솔공제회) → 빈 정보만 질문 **5~6개 가변**(고객사마다 다름) → 답이 안 맞으면 다시 질문 → 프로필 → 추천.
+  - 확보 정보: 기업 분류 · 운용 규모 · 관심 섹터 · 투자 성향 · 관심 서비스 (+ 유형별 니즈 · 자료 형식은 질문 수 보충용).
+  - 추천 = 어드민 기본값(`ADMIN_BASE`) < 답변 기반 판단. 화면에 근거와 "어드민 기본 순서 대비 바뀐 점"을 함께 보여 준다.
+  - 서버 AI(Claude) 미연결 — 규칙 기반 계산이며 화면에 그렇게 표시. 실제 DART 조회 · LLM 질문 생성은 서버가 생기면 교체.
+  - 결과는 `il.session.profile` · `il.session.recs`(+ `localStorage['il.profile']`)에 저장. 기존 유형 직접 선택(WM 포함)은 "유형 직접 선택 →"으로 남김.
+- **Home**: 메인 카피 "법인 맞춤형 추천 서비스" + 서브 카피 → 홀로그램(`hologram.html` = `web effect/eugene-hologram-v3.html` 그대로, 경로만 수정) → 내 추천 서비스 4개 → 근거형 Q&A → 기존 섹션.
+- **남은 일**: PWA(manifest · 서비스 워커 · 아이콘), 가입 질문 트리 5개 최종안(세희) 반영.
+
+### F-2. 가입 상담 질문 개편 (어드민 고려 · 2026-10-29)
+
+- **슬롯 먼저**: ① 고객 구분 ② 고객 정체성 ③ 운용 규모 · 목적 ④ 관심 분야 + 원하는 서비스 ⑤ 심화. 모든 답은 `il.session.profile`에 슬롯으로 저장.
+- **분기는 Q1 한 번**: 법인명 → 공시 DB 조회(가상 금융사 공시 `disclosure-data.js` → Supabase `stocks`(상장 = 공시 대상, 금융 업종 = 금융사) + `events` 최근 이슈) → 못 찾으면 고객 구분(금융사 / 공시 대상 법인 / 일반 법인 / WM VIP)을 직접 묻는다. 구분마다 ②③ 보기만 다르다.
+- **이미 아는 건 묻지 않음**: DB · 공시로 채운 슬롯은 건너뛴다. 자유 입력 한 번이 여러 슬롯을 채운다(예: "바이오 쪽 세미나 자주 듣고 싶어요" → 관심 분야 + 원하는 서비스 + 빈도).
+- **④는 우리가 줄 수 있는 것으로 유도**: 지금 열린 행사(`events-data.js`) + 관심 섹터의 최근 리포트(Supabase `reports`) → "이 주제로 세미나를 요청할 수 있어요". **⑤는 ④에서 고른 서비스별 질문**.
+- **Gemini**: 질문 문구 다듬기 · 자유 입력 슬롯 추출만. 보기(칩) · 추천 점수는 어드민 설정(`assets/yuri-flow.js` `IL_SIGNUP_FLOW`, `admin.html`에서 트리 확인). 키는 Cloudflare Pages 시크릿 `GEMINI_API_KEY` → 함수 `functions/api/yuri.js`(GET = 키 유무, POST = ask/extract). 키 · 서버가 없으면 같은 흐름을 규칙 기반으로 진행.
+- **파일**: 첫 화면 `index.html`(v3 UI + 새 엔진), `hologram.html`은 삭제(Home iframe은 `index.html`), `signup.html`은 유형 직접 선택 · 이메일 로그인 · 승인 대기만, `signup-chat.*` 삭제.

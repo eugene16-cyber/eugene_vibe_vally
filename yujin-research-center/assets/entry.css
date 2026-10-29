@@ -91,3 +91,11 @@
   .reel__cta{width:100%}
   .reel__skip{top:16px;right:16px}
 }
+
+/* 가입 페이지(signup.html) — 쇼릴 없이 가운데 한 단 */
+.entry--solo[data-phase=pick] .panel,.entry--solo[data-phase=pick] .entry-foot{margin-left:auto;margin-right:auto;max-width:600px}
+.entry--solo[data-phase=pick] .entry-foot{text-align:center;padding-left:24px}
+@media (max-width:768px){
+  .entry--solo[data-phase=pick] .panel{padding-top:32px}
+  .entry--solo[data-phase=pick] .entry-foot{padding-left:16px}
+}

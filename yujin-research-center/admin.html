@@ -3,19 +3,77 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>애널리스트 검수 · 유진 Insight Lab</title>
+<title>어드민 · 유진 Insight Lab</title>
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
 <link rel="stylesheet" href="assets/app.css?v=20261029e">
+<style>
+  .ad{padding-top:56px;padding-bottom:72px}
+  .ad-grid{display:grid;gap:16px;margin-top:24px}
+  .ad-grid>*{min-width:0}
+  .ad-k{font-size:12px;font-weight:700;color:var(--blue-main);letter-spacing:.06em}
+  .ad h2{font-size:var(--text-lg);font-weight:700;margin:4px 0 12px}
+  .ad-seg{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+  .ad-seg .card__body{padding:16px}
+  .ad-seg b{display:block;font-size:15px;margin-bottom:8px}
+  .ad-seg dt{font-size:12px;color:var(--ink-500);margin-top:8px}
+  .ad-seg dd{margin:2px 0 0;font-size:13px}
+  .ad-chips{display:flex;flex-wrap:wrap;gap:6px}
+  .ad-chips span{padding:3px 9px;border-radius:var(--radius-full);background:var(--gray-100);font-size:12.5px}
+  .ad-note{font-size:13px;color:var(--ink-500);margin-top:8px}
+  @media (max-width:900px){.ad-seg{grid-template-columns:1fr 1fr}}
+  @media (max-width:560px){.ad-seg{grid-template-columns:1fr}}
+</style>
 <script src="assets/config.js?v=20261029a"></script>
 <script src="assets/partials.js?v=20261029a" defer></script>
+<script src="assets/yuri-flow.js?v=20261029g" defer></script>
 </head>
 <body data-chrome="none">
-<main class="wrap" id="main" style="padding-top:72px;padding-bottom:72px;max-width:560px">
-  <p class="sec-eyebrow">ADMIN</p>
-  <h1 class="sec-title">애널리스트 검수</h1>
-  <p class="sec-sub">검수 대기 · 재검토 · 운영 지표 화면은 서버(lounge_api)가 있어야 동작해요. 이번 시연에서는 준비 중이에요.</p>
-  <a class="btn btn--secondary" href="index.html" style="margin-top:24px">고객 화면으로 ↩</a>
+<main class="wrap ad" id="main">
+  <p class="sec-eyebrow">ADMIN · 시연용</p>
+  <h1 class="sec-title">가입 상담 질문 트리</h1>
+  <p class="sec-sub">유리 가입 상담이 쓰는 설정 그대로예요(assets/yuri-flow.js). 분기는 Q1 고객 구분에서 한 번만 나뉘고, 이후 질문은 비어 있는 슬롯만 물어요.</p>
+
+  <div class="ad-grid">
+    <section class="card"><div class="card__body">
+      <p class="ad-k">STEP 1 · 저장 항목(슬롯)부터</p>
+      <h2>고객 프로필 슬롯</h2>
+      <div class="tbl-wrap"><table class="tbl"><thead><tr><th>번호</th><th>슬롯</th><th>채우는 방법</th></tr></thead><tbody id="ad-slots"></tbody></table></div>
+    </div></section>
+
+    <section>
+      <p class="ad-k">STEP 2 · Q1에서 한 번만 분기</p>
+      <h2>고객 구분별 ② · ③ 보기</h2>
+      <div class="ad-seg" id="ad-seg"></div>
+      <p class="ad-note">질문 문구는 Gemini가 고객 프로필에 맞게 다듬고, 보기(칩)는 이 설정에서만 바뀌어요.</p>
+    </section>
+
+    <section class="card"><div class="card__body">
+      <p class="ad-k">STEP 3 · ④ 원하는 서비스 → ⑤ 심화</p>
+      <h2>서비스 · 심화 질문</h2>
+      <div class="tbl-wrap"><table class="tbl"><thead><tr><th>서비스</th><th>구분</th><th class="num">어드민 기본 점수</th><th>⑤ 심화 질문 · 보기</th></tr></thead><tbody id="ad-svc"></tbody></table></div>
+      <p class="ad-note">추천 = 어드민 기본 점수 &lt; 답변 기반 판단(고른 서비스 · 관심 분야 · 고객 구분 · 목적 · 심화 답). ④ 질문에는 지금 열린 행사와 관심 섹터의 최근 리포트를 함께 보여 줘요.</p>
+    </div></section>
+  </div>
+  <a class="btn btn--secondary" href="index.html" style="margin-top:28px">고객 화면으로 ↩</a>
 </main>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var F = window.IL_SIGNUP_FLOW; if (!F) return;
+  var chips = function (opts) { return '<div class="ad-chips">' + opts.map(function (o) { return '<span>' + esc(o.label) + '</span>'; }).join('') + '</div>'; };
+  $('#ad-slots').innerHTML = F.slots.map(function (s) { return '<tr><td>' + s.no + '</td><td><b>' + esc(s.label) + '</b></td><td>' + esc(s.how) + '</td></tr>'; }).join('');
+  $('#ad-seg').innerHTML = Object.keys(F.segments).map(function (k) {
+    var g = F.segments[k];
+    return '<div class="card"><div class="card__body"><b>' + esc(g.label) + '</b><dl>' +
+      '<dt>② ' + esc(g.identity.ask) + '</dt><dd>' + chips(g.identity.options) + '</dd>' +
+      '<dt>③ ' + esc(g.purpose.ask) + '</dt><dd>' + chips(g.purpose.options) + '</dd></dl></div></div>';
+  }).join('');
+  $('#ad-svc').innerHTML = F.services.map(function (s) {
+    var d = F.deep[s.id];
+    return '<tr><td><b>' + esc(s.label) + '</b></td><td>' + esc(s.pillar) + '</td><td class="num">' + (F.adminBase[s.id] || 0) + '</td><td>' +
+      (d ? esc(d.ask({ sectors: ['관심 섹터'] })) + chips(d.options) : '-') + '</td></tr>';
+  }).join('');
+});
+</script>
 </body>
 </html>
