@@ -70,3 +70,7 @@
 
 /* 유리 Q&A 버튼과 겹치지 않게 맨 위로 버튼을 위로 */
 .fab{bottom:92px}
+/* 라운지 선 아이콘 — 평소 짙은 회색, 올리면 유진 레드 */
+.lg-card__ic{background:#f5f6f8;border:1px solid #e7e9ee;color:var(--ink-800);transition:color .2s,background .2s,border-color .2s}
+.lg-card__ic svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+.lg-card:not(.is-edit):hover .lg-card__ic{color:#e5242b;background:#fff5f5;border-color:#f3c3c6}

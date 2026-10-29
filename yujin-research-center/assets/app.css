@@ -138,10 +138,10 @@ a.card:hover,.card.is-hover:hover{transform:translateY(-3px);box-shadow:var(--sh
   border-bottom:1px solid var(--color-hairline)}
 .gnb__in{display:flex;align-items:center;gap:24px;height:100%;max-width:1200px;margin:0 auto;padding:0 24px}
 .logo{display:flex;align-items:center;gap:10px;flex:none;font-weight:700;font-size:16px;letter-spacing:-.01em;color:var(--ink-900)}
-.logo__mark{width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,var(--blue-main),var(--blue-navy));display:grid;place-items:center;
+.logo__wm{font-size:17px;font-weight:800;letter-spacing:-.02em;color:#c8102e}
   color:#fff;font-size:13px;font-weight:800}
 .logo__bar{width:1px;height:14px;background:var(--gray-200)}
-.logo__sub{font-weight:600;color:var(--blue-main)}
+.logo__sub{font-weight:600;color:var(--ink-800)}
 .gnb__menu{display:flex;gap:4px}
 .gnb__menu a{height:36px;padding:0 14px;display:inline-flex;align-items:center;border-radius:var(--radius-full);font-weight:600;color:var(--ink-500);
   transition:background var(--dur-micro),color var(--dur-micro)}
@@ -159,7 +159,9 @@ a.card:hover,.card.is-hover:hover{transform:translateY(-3px);box-shadow:var(--sh
 /* 다크 메뉴 (홈 히어로) */
 body[data-nav=dark] .gnb{background:rgba(6,16,38,.72);border-bottom-color:rgba(255,255,255,.08)}
 body[data-nav=dark] .logo,body[data-nav=dark] .gnb__desk,body[data-nav=dark] .gnb__burger{color:#fff}
-body[data-nav=dark] .logo__sub{color:var(--blue-point)}
+body[data-nav=dark] .logo__wm{color:#fff}
+body[data-nav=dark] .logo__sub{color:#e5242b}
+body[data-nav=dark] .logo__bar{background:#444}
 body[data-nav=dark] .gnb__menu a{color:rgba(255,255,255,.66)}
 body[data-nav=dark] .gnb__menu a:hover{background:rgba(255,255,255,.08);color:#fff}
 body[data-nav=dark] .gnb__me{background:rgba(255,255,255,.1);color:#fff}

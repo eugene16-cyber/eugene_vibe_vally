@@ -6,9 +6,23 @@
 <title>어드민 · 유진 Insight Lab</title>
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
-<link rel="stylesheet" href="assets/app.css?v=20261029e">
+<link rel="stylesheet" href="assets/app.css?v=20261029j">
 <style>
-  .ad{padding-top:56px;padding-bottom:72px}
+  body{background:#f6f7f9}
+  .ad-shell{display:grid;grid-template-columns:232px minmax(0,1fr);min-height:100vh}
+  .ad-nav{position:sticky;top:0;align-self:start;height:100vh;display:flex;flex-direction:column;gap:4px;padding:28px 16px;background:var(--white);border-right:1px solid var(--color-hairline)}
+  .ad-brand{padding:0 10px 22px}
+  .ad-brand b{display:block;font-size:17px;font-weight:800;color:var(--blue-navy);letter-spacing:-.01em}
+  .ad-brand span{font-size:12px;color:var(--ink-500)}
+  .ad-nav [role=tablist]{display:flex;flex-direction:column;gap:4px}
+  .ad-nav [role=tab]{display:flex;align-items:center;gap:8px;width:100%;padding:11px 12px;border-radius:var(--radius-chip);text-align:left;font-weight:600;color:var(--ink-500)}
+  .ad-nav [role=tab]:hover{background:#f3f5f8}
+  .ad-nav [role=tab][aria-selected=true]{background:#e8f1fe;color:var(--blue-main)}
+  .ad-nav [role=tab] small{display:block;font-size:11.5px;font-weight:500;color:var(--ink-500)}
+  .ad-cnt{margin-left:auto;min-width:22px;height:22px;padding:0 6px;border-radius:var(--radius-full);background:var(--blue-cta);color:var(--white);font-size:12px;font-weight:700;display:inline-grid;place-items:center}
+  .ad-nav .btn{margin-top:auto;margin-bottom:44px}
+  .ad-shell{background:linear-gradient(to right,var(--white) 231px,var(--border-neutral) 231px 232px,transparent 232px)}
+  .ad{padding:40px 40px 72px;max-width:1180px;width:100%;min-width:0}
   .ad-grid{display:grid;gap:16px;margin-top:24px}
   .ad-grid>*{min-width:0}
   .ad-k{font-size:12px;font-weight:700;color:var(--blue-main);letter-spacing:.06em}
@@ -21,17 +35,41 @@
   .ad-chips{display:flex;flex-wrap:wrap;gap:6px}
   .ad-chips span{padding:3px 9px;border-radius:var(--radius-full);background:var(--gray-100);font-size:12.5px}
   .ad-note{font-size:13px;color:var(--ink-500);margin-top:8px}
-  @media (max-width:900px){.ad-seg{grid-template-columns:1fr 1fr}}
+  @media (max-width:900px){.ad-seg{grid-template-columns:1fr 1fr}
+    .ad-shell{grid-template-columns:minmax(0,1fr);background:none}
+    .ad-nav{position:static;height:auto;flex-direction:row;align-items:center;flex-wrap:wrap;padding:14px 16px;border-right:0;border-bottom:1px solid var(--color-hairline)}
+    .ad-brand{padding:0 8px 0 4px;flex:1 1 auto}
+    .ad-nav [role=tablist]{flex-direction:row;width:100%;overflow-x:auto}
+    .ad-nav [role=tab]{width:auto;white-space:nowrap;padding:9px 12px}
+    .ad-nav [role=tab] small{display:none}
+    .ad-nav .btn{display:none}
+    .ad{padding:24px 16px 56px}}
   @media (max-width:560px){.ad-seg{grid-template-columns:1fr}}
 </style>
 <script src="assets/config.js?v=20261029a"></script>
-<script src="assets/partials.js?v=20261029a" defer></script>
+<script src="assets/partials.js?v=20261029j" defer></script>
+<link rel="stylesheet" href="assets/outreach.css?v=20261029b">
 <script src="assets/yuri-flow.js?v=20261029h" defer></script>
+<script src="assets/events-data.js?v=20261029c" defer></script>
+<script src="assets/outreach-data.js?v=20261029a" defer></script>
+<script src="assets/outreach.js?v=20261029b" defer></script>
 </head>
 <body data-chrome="none">
-<main class="wrap ad" id="main">
-  <p class="sec-eyebrow">ADMIN · 시연용</p>
-  <h1 class="sec-title">가입 상담 질문 트리</h1>
+<div class="ad-shell">
+<nav class="ad-nav" aria-label="어드민">
+  <div class="ad-brand"><b>Insight Lab Admin</b><span>시연용 가상 화면</span></div>
+  <div role="tablist" aria-label="어드민 메뉴" aria-orientation="vertical">
+    <button role="tab" id="tab-ob" aria-controls="pn-ob" aria-selected="true"><span>신규 유입 관리<small>발굴 · 제안 메일 · 유입 경로</small></span><span class="ad-cnt" id="ad-ob-count" hidden></span></button>
+    <button role="tab" id="tab-flow" aria-controls="pn-flow" aria-selected="false"><span>가입 질문 트리<small>가입 상담 AI 질문 · 보기 설정</small></span></button>
+  </div>
+  <a class="btn btn--secondary btn--sm" href="index.html">고객 화면으로 ↩</a>
+</nav>
+<main class="ad" id="main">
+  <section id="pn-ob" role="tabpanel" aria-labelledby="tab-ob"></section>
+
+  <section id="pn-flow" role="tabpanel" aria-labelledby="tab-flow" hidden>
+  <p class="ad-k">SETUP · 가입 상담</p>
+  <h2 style="font-size:24px;margin:4px 0 0">가입 질문 트리</h2>
   <p class="sec-sub">유리 가입 상담이 쓰는 설정 그대로예요(assets/yuri-flow.js). 분기는 Q1 고객 구분에서 한 번만 나뉘고, 이후 질문은 비어 있는 슬롯만 물어요.</p>
 
   <div class="ad-grid">
@@ -57,10 +95,19 @@
       <p class="ad-note">추천 = 어드민 기본 점수 &lt; 답변 기반 판단(고른 서비스 · 관심 분야 · 고객 구분 · 목적 · 심화 답). ④ 질문에는 지금 열린 행사와 관심 섹터의 최근 리포트를 함께 보여 줘요.</p>
     </div></section>
   </div>
-  <a class="btn btn--secondary" href="index.html" style="margin-top:28px">고객 화면으로 ↩</a>
+  </section>
 </main>
+</div>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+  var bar = $('[aria-label="어드민 메뉴"]');
+  var show = function (id) {
+    $$('[role=tab]', bar).forEach(function (x) { $('#' + x.getAttribute('aria-controls')).hidden = x.id !== id; });
+    history.replaceState(null, '', id === 'tab-flow' ? '#flow' : location.pathname);
+  };
+  wireTabsA11y(bar, show);
+  if (location.hash === '#flow') $('#tab-flow').click();
+  if (window.ILOutreach) ILOutreach.mount($('#pn-ob'));
   var F = window.IL_SIGNUP_FLOW; if (!F) return;
   var chips = function (opts) { return '<div class="ad-chips">' + opts.map(function (o) { return '<span>' + esc(o.label) + '</span>'; }).join('') + '</div>'; };
   $('#ad-slots').innerHTML = F.slots.map(function (s) { return '<tr><td>' + s.no + '</td><td><b>' + esc(s.label) + '</b></td><td>' + esc(s.how) + '</td></tr>'; }).join('');

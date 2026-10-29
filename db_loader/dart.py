@@ -4,6 +4,7 @@
 키: 환경변수 dart_api (또는 dart_api_key) — https://opendart.fss.or.kr 무료 발급, 하루 2만 건 제한.
 """
 import io
+import os
 import time
 import xml.etree.ElementTree as ET
 import zipfile
@@ -38,8 +39,13 @@ def all_corps():
     """DART 고유번호 전체 [{corp_code, corp_name, corp_eng_name, stock_code, modify_date}] — 비상장 · 기관 포함 약 12만 개"""
     global _all
     if _all is None:
-        r = requests.get(API + "corpCode.xml", params={"crtfc_key": key()}, timeout=60)
-        z = zipfile.ZipFile(io.BytesIO(r.content))
+        f = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".cache", "corpCode.zip")
+        if not os.path.exists(f) or time.time() - os.path.getmtime(f) > 86400:     # 하루 한 번만 새로 받는다
+            r = requests.get(API + "corpCode.xml", params={"crtfc_key": key()}, timeout=60)
+            r.raise_for_status()
+            os.makedirs(os.path.dirname(f), exist_ok=True)
+            open(f, "wb").write(r.content)
+        z = zipfile.ZipFile(f)
         root = ET.fromstring(z.read(z.namelist()[0]))
         _all = [{k: (el.findtext(k) or "").strip() for k in ("corp_code", "corp_name", "corp_eng_name", "stock_code", "modify_date")}
                 for el in root.iter("list")]

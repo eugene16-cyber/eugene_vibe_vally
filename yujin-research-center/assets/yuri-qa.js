@@ -1,121 +1,260 @@
 // 유리 근거형 Q&A — 가입 상담 화면이 작아져 오른쪽 아래 버튼이 되고, 누르면 채팅창으로 다시 열린다
-// 서버 AI가 없으니 검수 완료 질문에만 답하고, 답은 Supabase reports의 실제 요약 + 근거 리포트 링크로 만든다.
+// · 음성 질문(Web Speech, ko-KR) → 리포트 원문에서 근거를 찾고 → Gemini(/api/yuri 'qa')가 원문 안에서만 답한다. 음성으로 물으면 소리로도 답한다.
+// · 서버 AI가 없으면 원문에서 찾은 문장을 그대로 보여 준다. 모든 답에 '원문 근거' 카드(인용 문장 · 리포트 · 원문 PDF)를 붙인다.
 (function () {
   'use strict';
   var s = IL.session() || {}, p = s.profile || {};
   var Q_KEY = 'il.home-questions';
+  var cfg = window.IL_CONFIG || {};
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  /* ---------- 스타일 (첫 화면 홀로그램 패널과 같은 톤) ---------- */
+  /* ---------- 스타일 (첫 화면 홀로그램 패널과 같은 톤 + 금빛 반응) ---------- */
   var css = document.createElement('style');
   css.textContent = [
     '.yq-fab{position:fixed;right:max(20px,env(safe-area-inset-right,0px));bottom:max(20px,env(safe-area-inset-bottom,0px));z-index:400;display:flex;align-items:center;gap:10px;height:56px;padding:0 18px 0 8px;border-radius:999px;border:1px solid rgba(63,243,255,.45);background:rgba(3,16,26,.92);color:#e4fbff;font-weight:700;font-size:14px;box-shadow:0 0 30px rgba(63,243,255,.28),0 12px 30px -10px rgba(0,0,0,.6);transition:transform .2s,box-shadow .2s}',
     '.yq-fab:hover{transform:translateY(-2px);box-shadow:0 0 40px rgba(63,243,255,.45),0 12px 30px -10px rgba(0,0,0,.6)}',
-    '.yq-orb{width:40px;height:40px;border-radius:50%;flex:none;background:radial-gradient(circle at 38% 32%,#e9feff,#3ff3ff 42%,#0077a8 78%,#022 100%);box-shadow:0 0 18px rgba(63,243,255,.8),inset 0 -4px 10px rgba(0,30,50,.5);animation:yq-breathe 3.6s ease-in-out infinite}',
+    '.yq-orb{width:40px;height:40px;border-radius:50%;flex:none;background:radial-gradient(circle at 38% 32%,#e9feff,#3ff3ff 42%,#0077a8 78%,#022 100%);box-shadow:0 0 18px rgba(63,243,255,.8),inset 0 -4px 10px rgba(0,30,50,.5);animation:yq-breathe 3.6s ease-in-out infinite;transition:background .5s,box-shadow .5s}',
     '@keyframes yq-breathe{50%{box-shadow:0 0 28px rgba(63,243,255,1),inset 0 -4px 10px rgba(0,30,50,.5)}}',
+    '@keyframes yq-beat{50%{transform:scale(1.12)}}',
+    // 금빛 반응 — 듣기 · 생각하기 · 말하기 (jarvis 상태 연출 참고)
+    '.yq[data-mood=listening] .yq-head .yq-orb,.yq[data-mood=thinking] .yq-head .yq-orb,.yq[data-mood=speaking] .yq-head .yq-orb{background:radial-gradient(circle at 38% 32%,#fffbe6,#f5c518 45%,#a06c00 80%,#221500 100%);box-shadow:0 0 22px rgba(245,197,24,.9)}',
+    '.yq[data-mood=listening] .yq-head .yq-orb{animation:yq-beat .9s ease-in-out infinite}',
+    '.yq[data-mood=thinking] .yq-head .yq-orb{animation:yq-beat 1.4s ease-in-out infinite}',
+    '.yq[data-mood=speaking] .yq-head .yq-orb{animation:yq-beat .45s ease-in-out infinite}',
+    '.yq[data-mood=listening],.yq[data-mood=thinking],.yq[data-mood=speaking]{border-color:rgba(245,197,24,.55);box-shadow:0 0 46px rgba(245,197,24,.18),0 30px 70px -20px rgba(0,0,0,.7)}',
     '.yq-fab[aria-expanded=true]{opacity:0;pointer-events:none}',
     '.yq-dock{position:fixed;z-index:401;left:50%;top:50%;width:min(60vmin,520px);aspect-ratio:1;border-radius:50%;transform:translate(-50%,-50%);pointer-events:none;background:radial-gradient(circle at 38% 32%,#e9feff,#3ff3ff 30%,#0077a8 62%,rgba(0,40,60,0) 72%);box-shadow:0 0 120px rgba(63,243,255,.6);transition:all .9s cubic-bezier(.16,1,.3,1)}',
-    '.yq{position:fixed;z-index:402;right:max(20px,env(safe-area-inset-right,0px));bottom:max(20px,env(safe-area-inset-bottom,0px));width:min(420px,calc(100vw - 32px));height:min(640px,calc(100vh - 100px));display:flex;flex-direction:column;border-radius:14px;color:#e4fbff;background:rgba(3,16,26,.96);border:1px solid rgba(63,243,255,.32);box-shadow:0 0 40px rgba(63,243,255,.16),0 30px 70px -20px rgba(0,0,0,.7);backdrop-filter:blur(10px);transform-origin:bottom right;transform:scale(.6);opacity:0;visibility:hidden;transition:transform .35s cubic-bezier(.16,1,.3,1),opacity .25s,visibility 0s .35s;font-family:var(--font-sans)}',
-    '.yq.is-open{transform:none;opacity:1;visibility:visible;transition:transform .35s cubic-bezier(.16,1,.3,1),opacity .25s}',
+    '.yq{position:fixed;z-index:402;right:max(20px,env(safe-area-inset-right,0px));bottom:max(20px,env(safe-area-inset-bottom,0px));width:min(440px,calc(100vw - 32px));height:min(680px,calc(100vh - 96px));display:flex;flex-direction:column;border-radius:14px;color:#e4fbff;background:rgba(3,16,26,.96);border:1px solid rgba(63,243,255,.32);box-shadow:0 0 40px rgba(63,243,255,.16),0 30px 70px -20px rgba(0,0,0,.7);backdrop-filter:blur(10px);transform-origin:bottom right;transform:scale(.6);opacity:0;visibility:hidden;transition:transform .35s cubic-bezier(.16,1,.3,1),opacity .25s,visibility 0s .35s,border-color .5s,box-shadow .5s;font-family:var(--font-sans)}',
+    '.yq.is-open{transform:none;opacity:1;visibility:visible;transition:transform .35s cubic-bezier(.16,1,.3,1),opacity .25s,border-color .5s,box-shadow .5s}',
     '.yq-head{display:flex;align-items:center;gap:11px;padding:14px 14px 12px 16px;border-bottom:1px solid rgba(63,243,255,.18)}',
     '.yq-head .yq-orb{width:32px;height:32px}',
     '.yq-head b{display:block;font-size:15px}.yq-head span{display:block;font-size:11.5px;color:#7fa9b8}',
     '.yq-x{margin-left:auto;width:32px;height:32px;border-radius:8px;border:1px solid rgba(63,243,255,.18);background:transparent;color:#7fa9b8;font-size:14px}',
     '.yq-log{flex:1;min-height:0;overflow-y:auto;padding:14px 14px 6px;display:flex;flex-direction:column;gap:10px}',
-    '.yq-m{max-width:90%;padding:10px 13px;border-radius:10px;font-size:14px;line-height:1.6;animation:fadeUp .28s ease-out both}',
+    '.yq-m{max-width:92%;padding:10px 13px;border-radius:10px;font-size:14px;line-height:1.6;animation:fadeUp .28s ease-out both}',
     '.yq-m.bot{align-self:flex-start;background:rgba(63,243,255,.07);border:1px solid rgba(63,243,255,.18);border-top-left-radius:3px}',
     '.yq-m.me{align-self:flex-end;background:rgba(63,243,255,.85);color:#021018;font-weight:600;border-top-right-radius:3px}',
+    '.yq-m.me .yq-voice{display:inline-block;margin-right:6px;font-size:11px;font-weight:700;opacity:.7}',
     '.yq-m .t{display:block;font-weight:700;font-size:15px}.yq-m .h{display:block;margin-top:2px;font-size:12.5px;color:#7fa9b8}',
-    '.yq-m ul{margin:8px 0 0;padding-left:16px;display:grid;gap:8px}.yq-m li span{color:#9cc4d0;font-size:13px}',
-    '.yq-cites{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}',
-    '.yq-cites a{max-width:100%;padding:4px 10px;border-radius:999px;font-size:12px;color:#bdf7ff;background:rgba(63,243,255,.1);border:1px solid rgba(63,243,255,.3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}',
+    '.yq-ans{font-size:14.5px;line-height:1.7}.yq-ans sup{font-size:10.5px;color:#3ff3ff;font-weight:700;margin-left:1px}',
+    '.yq-tag{display:inline-block;margin-bottom:6px;padding:1px 7px;border-radius:5px;font-size:10.5px;font-weight:700;color:#ffe08a;border:1px solid rgba(245,197,24,.45)}',
+    '.yq-tag.rule{color:#7fa9b8;border-color:rgba(63,243,255,.25)}',
+    '.yq-src{margin-top:10px;display:grid;gap:8px}',
+    '.yq-src__h{font-size:11.5px;font-weight:700;letter-spacing:.06em;color:#7fa9b8}',
+    '.yq-doc{padding:10px 12px;border-radius:9px;background:rgba(2,12,20,.7);border:1px solid rgba(63,243,255,.16)}',
+    '.yq-doc__t{display:flex;gap:8px;align-items:baseline;font-size:13px;font-weight:700}.yq-doc__t i{font-style:normal;color:#3ff3ff;flex:none}',
+    '.yq-doc__t small{margin-left:auto;font-weight:400;color:#4c7180;font-size:11px;flex:none}',
+    '.yq-doc q{display:block;margin-top:6px;padding-left:10px;border-left:2px solid rgba(245,197,24,.6);font-size:12.5px;line-height:1.6;color:#cfe9f0;quotes:none}',
+    '.yq-doc q mark{background:rgba(245,197,24,.22);color:#fff3c4;border-radius:2px;padding:0 1px}',
+    '.yq-doc__a{display:flex;gap:10px;margin-top:6px;font-size:12px}.yq-doc__a a{color:#3ff3ff}.yq-doc__a a:hover{text-decoration:underline}',
     '.yq-note{font-size:11px;color:#4c7180;margin-top:8px}',
     '.yq-box{margin:8px 12px 12px;border:1px solid rgba(63,243,255,.28);border-radius:12px;background:rgba(2,14,22,.82);overflow:hidden}',
     '.yq-box-h{display:flex;justify-content:space-between;padding:10px 14px 8px;border-bottom:1px solid rgba(63,243,255,.18);font-size:13px;font-weight:600}.yq-box-h span{font-size:10.5px;color:#4c7180;font-weight:400}',
-    '.yq-opts{max-height:30vh;overflow-y:auto}',
+    '.yq-opts{max-height:24vh;overflow-y:auto}',
     '.yq-opt{display:flex;gap:12px;width:100%;padding:9px 14px;text-align:left;color:#e4fbff;background:transparent;border:0;border-bottom:1px solid rgba(63,243,255,.08);font-size:13.5px;line-height:1.4}',
     '.yq-opt:hover,.yq-opt:focus-visible{background:rgba(63,243,255,.08);outline:none}',
     '.yq-opt i{flex:none;width:24px;height:24px;border-radius:7px;display:grid;place-items:center;font-style:normal;font-size:12px;color:#7fa9b8;background:rgba(63,243,255,.06);border:1px solid rgba(63,243,255,.18)}',
     '.yq-opt small{display:block;font-size:11.5px;color:#7fa9b8;margin-top:1px}',
     '.yq-ask{display:flex;align-items:center;gap:8px;padding:6px 8px 6px 14px}',
-    '.yq-ask span{color:#7fa9b8}.yq-ask input{flex:1;min-width:0;height:34px;border:0;background:transparent;color:#e4fbff;font:inherit;font-size:14px}.yq-ask input:focus{outline:none}.yq-ask input::placeholder{color:#4c7180}',
-    '.yq-ask button{width:32px;height:30px;border-radius:7px;border:1px solid rgba(63,243,255,.18);background:transparent;color:#7fa9b8}',
-    '@media (max-width:560px){.yq{right:8px;bottom:8px;width:calc(100vw - 16px);height:calc(100svh - 80px)}.yq-fab span{display:none}.yq-fab{padding:0 8px}}',
-    '@media (prefers-reduced-motion:reduce){.yq,.yq-dock,.yq-orb{transition:none;animation:none}}'
+    '.yq-ask>span{color:#7fa9b8}.yq-ask input{flex:1;min-width:0;height:34px;border:0;background:transparent;color:#e4fbff;font:inherit;font-size:14px}.yq-ask input:focus{outline:none}.yq-ask input::placeholder{color:#4c7180}',
+    '.yq-ask button{flex:none;width:34px;height:32px;border-radius:8px;border:1px solid rgba(63,243,255,.18);background:transparent;color:#7fa9b8;display:grid;place-items:center}',
+    '.yq-ask button svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}',
+    '.yq-mic[aria-pressed=true]{color:#221500;background:#f5c518;border-color:#f5c518;animation:yq-beat .9s ease-in-out infinite}',
+    '@media (max-width:560px){.yq{right:8px;bottom:8px;width:calc(100vw - 16px);height:calc(100svh - 80px)}.yq-fab>span{display:none}.yq-fab{padding:0 8px}}',
+    '@media (prefers-reduced-motion:reduce){.yq,.yq-dock,.yq-orb,.yq-mic{transition:none;animation:none!important}}'
   ].join('\n');
   document.head.appendChild(css);
 
   /* ---------- 검수 완료 질문 — 관심 분야 순서로 ---------- */
   var PRESETS = [
-    { id: 'semi', tag: '반도체', q: '최근 반도체 리포트 요약해 줘', keys: /반도체|메모리|HBM|파운드리|D램/i, lead: '최근 반도체 관련 리포트에서 짚은 내용이에요.' },
-    { id: 'market', tag: '시황', q: '최근 시황 리포트 핵심만 알려 줘', match: function (r) { return r.kind === 'macro' || /투자전략|시황|매크로|전략/.test(r.category || ''); }, lead: '최근 시황 · 전략 리포트의 핵심이에요.' },
-    { id: 'ai', tag: 'AI 인프라', q: 'AI 인프라 관련 최근 자료 찾아 줘', keys: /AI|인공지능|데이터센터|전력기기|GPU/i, lead: 'AI 인프라와 연결된 최근 자료예요.' },
-    { id: 'bio', tag: '바이오', q: '바이오 업종 리포트 정리해 줘', keys: /바이오|제약|헬스|의료/, lead: '바이오 · 헬스케어 관련 최근 리포트예요.' },
-    { id: 'battery', tag: '2차전지', q: '2차전지 리포트는 어떤 내용이야?', keys: /2차전지|이차전지|배터리|양극재/, lead: '2차전지 관련 최근 리포트예요.' },
-    { id: 'rate', tag: '금리', q: '금리 전망 다룬 리포트 있어?', keys: /금리|채권|연준|FOMC|국채/i, lead: '금리 · 통화정책을 다룬 최근 리포트예요.' },
-    { id: 'div', tag: '배당', q: '배당 · 인컴 관련 리포트 있어?', keys: /배당|주주환원|밸류업|인컴/, lead: '배당 · 주주환원을 다룬 최근 리포트예요.' }
+    { id: 'semi', tag: '반도체', q: '최근 반도체 리포트 요약해 줘', keys: /반도체|메모리|HBM|파운드리|D램/i },
+    { id: 'market', tag: '시황', q: '최근 시황 리포트 핵심만 알려 줘', keys: /시황|전략|매크로|증시|코스피/i, macro: true },
+    { id: 'ai', tag: 'AI 인프라', q: 'AI 인프라 관련 최근 자료 찾아 줘', keys: /AI|인공지능|데이터센터|전력기기|GPU/i },
+    { id: 'bio', tag: '바이오', q: '바이오 업종 리포트 정리해 줘', keys: /바이오|제약|헬스|의료/ },
+    { id: 'battery', tag: '2차전지', q: '2차전지 리포트는 어떤 내용이야?', keys: /2차전지|이차전지|배터리|양극재/ },
+    { id: 'rate', tag: '금리', q: '금리 전망 다룬 리포트 있어?', keys: /금리|채권|연준|FOMC|국채/i },
+    { id: 'div', tag: '배당', q: '배당 · 인컴 관련 리포트 있어?', keys: /배당|주주환원|밸류업|인컴/ }
   ];
   var want = (p.sectors || []).join(' ');
   PRESETS.sort(function (a, b) {
-    var ha = a.keys && a.keys.test(want) ? 0 : a.id === 'market' ? 1 : 2, hb = b.keys && b.keys.test(want) ? 0 : b.id === 'market' ? 1 : 2;
+    var ha = a.keys.test(want) ? 0 : a.id === 'market' ? 1 : 2, hb = b.keys.test(want) ? 0 : b.id === 'market' ? 1 : 2;
     return ha - hb;
   });
   var REPORTS = [
-    { id: 'S1', kind: 'sector', category: '반도체', title: '메모리 업황 점검(예시)', summary: '재고 조정이 마무리 단계에 들어서며 가격 흐름이 안정되는 모습이에요.', published_at: '2026-10-27' },
+    { id: 'S1', kind: 'sector', category: '반도체', title: '메모리 업황 점검(예시)', summary: '재고 조정이 마무리 단계에 들어서며 가격 흐름이 안정되는 모습이에요. 설비투자 속도를 함께 봐야 해요.', published_at: '2026-10-27' },
     { id: 'S2', kind: 'macro', category: '투자전략', title: '11월 주식시장 전망(예시)', summary: '이익 추정치 변화와 환율 흐름을 변수로 꼽았어요.', published_at: '2026-10-28' }
   ], sample = true;
-  if (window.sb) sb.from('reports').select('id,kind,category,title,summary,company,published_at').order('published_at', { ascending: false }).limit(200)
+  if (window.sb) sb.from('reports').select('id,kind,category,title,summary,company,analyst,published_at,url').order('published_at', { ascending: false }).limit(300)
     .then(function (r) { if (r.data && r.data.length) { REPORTS = r.data; sample = false; } }, function () {});
 
+  /* ---------- 원문 검색 — 질문 낱말이 제목 · 업종 · 종목 · 본문에 얼마나 걸리는지 ---------- */
+  var STOP = /^(최근|요즘|관련|리포트|자료|알려|줘|주세요|요약|정리|해줘|해|있어|있나요|어떤|내용|무엇|뭐야|어때|대해|좀|핵심|만|은|는|이|가)$/;
+  function tokens(q) {
+    var t = String(q).replace(/[?？!.,·]/g, ' ').split(/\s+/).map(function (w) { return w.replace(/(은|는|이|가|을|를|에|의|도|로|과|와|쪽|관련)$/, ''); })
+      .filter(function (w) { return w.length >= 2 && !STOP.test(w); });
+    PRESETS.forEach(function (x) { if (x.keys.test(q) && t.indexOf(x.tag) < 0) t.push(x.tag); });
+    return t;
+  }
+  function search(q) {
+    var tk = tokens(q), pre = PRESETS.filter(function (x) { return x.keys.test(q); })[0];
+    // 고객이 직접 말한 낱말을 더 무겁게 — 자동으로 붙인 주제어(반도체 등)는 가볍게
+    var own = tk.filter(function (w) { return q.indexOf(w) > -1; });
+    return REPORTS.map(function (r) {
+      var sc = 0, title = r.title || '', meta = [r.category, r.company].join(' '), body = r.summary || '';
+      tk.forEach(function (w) {
+        var k = own.indexOf(w) > -1 ? 1 : 0.35;
+        if (title.indexOf(w) > -1) sc += 4 * k; if (meta.indexOf(w) > -1) sc += 2 * k; if (body.indexOf(w) > -1) sc += 2 * k;
+      });
+      if (pre && pre.keys.test(title + ' ' + meta + ' ' + body)) sc += 1;
+      if (pre && pre.macro && (r.kind === 'macro' || /투자전략|시황|매크로/.test(r.category || ''))) sc += 3;
+      return { r: r, sc: sc };
+    }).filter(function (x) { return x.sc > 0; })
+      .sort(function (a, b) { return b.sc - a.sc || String(b.r.published_at).localeCompare(String(a.r.published_at)); })
+      .slice(0, 3).map(function (x) { return x.r; });
+  }
+  // 원문에서 질문과 가장 많이 겹치는 문장을 인용으로
+  function quote(r, tk) {
+    var sents = String(r.summary || '').replace(/\s+/g, ' ').split(/(?<=[.다요])\s+/).filter(function (x) { return x.length > 8; });
+    if (!sents.length) return '';
+    var best = sents.map(function (x) { return { x: x, n: tk.filter(function (w) { return x.indexOf(w) > -1; }).length }; })
+      .sort(function (a, b) { return b.n - a.n; })[0].x;
+    best = best.length > 180 ? best.slice(0, 180) + '…' : best;
+    var h = esc(best);
+    tk.forEach(function (w) { if (w.length >= 2) h = h.split(esc(w)).join('<mark>' + esc(w) + '</mark>'); });
+    return h;
+  }
+
+  /* ---------- Gemini (서버 함수) — 원문 안에서만 답 ---------- */
+  var local = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+  var aiOn = local ? Promise.resolve(false) : fetch((cfg.apiBase || '') + '/api/yuri').then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (j) { return !!(j && j.ai); }).catch(function () { return false; });
+  function aiAnswer(q, docs) {
+    return aiOn.then(function (on) {
+      if (!on || !docs.length) return null;
+      return fetch((cfg.apiBase || '') + '/api/yuri', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ task: 'qa', question: q, docs: docs.map(function (r) { return { title: r.title, date: r.published_at, text: r.summary }; }) }) })
+        .then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
+    });
+  }
+
   /* ---------- 화면 ---------- */
+  var MIC = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>';
+  var SEND = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
   var fab = document.createElement('button');
   fab.type = 'button'; fab.className = 'yq-fab'; fab.setAttribute('aria-expanded', 'false'); fab.setAttribute('aria-controls', 'yq');
   fab.innerHTML = '<i class="yq-orb" aria-hidden="true"></i><span>유리에게 질문</span>';
   var box = document.createElement('section');
   box.className = 'yq'; box.id = 'yq'; box.setAttribute('role', 'dialog'); box.setAttribute('aria-label', '유리 근거형 Q&A');
-  box.innerHTML = '<div class="yq-head"><i class="yq-orb" aria-hidden="true"></i><div><b>유리</b><span>근거형 Q&A · 리서치센터 리포트로 답해요</span></div><button type="button" class="yq-x" aria-label="닫기">✕</button></div>' +
+  box.innerHTML = '<div class="yq-head"><i class="yq-orb" aria-hidden="true"></i><div><b>유리</b><span id="yq-status">근거형 Q&A · 말로 물어보셔도 돼요</span></div><button type="button" class="yq-x" aria-label="닫기">✕</button></div>' +
     '<div class="yq-log" role="log" aria-live="polite"></div>' +
-    '<div class="yq-box"><div class="yq-box-h">검수 완료 질문<span>하나 선택 · 직접 입력 가능</span></div><div class="yq-opts"></div>' +
-    '<form class="yq-ask"><span aria-hidden="true">✎</span><label class="sr-only" for="yq-in">직접 입력</label><input id="yq-in" autocomplete="off" placeholder="직접 입력"><button type="submit" aria-label="보내기">↵</button></form></div>';
+    '<div class="yq-box"><div class="yq-box-h">검수 완료 질문<span>하나 선택 · 직접 입력 · 음성</span></div><div class="yq-opts"></div>' +
+    '<form class="yq-ask"><span aria-hidden="true">✎</span><label class="sr-only" for="yq-in">질문 입력</label><input id="yq-in" autocomplete="off" placeholder="질문을 입력하거나 마이크를 눌러 말해 주세요">' +
+    '<button type="button" class="yq-mic" aria-pressed="false" aria-label="음성으로 질문하기">' + MIC + '</button><button type="submit" aria-label="보내기">' + SEND + '</button></form></div>';
   document.body.appendChild(fab); document.body.appendChild(box);
-  var logEl = $('.yq-log', box), optsEl = $('.yq-opts', box), input = $('#yq-in', box);
+  var logEl = $('.yq-log', box), optsEl = $('.yq-opts', box), input = $('#yq-in', box), micBtn = $('.yq-mic', box), statusEl = $('#yq-status', box);
   optsEl.innerHTML = PRESETS.map(function (q, i) {
     return '<button type="button" class="yq-opt" data-q="' + q.id + '"><i>' + (i + 1) + '</i><span>' + esc(q.q) + '<small>#' + esc(q.tag) + ' · 검수 완료</small></span></button>';
   }).join('');
 
+  var STATUS = { idle: '근거형 Q&A · 말로 물어보셔도 돼요', listening: '듣고 있어요…', thinking: '원문에서 근거를 찾고 있어요…', speaking: '답하고 있어요' };
+  function setMood(m) { box.dataset.mood = m; statusEl.textContent = STATUS[m] || STATUS.idle; }
   function msg(cls, html) { var el = document.createElement('div'); el.className = 'yq-m ' + cls; el.innerHTML = html; logEl.appendChild(el); logEl.scrollTop = logEl.scrollHeight; return el; }
-  var first = function (t) { t = String(t || '').replace(/\s+/g, ' ').trim(); var m = t.match(/^.{20,130}?[.다요]\s/); return m ? m[0].trim() : t.slice(0, 110) + (t.length > 110 ? '…' : ''); };
-  function cites(list) { return list.length ? '<div class="yq-cites">' + list.map(function (r) { return '<a href="reports.html?id=' + encodeURIComponent(r.id) + '">📄 ' + esc(r.title) + '</a>'; }).join('') + '</div>' : ''; }
   function remember(q) {
     var l = []; try { l = JSON.parse(localStorage.getItem(Q_KEY) || '[]'); } catch (e) {}
     l = [{ q: q, at: new Date().toISOString() }].concat(l.filter(function (x) { return x.q !== q; })).slice(0, 8);
     try { localStorage.setItem(Q_KEY, JSON.stringify(l)); } catch (e) {}
   }
-  function answerPreset(q) {
-    msg('me', esc(q.q));
-    var hits = REPORTS.filter(q.match || function (r) { return q.keys.test([r.title, r.category, r.company, r.summary].join(' ')); }).slice(0, 3);
-    msg('bot', hits.length
-      ? '<b class="t">' + esc(q.lead) + '</b><ul>' + hits.map(function (r) { return '<li><b>' + esc(r.title) + '</b><br><span>' + esc(first(r.summary)) + '</span></li>'; }).join('') + '</ul>' + cites(hits) +
-        '<p class="yq-note">' + (sample ? '예시 리포트 기준' : '리서치센터 리포트 요약 기준') + ' · 정보 제공용이며 투자 권유가 아니에요</p>'
-      : '<b class="t">지금은 이 주제를 다룬 리포트가 없어요.</b><span class="h">새 리포트가 나오면 여기에 정리해 드릴게요.</span>');
-    remember(q.q);
-  }
-  function ask(text) {
-    text = String(text || '').trim(); if (!text) return;
-    var q = PRESETS.filter(function (x) { return text.indexOf(x.tag) > -1 || (x.keys && x.keys.test(text)); })[0];
-    if (q) { answerPreset(Object.assign({}, q, { q: text })); return; }
-    msg('me', esc(text));
-    var words = text.split(/\s+/).filter(function (w) { return w.length >= 2; });
-    var rel = REPORTS.filter(function (r) { return words.some(function (w) { return String(r.title).indexOf(w) > -1; }); }).slice(0, 3);
-    msg('bot', '<b class="t">아직 검수된 답이 없는 질문이에요.</b><span class="h">아래 검수 완료 질문을 골라 주세요.' + (rel.length ? ' 제목이 비슷한 리포트는 찾아 뒀어요.' : '') + '</span>' + cites(rel));
-    remember(text);
+  // 원문 근거 카드 — 인용 문장 · 리포트 상세 · 원문 PDF
+  function sources(docs, tk) {
+    return '<div class="yq-src"><span class="yq-src__h">원문 근거</span>' + docs.map(function (r, i) {
+      var qt = quote(r, tk);
+      return '<div class="yq-doc"><div class="yq-doc__t"><i>[' + (i + 1) + ']</i><span>' + esc(r.title) + '</span><small>' + esc(String(r.published_at || '').replace(/-/g, '.')) + '</small></div>' +
+        (qt ? '<q>' + qt + '</q>' : '') +
+        '<div class="yq-doc__a"><a href="reports.html?id=' + encodeURIComponent(r.id) + '">리포트 상세</a>' + (r.url ? '<a href="' + esc(r.url) + '" target="_blank" rel="noopener">원문 PDF ↗</a>' : '') + '</div></div>';
+    }).join('') + '</div>';
   }
 
+  // 음성으로 물었으면 소리로도 답한다
+  function speak(text) {
+    if (!('speechSynthesis' in window)) { setMood('idle'); return; }
+    try {
+      speechSynthesis.cancel();
+      var u = new SpeechSynthesisUtterance(String(text).replace(/\[\d+\]/g, '').slice(0, 260));
+      u.lang = 'ko-KR'; u.rate = 1.05;
+      var ko = speechSynthesis.getVoices().filter(function (v) { return /ko/i.test(v.lang); })[0]; if (ko) u.voice = ko;
+      u.onend = u.onerror = function () { setMood('idle'); };
+      setMood('speaking');
+      speechSynthesis.speak(u);
+    } catch (e) { setMood('idle'); }
+  }
+
+  var busy = false;
+  function ask(text, byVoice) {
+    text = String(text || '').trim(); if (!text || busy) return;
+    busy = true;
+    msg('me', (byVoice ? '<span class="yq-voice">🎙 음성</span>' : '') + esc(text));
+    remember(text);
+    setMood('thinking');
+    var tk = tokens(text), docs = search(text);
+    var typing = msg('bot', '<span class="h">원문에서 근거를 찾고 있어요…</span>');
+    aiAnswer(text, docs).then(function (j) {
+      typing.remove();
+      var answerText;
+      if (!docs.length) {
+        answerText = '지금 발간된 리포트에서는 이 질문의 근거를 찾지 못했어요.';
+        msg('bot', '<b class="t">' + esc(answerText) + '</b><span class="h">아래 검수 완료 질문을 골라 보시거나, 섹터 · 종목 이름을 넣어 다시 물어봐 주세요.</span>');
+      } else if (j && j.answer) {
+        answerText = j.answer;
+        var html = esc(j.answer).replace(/\[(\d)\]/g, '<sup>[$1]</sup>');
+        msg('bot', '<span class="yq-tag">AI 답변 · 원문 근거 기반</span><div class="yq-ans">' + html + '</div>' + sources(docs, tk) +
+          '<p class="yq-note">리서치센터 리포트 원문 안에서만 답했어요 · 정보 제공용이며 투자 권유가 아니에요</p>');
+      } else {
+        answerText = '관련 리포트 원문에서 찾은 내용이에요.';
+        msg('bot', '<span class="yq-tag rule">원문 검색</span><b class="t">관련 리포트 원문에서 찾은 내용이에요.</b>' + sources(docs, tk) +
+          '<p class="yq-note">' + (sample ? '예시 리포트 기준 · ' : '') + '정보 제공용이며 투자 권유가 아니에요</p>');
+      }
+      busy = false;
+      if (byVoice) speak(answerText); else setMood('idle');
+    });
+  }
+
+  /* ---------- 음성 인식 (Web Speech · 한국어) ---------- */
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition, rec = null;
+  function stopMic() { if (rec) { try { rec.stop(); } catch (e) {} } }
+  micBtn.addEventListener('click', function () {
+    if (rec) { stopMic(); return; }
+    if (!SR) { toast('이 브라우저는 음성 인식을 지원하지 않아요. Chrome이나 Edge에서 써 주세요.'); return; }
+    if ('speechSynthesis' in window) speechSynthesis.cancel();
+    rec = new SR(); rec.lang = 'ko-KR'; rec.interimResults = true; rec.maxAlternatives = 1;
+    var finalText = '';
+    rec.onresult = function (e) {
+      var txt = '';
+      for (var i = 0; i < e.results.length; i++) { txt += e.results[i][0].transcript; if (e.results[i].isFinal) finalText = txt; }
+      input.value = txt;
+    };
+    rec.onerror = function (e) {
+      if (e.error === 'not-allowed' || e.error === 'service-not-allowed') toast('마이크 권한이 필요해요. 주소창 옆 권한 설정에서 허용해 주세요.');
+      else if (e.error === 'no-speech') toast('말소리가 들리지 않았어요. 다시 눌러 말해 주세요.');
+    };
+    rec.onend = function () {
+      rec = null; micBtn.setAttribute('aria-pressed', 'false');
+      var q = (finalText || input.value).trim();
+      if (q) { input.value = ''; ask(q, true); } else setMood('idle');
+    };
+    try { rec.start(); micBtn.setAttribute('aria-pressed', 'true'); setMood('listening'); input.value = ''; input.placeholder = '듣고 있어요… 말을 마치면 바로 답해 드려요'; }
+    catch (e) { rec = null; }
+  });
+
+  /* ---------- 열기 · 닫기 ---------- */
   function open() {
     box.classList.add('is-open'); fab.setAttribute('aria-expanded', 'true');
-    if (!logEl.children.length) msg('bot', '<b class="t">' + esc(s.name || '고객') + '님, 무엇이 궁금하세요?</b><span class="h">리서치센터 리포트를 근거로 답해 드려요</span>');
+    if (!logEl.children.length) msg('bot', '<b class="t">' + esc(s.name || '고객') + '님, 무엇이 궁금하세요?</b><span class="h">마이크를 누르고 말해 주셔도 돼요. 리포트 원문을 근거로 답해 드려요.</span>');
     var b = $('.yq-opt', box); if (b) b.focus({ preventScroll: true });
   }
-  function close() { box.classList.remove('is-open'); fab.setAttribute('aria-expanded', 'false'); fab.focus({ preventScroll: true }); }
+  function close() {
+    stopMic(); if ('speechSynthesis' in window) speechSynthesis.cancel(); setMood('idle');
+    box.classList.remove('is-open'); fab.setAttribute('aria-expanded', 'false'); fab.focus({ preventScroll: true });
+  }
   fab.addEventListener('click', open);
   $('.yq-x', box).addEventListener('click', close);
   box.addEventListener('keydown', function (e) {
@@ -124,16 +263,16 @@
   });
   optsEl.addEventListener('click', function (e) {
     var b = e.target.closest('[data-q]'); if (!b) return;
-    answerPreset(PRESETS.filter(function (q) { return q.id === b.dataset.q; })[0]);
+    ask(PRESETS.filter(function (q) { return q.id === b.dataset.q; })[0].q);
   });
-  $('.yq-ask', box).addEventListener('submit', function (e) { e.preventDefault(); ask(input.value); input.value = ''; });
-  window.YuriQA = { open: open, close: close };
+  $('.yq-ask', box).addEventListener('submit', function (e) { e.preventDefault(); ask(input.value); input.value = ''; input.placeholder = '질문을 입력하거나 마이크를 눌러 말해 주세요'; });
+  window.YuriQA = { open: open, close: close, ask: ask };
   if (/#qa$/.test(location.hash)) open();
 
   /* ---------- 가입 상담에서 넘어왔으면: 큰 구가 작아져 버튼 자리로 ---------- */
   var docked = null;
   try { docked = sessionStorage.getItem('il.yuri-dock'); sessionStorage.removeItem('il.yuri-dock'); } catch (e) {}
-  if (docked && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  if (docked && !reduce) {
     var orb = document.createElement('div'); orb.className = 'yq-dock'; document.body.appendChild(orb);
     fab.style.opacity = '0';
     requestAnimationFrame(function () {
@@ -142,7 +281,7 @@
         orb.style.left = (r.left + r.width / 2) + 'px'; orb.style.top = (r.top + r.height / 2) + 'px';
         orb.style.width = r.width + 'px'; orb.style.opacity = '.9';
       }, 350);
-      setTimeout(function () { orb.remove(); fab.style.opacity = ''; toast('유리는 오른쪽 아래에 있어요. 궁금한 게 생기면 눌러 주세요.'); }, 1350);
+      setTimeout(function () { orb.remove(); fab.style.opacity = ''; toast('유리는 오른쪽 아래에 있어요. 말로 물어보셔도 돼요.'); }, 1350);
     });
   }
 })();

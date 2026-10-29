@@ -22,8 +22,14 @@
 
 /* 오비트 북 — 가운데 크게 (모듈 스타일은 orbit-books.css) */
 .cx-orbit{margin-top:12px}
-.cx-bookdesc{display:flex;justify-content:center;padding:14px 0 4px}
-.cx-bookdesc .btn{font-size:var(--text-body)}
+/* 이번 분기 행사 — 지금 신청할 수 있는 행사 수 · 다음 행사 */
+.cx-hero{text-align:center;padding:4px 0 0}
+.cx-hero__t{font-size:var(--text-title);font-weight:800;color:var(--blue-navy);letter-spacing:-.02em;margin:6px 0 4px}
+.cx-hero__t b{color:var(--blue-cta);font-variant-numeric:tabular-nums}
+.cx-hero__next{font-size:var(--text-body);color:var(--ink-500)}
+.cx-hero__next b{color:var(--ink-900);font-weight:700}
+.cx-hero__hint{display:inline-flex;align-items:center;gap:6px;font-size:var(--text-micro);color:var(--color-muted);margin-top:6px}
+.cx-hero__hint svg{width:15px;height:15px;flex:none}
 
 /* ═════ 일정 탐색 ═════ */
 .cx-explore{margin-top:40px;scroll-margin-top:calc(var(--nav-h) + 16px)}
@@ -124,6 +130,7 @@
 .cx-steps{display:flex;flex-direction:column;gap:10px;margin:22px 0;padding:0;list-style:none}
 .cx-steps li{display:flex;align-items:center;gap:12px;font-size:var(--text-body);font-weight:600;color:var(--ink-800)}
 .cx-steps b{width:30px;height:30px;border-radius:50%;background:#fff;border:1px solid var(--color-hairline);display:inline-flex;align-items:center;justify-content:center;font-size:11px;color:var(--blue-cta);font-variant-numeric:tabular-nums;flex:none}
+.cx-steps small{display:block;font-size:var(--text-micro);font-weight:500;color:var(--color-muted);margin-top:1px}
 .cx-card{border:1px solid var(--color-hairline);border-radius:var(--radius-lg);padding:26px;background:#fff;box-shadow:var(--shadow-soft);min-width:0}
 .cx-card h3{font-size:var(--text-lg);font-weight:800;color:var(--ink-900);margin-bottom:16px}
 .cx-svc{background:var(--surface-tint);border-radius:var(--radius-md);padding:14px 16px;margin:16px 0}
@@ -142,7 +149,6 @@
 .cx-ext__ix{font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--gray-400)}
 .cx-ext h3{font-size:var(--text-lg);font-weight:800;color:var(--blue-navy)}
 .cx-ext p{font-size:var(--text-micro);color:var(--ink-500);line-height:1.7;flex:1}
-.cx-ext__tags{display:flex;gap:6px;flex-wrap:wrap}
 .cx-ext .btn{align-self:flex-start}
 .cx-suggest{display:flex;align-items:center;gap:20px;padding:20px 22px;border-radius:var(--radius-lg);background:var(--surface-tint);margin-bottom:36px}
 .cx-suggest h3{font-size:var(--text-body);font-weight:800;color:var(--ink-900)}

@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=JetBrains+Mono:wght@400;600&display=swap">
 <style>
   :root {
-    --bg: #020910;
+    --bg: #081534;  /* 짙은 남색 */
     --panel: rgba(4, 22, 34, 0.58);
     --panel-line: rgba(63, 243, 255, 0.16);
     --text: #e4fbff;
@@ -34,7 +34,7 @@
     min-height: 100vh;
     overflow-x: hidden;
     background:
-      radial-gradient(1100px 700px at 50% 48%, rgba(0, 170, 220, 0.16), transparent 70%),
+      radial-gradient(1100px 700px at 50% 48%, rgba(46, 110, 220, 0.22), transparent 70%),
       var(--bg);
   }
   .num { font-variant-numeric: tabular-nums; }
@@ -332,6 +332,17 @@
     .holo-status b, .live::before, .yuri[data-busy="1"] .yuri-avatar::after { animation: none; }
     .msg, .msg.typing i { animation: none; }
   }
+  /* 유리 반응 — 말하기 · 생각하기 금빛 */
+  :root { --gold: #f5c518; --gold-soft: #ffe08a; }
+  .yuri { transition: opacity 0.35s, transform 0.35s, visibility 0s 0.35s, border-color 0.5s, box-shadow 0.5s; }
+  .yuri[data-mood="speaking"], .yuri[data-mood="thinking"] { border-color: rgba(245, 197, 24, 0.55); box-shadow: 0 0 46px rgba(245, 197, 24, 0.2), inset 0 0 30px rgba(245, 197, 24, 0.05); }
+  .yuri[data-mood="speaking"] .yuri-avatar, .yuri[data-mood="thinking"] .yuri-avatar { border-color: rgba(245, 197, 24, 0.8); box-shadow: 0 0 18px rgba(245, 197, 24, 0.6), inset 0 0 10px rgba(245, 197, 24, 0.4); }
+  .yuri[data-mood="speaking"] .yuri-avatar::after, .yuri[data-mood="thinking"] .yuri-avatar::after { background: radial-gradient(circle at 40% 35%, #fffbe6, var(--gold) 45%, #a06c00 80%); animation: pulse 0.7s ease-in-out infinite; }
+  .yuri[data-mood="thinking"] .yuri-avatar::after { animation-duration: 1.3s; }
+  #stage[data-mood="speaking"] .holo-status b, #stage[data-mood="thinking"] .holo-status b { color: var(--gold-soft); text-shadow: 0 0 14px rgba(245, 197, 24, 0.7); }
+  .holo-status b { transition: color 0.4s, text-shadow 0.4s; }
+  .msg.bot.typing i { background: var(--gold-soft); }
+  @media (prefers-reduced-motion: reduce) { .yuri-avatar::after { animation: none !important; } }
 </style>
 </head>
 <body>
@@ -354,7 +365,6 @@
     <section id="stage" aria-label="유진 Insight Lab 시작 화면">
       <div class="grid"></div>
       <div class="scanlines"></div>
-      <div class="scan" id="scan"></div>
       <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
       <div class="hud-readout" id="readout-l">YAW --<br>PITCH --<br>NODES --</div>
       <div class="hud-readout right" id="readout-r">LINK --<br>PKT --<br>SYNC 00.0%</div>
@@ -402,6 +412,18 @@
 <script src="assets/disclosure-data.js?v=20261029g"></script>
 <script src="assets/events-data.js?v=20261029c"></script>
 <script src="assets/yuri-flow.js?v=20261029h"></script>
+<script>
+// 제안 메일 링크(?ref=)로 들어온 방문 — 어드민 '신규 유입' 집계용(assets/outreach.js)
+(function () {
+  var q = new URLSearchParams(location.search), ref = q.get('ref');
+  if (!ref || !/^[\w-]{1,40}$/.test(ref)) return;
+  try {
+    var a = JSON.parse(localStorage.getItem('il.inbound') || '[]');
+    if (!a.some(function (x) { return x.ref === ref; })) a.push({ ref: ref, src: q.get('src') || '', at: new Date().toISOString() });
+    localStorage.setItem('il.inbound', JSON.stringify(a.slice(-200)));
+  } catch (e) {}
+})();
+</script>
 <script type="importmap">
 {
   "imports": {
@@ -427,15 +449,9 @@ const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").match
 const HUBS = [
   { id: "SEL", name: "서울", u: 0.02, v: 0.08, region: "아시아", home: true },
   { id: "TYO", name: "도쿄", u: 0.38, v: 0.22, region: "아시아" },
-  { id: "SHA", name: "상하이", u: -0.22, v: 0.4, region: "아시아" },
   { id: "HKG", name: "홍콩", u: 0.12, v: -0.34, region: "아시아" },
-  { id: "SIN", name: "싱가포르", u: -0.08, v: -0.62, region: "아시아" },
-  { id: "DXB", name: "두바이", u: -0.5, v: 0.02, region: "중동" },
-  { id: "FRA", name: "프랑크푸르트", u: -0.4, v: 0.58, region: "유럽" },
   { id: "LON", name: "런던", u: -0.68, v: 0.32, region: "유럽" },
   { id: "NYC", name: "뉴욕", u: 0.62, v: -0.12, region: "북미" },
-  { id: "SFO", name: "샌프란시스코", u: 0.55, v: 0.52, region: "북미" },
-  { id: "SYD", name: "시드니", u: 0.42, v: -0.58, region: "오세아니아" },
 ];
 
 function latLngToVec(lat, lng, r = 1) {
@@ -447,7 +463,6 @@ const pick = (arr) => arr[(Math.random() * arr.length) | 0];
 
 /* ---------------- 3D 홀로그램 지구본 ---------------- */
 const stage = document.getElementById("stage");
-const scanEl = document.getElementById("scan");
 
 let renderer;
 try {
@@ -638,7 +653,7 @@ function ndcToWorld(nx, ny, z, out) {
 const INFLOW = [[-1.3, 1.1], [1.35, 0.85], [-1.35, -0.55], [0.85, 1.3]];
 const FIRST = 0.6;
 const TRAVEL = reduceMotion ? 1.2 : 3.0;
-const CYCLE = 11;
+const CYCLE = 26;  // 저절로 들어오는 빛 — 덜 자주
 const P0 = new THREE.Vector3(), P1 = new THREE.Vector3();
 let beamIdx = -1, beamStart = 0, beamDur = TRAVEL, nextAuto = FIRST;
 let absorbed = true, everAbsorbed = false;
@@ -657,14 +672,42 @@ function startBeam(t, dur) {
   // 제어점을 옆으로 비켜 직선이 아니라 휘어 들어오게 한다
   P1.set(P0.x * 0.45 - P0.y * 0.35, P0.y * 0.45 + P0.x * 0.35, 0.6);
 }
-const beamIn = () => startBeam(elapsed, reduceMotion ? 0.6 : 1.3);
-// 유리가 분석하는 동안: HUD 링이 빨라지고 빛이 연달아 들어온다
+// 고객이 답할 때 — 방금 들어온 빛이 있으면 건너뛴다(연달아 날아오지 않게)
+const beamIn = () => { if (beamIdx >= 0 && elapsed - beamStart < 5) return; startBeam(elapsed, reduceMotion ? 0.6 : 1.3); };
+// 유리가 분석하는 동안: HUD 링이 빨라지고 빛이 띄엄띄엄 들어온다
 let thinking = false, thinkBeamIn = 0;
-const setThinking = (on) => { thinking = on; thinkBeamIn = 0; };
+const setThinking = (on) => { thinking = on; thinkBeamIn = 0; setMood(on ? "thinking" : "listening"); };
+
+// 유리 반응 — 말할 때(speaking) · 생각할 때(thinking) 금빛으로 물들고 맥박처럼 뛴다 (jarvis 상태 연출 참고)
+let mood = "idle", moodT = 0;
+const MOOD_GOLD = { a: new THREE.Color("#5a3d00"), b: new THREE.Color("#ffe08a"), rim: new THREE.Color("#9a6a00"), air: new THREE.Color("#f5c518") };
+let MOOD_BASE = null;   // 원래 색(처음 한 번 저장)
+function setMood(m) {
+  mood = m;
+  stage.dataset.mood = m;
+  const y = document.getElementById("yuri"); if (y) y.dataset.mood = m;
+}
+function updateMood(dt) {
+  if (!MOOD_BASE) {
+    particleMaterial.uniforms.uColor.value = particleMaterial.uniforms.uColor.value.clone();
+    MOOD_BASE = { a: dotMaterial.uniforms.uColorA.value.clone(), b: dotMaterial.uniforms.uColorB.value.clone(),
+      rim: core.material.uniforms.uRim.value.clone(), air: atmosphere.material.uniforms.uColor.value.clone(), p: particleMaterial.uniforms.uColor.value.clone() };
+  }
+  const target = mood === "speaking" || mood === "thinking" ? 1 : mood === "listening" ? 0.18 : 0;
+  moodT += (target - moodT) * Math.min(1, dt * 3.2);
+  dotMaterial.uniforms.uColorA.value.copy(MOOD_BASE.a).lerp(MOOD_GOLD.a, moodT);
+  dotMaterial.uniforms.uColorB.value.copy(MOOD_BASE.b).lerp(MOOD_GOLD.b, moodT);
+  core.material.uniforms.uRim.value.copy(MOOD_BASE.rim).lerp(MOOD_GOLD.rim, moodT * 0.8);
+  atmosphere.material.uniforms.uColor.value.copy(MOOD_BASE.air).lerp(MOOD_GOLD.air, moodT * 0.85);
+  particleMaterial.uniforms.uColor.value.copy(MOOD_BASE.p).lerp(MOOD_GOLD.air, moodT);
+  // 말할 땐 짧게 빠르게, 생각할 땐 느리고 크게 뛴다
+  const beat = reduceMotion ? 0 : mood === "speaking" ? Math.sin(elapsed * 10) * 0.012 : mood === "thinking" ? Math.sin(elapsed * 3.2) * 0.022 : 0;
+  globe.scale.setScalar(1 + beat * moodT);
+}
 function updateLight(t, dt) {
   if (thinking) {
     thinkBeamIn -= dt;
-    if (thinkBeamIn <= 0) { startBeam(t, 0.8); thinkBeamIn = 0.55; }
+    if (thinkBeamIn <= 0) { startBeam(t, 1.1); thinkBeamIn = 2.4; }  // 분석 중에도 띄엄띄엄
   } else if (t >= nextAuto) startBeam(t, TRAVEL);
 
   let approach = 0;
@@ -772,13 +815,11 @@ const dotMaterial = new THREE.ShaderMaterial({
       float a = smoothstep(0.5, 0.25, d);
       float facing = smoothstep(-0.05, 0.7, vFacing);
       float twinkle = 0.78 + 0.22 * sin(uTime * 1.4 + vRand * 40.0);
-      float scan = exp(-abs(gl_FragCoord.y - uScan) / 22.0);
       vec3 col = mix(uColorA, uColorB, max(vKind * (0.55 + 0.45 * facing) * (0.7 + 0.3 * vRand), 0.25));
-      col += vec3(0.6, 1.0, 1.0) * scan * 0.9;
       float strength = mix(0.42, 1.0, vKind);
       // 다가오는 빛을 받는 쪽은 밝게, 흡수된 빛은 무늬 전체를 밝힌다
       strength *= 1.0 + 0.35 * smoothstep(-0.2, 0.7, vLit) * uSun + 0.4 * uCharge;
-      gl_FragColor = vec4(col, a * (0.15 + 0.85 * facing) * twinkle * strength + scan * 0.4);
+      gl_FragColor = vec4(col, a * (0.15 + 0.85 * facing) * twinkle * strength);
     }`,
   transparent: true,
   depthWrite: false,
@@ -846,7 +887,7 @@ const particleMaterial = new THREE.ShaderMaterial({
 });
 const particleLayers = [];
 for (const dir of [1, -1]) {
-  const n = isSmall() ? 260 : 520;
+  const n = isSmall() ? 90 : 160;  // 깔끔하게 — 떠도는 입자 줄임
   const pos = [], rnd = [];
   for (let i = 0; i < n; i++) {
     const v = new THREE.Vector3(rand(-1, 1), rand(-1, 1), rand(-1, 1)).normalize();
@@ -940,7 +981,7 @@ for (const hub of HUBS) {
 // 거점 간 호(arc)
 const arcs = [];
 const bursts = [];
-const MAX_ARCS = () => (isSmall() ? 5 : 8);
+const MAX_ARCS = () => (isSmall() ? 2 : 3);  // 깔끔하게 — 호는 몇 개만
 
 function makeArc(from, to) {
   const angle = from.normal.angleTo(to.normal);
@@ -1118,6 +1159,7 @@ function frame() {
   particleMaterial.uniforms.uTime.value = elapsed;
   starMaterial.uniforms.uTime.value = elapsed;
   updateLight(elapsed, dt);
+  updateMood(dt);
   easeView(dt);
 
   if (!dragging) {
@@ -1137,7 +1179,7 @@ function frame() {
 
   // HUD 링 회전 + 전송 도착 시 번쩍임
   hudFlash = Math.max(0, hudFlash - dt * 2.5);
-  const spin = motion * (thinking ? 5 : 1);
+  const spin = motion * (thinking ? 5 : mood === "speaking" ? 2.2 : 1);
   hudParts.dashes.rotation.z += 0.06 * spin * dt;
   hudParts.ticks.rotation.z -= 0.025 * spin * dt;
   hudParts.sweep.rotation.z -= 0.5 * spin * dt;
@@ -1145,10 +1187,7 @@ function frame() {
   hudParts.sweep.material.opacity = 0.65 + hudFlash * 0.35;
   hudParts.dashes.material.opacity = 0.3 + hudFlash * 0.4;
 
-  // 스캔라인: CSS 줄과 점 밝기를 같은 위치로 맞춘다
-  const scanY = ((elapsed * 0.22 * motion) % 1) * (viewH + 160) - 80;
-  scanEl.style.transform = `translateY(${scanY.toFixed(1)}px)`;
-  dotMaterial.uniforms.uScan.value = (viewH - scanY) * renderer.getPixelRatio();
+  // (움직이는 가로줄은 뺐다)
 
   spawnIn -= dt;
   if (spawnIn <= 0) {
@@ -1249,6 +1288,7 @@ function addMsg(who, html, cls = "") {
 }
 // 유리가 말할 때: 입력 중 표시 → 말풍선. 질문은 '굵은 제목 + 작은 보조 설명'으로 끊어서
 async function say(title, hint, cls) {
+  setMood("speaking");
   const t = addMsg("bot", "<i></i><i></i><i></i>", "typing");
   t.setAttribute("aria-label", "유리가 입력 중");
   await sleep(320 + Math.min((title + (hint || "")).length * 7, 700));
@@ -1268,6 +1308,7 @@ function answer(text) {
 
 /* 보기 패널 — Claude 질문 패널처럼: 머리(질문 · 단계) / 번호 행(이름 + 설명) / 직접 입력 행 */
 function renderPanel(q) {
+  setMood("listening");
   chipsEl.replaceChildren();
   askExtra.replaceChildren();
   qbox.hidden = false;
@@ -1357,6 +1398,7 @@ async function submit(text, picks, act) {
   setBusy(true);
   qbox.hidden = true;
   setStatus("YURI THINKING", "reading your answer");
+  setMood("thinking");
   const r = await flow.answer(text, picks, act);
   if (r.card) { hudFlash = 1; addMsg("bot", dbCard(r.card), "result db"); }
   for (const n of r.notes || []) await note(n);

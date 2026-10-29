@@ -35,3 +35,6 @@ jarvis/
 .dev.vars*
 !.dev.vars.example
 !.env.example
+
+# db_loader 캐시 (DART 고유번호 · 기업개황)
+db_loader/.cache/

@@ -25,6 +25,17 @@ function prompt(body) {
       '출력 형식: {"title": "...", "hint": "..."}'
     ].filter(Boolean).join('\n');
   }
+  if (body.task === 'qa') {
+    // 근거형 Q&A — 주어진 리포트 원문 안에서만 답하고, 쓴 근거 번호를 남긴다
+    const docs = (body.docs || []).slice(0, 5).map((d, i) => `[${i + 1}] ${d.title} (${d.date || ''})\n${String(d.text || '').slice(0, 900)}`).join('\n\n');
+    return [
+      '아래 리서치센터 리포트 원문만 근거로 고객 질문에 답해 줘. 원문에 없는 내용은 지어내지 말고, 없으면 "원문에서 확인되지 않아요"라고 해.',
+      '3문장 이내 해요체. 문장 끝에 근거 번호를 [1]처럼 붙여. 종목 매수 · 매도 권유나 수익 전망 표현은 쓰지 마.',
+      `질문: ${String(body.question || '').slice(0, 200)}`,
+      `원문:\n${docs}`,
+      '출력 형식: {"answer": "...", "cites": [1, 2]}'
+    ].join('\n');
+  }
   if (body.task === 'extract') {
     return [
       '고객의 답변에서 아래 항목을 찾아 줘. 각 항목은 주어진 보기 중에서만 고르고, 없으면 빼.',
@@ -33,6 +44,20 @@ function prompt(body) {
       'services는 콜론 앞 id로 적어. scale은 금액이 나오면 "약 N억 원" 형식. 자주 · 정기적으로 원하면 freq: true.',
       '출력 형식: {"slots": {"identity": "", "purpose": "", "sectors": [], "services": [], "scale": "", "freq": false}}'
     ].join('\n');
+  }
+  if (body.task === 'pitch') {
+    return [
+      '아래 영업 메일 초안을 이 회사에 맞게 자연스럽게 다시 써 줘. 너는 이번에는 유진투자증권 리서치센터 법인영업 담당자로서 쓴다.',
+      '사실은 주어진 정보 안에서만 쓰고, 없는 실적 · 수치 · 고객사 이름을 지어내지 마. 서비스와 행사는 아래 목록에 있는 것만.',
+      '제목(subject)은 45자 이내, 본문(body)은 600자 이내. 인사 → 연락한 이유(발굴 신호) → 맞춤 서비스 2개 + 유진 Insight Lab → 마무리 순서.',
+      '링크 · 수신 거부 안내 · 시연 표시는 시스템이 붙이니 본문에 쓰지 마.',
+      `회사: ${JSON.stringify(body.prospect || {})}`,
+      `제안 서비스: ${(body.services || []).join(' / ')}`,
+      body.event ? `다가오는 행사: ${JSON.stringify(body.event)}` : '',
+      `단계: ${['1차 제안', '리마인드(짧게)', '마지막 안내(짧게, 이후 먼저 연락하지 않는다고 밝힘)'][body.step] || '1차 제안'}`,
+      `초안: ${JSON.stringify(body.draft || {})}`,
+      '출력 형식: {"subject": "...", "body": "..."}'
+    ].filter(Boolean).join('\n');
   }
   return null;
 }
@@ -55,7 +80,7 @@ export async function onRequestPost({ request, env }) {
     body: JSON.stringify({
       systemInstruction: { parts: [{ text: RULES }] },
       contents: [{ role: 'user', parts: [{ text }] }],
-      generationConfig: { responseMimeType: 'application/json', temperature: 0.4, maxOutputTokens: 400, thinkingConfig: { thinkingBudget: 0 } }
+      generationConfig: { responseMimeType: 'application/json', temperature: body.task === 'qa' ? 0.2 : 0.4, maxOutputTokens: body.task === 'qa' ? 700 : 400, thinkingConfig: { thinkingBudget: 0 } }
     })
   });
   let r = await call(MODEL);

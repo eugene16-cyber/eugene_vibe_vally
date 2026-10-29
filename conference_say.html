@@ -1,0 +1,1263 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>세미나·컨퍼런스 | 유진투자증권 Insight Lab</title>
+<meta name="description" content="콥데이·NDR·IPO·Conference·WM특화세미나 일정을 한 곳에서 찾고 신청해요.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  /* 사이트 토큰(블루 · 네이비): 연회색 바탕 위 흰 카드, 파란 강조, 16px 둥근 모서리. 한 화면에 한 가지 일만 보이게 */
+  :root{
+    --bg:#f4f6f9; --surface:#ffffff; --fg:#17181b; --muted:#6b7684; --line:#dde4eb;
+    --accent:#3182f6; --accent-d:#1b6ae0; --accent-ink:#ffffff; --accent-soft:#e8f1fe;
+    --navy:#0f2a4a; --mist:#f4f6f9;
+    --flag-bg:#fff4e0; --flag-fg:#b25e00;
+    --ok:#1e7a4f; --ok-soft:#e6f4ec; --warn:#b4570f; --warn-soft:#fdf0e3; --stop:#8a94a3; --stop-soft:#eef1f5;
+    --ndr-soft:#f6ece7; --bad:#c2412d;
+    --font:"Pretendard Variable","Pretendard",-apple-system,system-ui,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+    --r:16px; --r-sm:10px; --pill:999px; --max:1100px;
+    --c-corpday:#3182f6; --c-ipo:#334966; --c-ndr:#b8613f; --c-conference:#3f7f75; --c-wm:#9a7a2c;
+  }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+    --bg:#0b1422; --surface:#121d2f; --fg:#eef2f8; --muted:#9aa6b7; --line:#24324a;
+    --accent:#4d9bff; --accent-d:#6aacff; --accent-ink:#06101f; --accent-soft:#17325a;
+    --navy:#eef2f8; --mist:#0f1a2b; --flag-bg:#3a2a10; --flag-fg:#ffc46b;
+    --ok:#6fd39a; --ok-soft:#133224; --warn:#ffb067; --warn-soft:#3a2a10; --stop:#8d9ab0; --stop-soft:#1b2638;
+    --ndr-soft:#3a2418; --bad:#ff8a74; color-scheme:dark } }
+  :root[data-theme="dark"]{
+    --bg:#0b1422; --surface:#121d2f; --fg:#eef2f8; --muted:#9aa6b7; --line:#24324a;
+    --accent:#4d9bff; --accent-d:#6aacff; --accent-ink:#06101f; --accent-soft:#17325a;
+    --navy:#eef2f8; --mist:#0f1a2b; --flag-bg:#3a2a10; --flag-fg:#ffc46b;
+    --ok:#6fd39a; --ok-soft:#133224; --warn:#ffb067; --warn-soft:#3a2a10; --stop:#8d9ab0; --stop-soft:#1b2638;
+    --ndr-soft:#3a2418; --bad:#ff8a74; color-scheme:dark }
+
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  button,input,select,textarea{font:inherit;color:inherit}
+  button{cursor:pointer}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  [hidden]{display:none!important}
+  .wrap{max-width:var(--max);margin:0 auto;padding-left:max(20px, env(safe-area-inset-left, 0px));padding-right:max(20px, env(safe-area-inset-right, 0px))}
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  h1,h2,h3,h4{color:var(--navy);margin:0;letter-spacing:-.02em;text-wrap:balance}
+  h1{font-size:30px;letter-spacing:-.03em;line-height:1.2}
+  h2{font-size:24px}
+  h3{font-size:17px}
+  p{margin:0}
+  .muted{color:var(--muted)}
+  .eyebrow{font-size:12px;font-weight:700;letter-spacing:.12em;color:var(--accent);text-transform:uppercase}
+  .flag{display:inline-block;padding:3px 9px;border-radius:6px;background:var(--flag-bg);color:var(--flag-fg);font-size:12px;font-weight:700}
+  .num{font-variant-numeric:tabular-nums}
+
+  /* 헤더 */
+  .gnb{position:sticky;top:env(safe-area-inset-top, 0px);z-index:40;background:var(--surface);border-bottom:1px solid var(--line)}
+  .gnb .wrap{display:flex;align-items:center;gap:24px;height:60px}
+  .brand{display:flex;align-items:center;gap:9px;text-decoration:none;color:var(--navy);font-weight:800;white-space:nowrap;font-size:15px}
+  .brand .mark{width:24px;height:24px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#7db5ff,var(--accent) 55%,#0f2a4a)}
+  .brand .lab{color:var(--accent)}
+  .nav{display:flex;gap:2px}
+  .nav a{padding:7px 13px;border-radius:var(--pill);text-decoration:none;color:var(--muted);font-weight:700;font-size:14px}
+  .nav a:hover{color:var(--navy);background:var(--mist)}
+  .nav a[aria-current="page"]{color:var(--accent);background:var(--accent-soft)}
+  .acct{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:13px}
+  .acct .who{color:var(--muted);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .acct .seg-chip{font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:var(--accent-soft);color:var(--accent)}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid transparent;border-radius:var(--pill);padding:9px 16px;font-weight:700;font-size:14px;background:var(--accent);color:var(--accent-ink);white-space:nowrap;transition:background .15s,border-color .15s,color .15s;text-decoration:none}
+  .btn:hover{background:var(--accent-d)}
+  .btn.ghost{background:var(--surface);color:var(--navy);border-color:var(--line)}
+  .btn.ghost:hover{border-color:var(--accent);color:var(--accent)}
+  .btn.soft{background:var(--accent-soft);color:var(--accent)}
+  .btn.sm{padding:6px 12px;font-size:13px}
+  .btn[disabled]{background:var(--stop-soft);color:var(--stop);border-color:transparent;cursor:not-allowed}
+  .link{background:none;border:0;padding:0;color:var(--muted);font-weight:700;font-size:13px;text-decoration:underline;text-underline-offset:3px}
+  .link:hover{color:var(--accent)}
+
+  /* 페이지 머리 */
+  .head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:28px 0 18px}
+  .head .t{display:flex;flex-direction:column;gap:6px}
+  .head p{color:var(--muted)}
+  .tabs{display:flex;gap:4px;background:var(--surface);border:1px solid var(--line);padding:4px;border-radius:var(--pill)}
+  .tabs button{border:0;background:transparent;padding:8px 16px;border-radius:var(--pill);font-weight:700;color:var(--muted);white-space:nowrap}
+  .tabs button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
+  .tabs button:not([aria-selected="true"]):hover{color:var(--navy)}
+  .count{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;border-radius:var(--pill);background:var(--accent-soft);color:var(--accent);font-size:12px;font-weight:800}
+  .tabrow{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-bottom:20px}
+
+  /* 히어로: 왼쪽 숫자, 오른쪽 책 */
+  .hero{position:relative;border-radius:var(--r);overflow:hidden;background:radial-gradient(120% 140% at 85% 50%,#2a6fd6 0%,#163a66 45%,#0b1f3a 100%);color:#fff;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);min-height:340px}
+  .hero .copy{padding:36px 0 32px 36px;display:flex;flex-direction:column;gap:10px;position:relative;z-index:2}
+  .hero .eyebrow{color:#9cc2ff}
+  .hero h2{color:#fff;font-size:34px;line-height:1.15}
+  .hero h2 b{color:#9cc2ff}
+  .hero .next{color:#cfdcf0;font-size:15px}
+  .hero .next b{color:#fff;font-weight:700}
+  .hero .hint{margin-top:auto;color:#9cc2ff;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px}
+  .hero .hint svg{width:16px;height:16px;flex:none}
+  .orbit-ctrl{position:absolute;right:14px;top:14px;z-index:5;border:1px solid rgba(255,255,255,.28);background:rgba(11,31,58,.45);color:#fff;border-radius:var(--pill);padding:5px 11px;font-size:12px;font-weight:700}
+  .orbit-ctrl:hover{background:rgba(255,255,255,.14)}
+  .stage{position:relative;min-height:340px}
+  .ring{position:absolute;left:50%;top:52%;width:78%;height:34%;transform:translate(-50%,-50%);border:1px solid rgba(156,194,255,.3);border-radius:50%;pointer-events:none}
+
+  .book{position:absolute;left:50%;top:52%;width:92px;height:126px;margin:-63px 0 0 -46px;border:0;padding:0;background:none;perspective:700px;will-change:transform;transition:opacity .3s,filter .3s}
+  .book.anim{transition:transform .55s cubic-bezier(.2,.8,.2,1),opacity .3s,filter .3s}
+  .book .body{position:absolute;inset:0;transform-style:preserve-3d}
+  /* 책 안쪽은 종이색 고정 */
+  .book .pages{position:absolute;inset:0;border-radius:3px 8px 8px 3px;background:linear-gradient(90deg,#e9edf3,#fff 12%);box-shadow:0 18px 30px rgba(0,0,0,.35);padding:10px 9px 10px 12px;color:#17181b;text-align:left;font-size:9.5px;line-height:1.45;display:flex;flex-direction:column;gap:4px;opacity:0;transition:opacity .2s .25s}
+  .book .pages b{font-size:11px;color:#0f2a4a}
+  .book .pages .kv{display:flex;justify-content:space-between;gap:4px}
+  .book .pages .kv span:last-child{font-weight:800;color:#3182f6}
+  .book .pages .nx{color:#6b7684}
+  .book .cover{position:absolute;inset:0;border-radius:3px 8px 8px 3px;background:var(--bc);color:#fff;transform-origin:left center;transition:transform .6s cubic-bezier(.2,.8,.2,1);backface-visibility:hidden;box-shadow:inset 6px 0 0 rgba(0,0,0,.22),inset 8px 0 0 rgba(255,255,255,.12),0 16px 26px rgba(0,0,0,.4);padding:14px 10px 10px 16px;display:flex;flex-direction:column;justify-content:space-between;text-align:left;overflow:hidden}
+  .book .cover::after{content:"";position:absolute;inset:0;background:linear-gradient(120deg,rgba(255,255,255,.22),transparent 40%,rgba(0,0,0,.18));pointer-events:none}
+  .book .cover b{font-size:16px;line-height:1.2;letter-spacing:-.02em}
+  .book .cover small{font-size:10px;opacity:.85}
+  .book:hover .cover{box-shadow:inset 6px 0 0 rgba(0,0,0,.22),inset 8px 0 0 rgba(255,255,255,.12),0 0 0 2px rgba(255,255,255,.7),0 16px 26px rgba(0,0,0,.4)}
+  .book.open .cover{transform:rotateY(-155deg)}
+  .book.open .pages{opacity:1}
+  .book.open{filter:drop-shadow(0 0 18px rgba(120,170,255,.55))}
+  .stage.picked .book:not(.open){opacity:.35;filter:saturate(.6)}
+
+  /* 선택한 카테고리 개요 */
+  .overview{display:none;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--oc,var(--accent));border-radius:var(--r);padding:16px 20px;margin-top:12px}
+  .overview.on{display:flex}
+  .overview .t{display:flex;flex-direction:column;gap:2px}
+  .overview .t p{color:var(--muted);font-size:14px}
+  .overview .stats{display:flex;gap:16px;font-size:14px;color:var(--muted)}
+  .overview .stats b{color:var(--navy);font-size:16px}
+  .overview .acts{display:flex;gap:8px;align-items:center}
+
+  /* 일정 */
+  .sec{padding-top:36px}
+  .sec-head{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+  .seg{display:inline-flex;background:var(--mist);border:1px solid var(--line);border-radius:var(--pill);padding:3px}
+  .seg button{border:0;background:transparent;padding:6px 13px;border-radius:var(--pill);font-weight:700;font-size:13px;color:var(--muted)}
+  .seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+  .cats{display:flex;gap:8px;flex-wrap:wrap}
+  .cats button{border:1px solid var(--line);background:var(--surface);border-radius:var(--pill);padding:7px 15px;font-weight:700;font-size:13px;color:var(--muted);display:inline-flex;align-items:center;gap:7px;transition:border-color .12s,color .12s}
+  .cats button:hover{border-color:var(--accent);color:var(--accent)}
+  .cats button i{width:8px;height:8px;border-radius:50%;background:var(--dot,var(--muted))}
+  .cats button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+  .cats button[aria-pressed="true"] i{background:#fff}
+  .filters{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:12px 0 4px}
+  .search{position:relative;flex:1 1 240px;max-width:360px}
+  .search input{width:100%;border:1px solid var(--line);border-radius:var(--pill);padding:8px 14px 8px 36px;background:var(--surface);font-size:14px}
+  .search input:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px var(--accent-soft)}
+  .search svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:15px;height:15px;stroke:var(--muted);fill:none;stroke-width:2}
+  .sel{border:1px solid var(--line);border-radius:var(--pill);padding:7px 28px 7px 13px;background:var(--surface);color:var(--fg);font-size:13px;font-weight:600;appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 14px) 50%,calc(100% - 9px) 50%;background-size:5px 5px;background-repeat:no-repeat}
+  .chk{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;border:1px solid var(--line);border-radius:var(--pill);padding:6px 12px;background:var(--surface)}
+  .chk input{width:15px;height:15px;accent-color:var(--accent);margin:0}
+  .filters .push{margin-left:auto}
+
+  .month{margin-top:20px}
+  .month h3{font-size:14px;color:var(--muted);font-weight:800;margin-bottom:8px}
+  .ev{display:grid;grid-template-columns:64px minmax(0,1fr) auto;gap:18px;align-items:center;padding:16px 18px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);margin-bottom:8px;transition:border-color .12s,transform .12s}
+  .ev:hover{border-color:var(--accent);transform:translateY(-2px)}
+  .ev .d{text-align:center;line-height:1.1}
+  .ev .d b{display:block;font-size:22px;color:var(--navy)}
+  .ev .d span{font-size:12px;color:var(--muted);font-weight:700}
+  .ev .cat{font-size:12px;font-weight:800;color:var(--cc)}
+  .ev h4{margin:1px 0 3px;font-size:16px}
+  .ev .meta{color:var(--muted);font-size:13px}
+  .badges{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+  .bdg{font-size:12px;font-weight:700;padding:2px 8px;border-radius:var(--pill);background:var(--stop-soft);color:var(--muted)}
+  .bdg.open{background:var(--ok-soft);color:var(--ok)}
+  .bdg.hot{background:var(--warn-soft);color:var(--warn)}
+  .bdg.invite{background:var(--ndr-soft);color:var(--c-ndr)}
+  .bdg.mine{background:var(--accent-soft);color:var(--accent)}
+  .bdg.aud{background:var(--surface);border:1px solid var(--line)}
+  .ev .acts{display:flex;flex-direction:column;gap:6px;align-items:center;min-width:104px}
+  .ev.past{opacity:.7}
+  .empty{padding:40px 16px;text-align:center;color:var(--muted);background:var(--surface);border:1px dashed var(--line);border-radius:var(--r);margin-top:14px}
+
+  .cal-head{display:flex;align-items:center;justify-content:center;gap:14px;margin:18px 0 10px}
+  .cal-head b{font-size:17px;color:var(--navy);min-width:110px;text-align:center}
+  .cal-head button{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:var(--surface);font-size:18px;line-height:1}
+  .cal-head button:hover{border-color:var(--accent);color:var(--accent)}
+  .cal-scroll{overflow-x:auto}
+  .cal{display:grid;grid-template-columns:repeat(7,minmax(92px,1fr));border:1px solid var(--line);border-radius:var(--r);overflow:hidden;min-width:660px;background:var(--surface)}
+  .cal .dow{background:var(--mist);text-align:center;font-size:12px;font-weight:800;color:var(--muted);padding:7px 0}
+  .cal .day{min-height:90px;border-top:1px solid var(--line);border-left:1px solid var(--line);padding:6px;display:flex;flex-direction:column;gap:4px}
+  .cal .day:nth-child(7n+1){border-left:0}
+  .cal .day .n{font-size:12px;font-weight:700;color:var(--muted)}
+  .cal .day.out{background:var(--mist)}
+  .cal .day.out .n{opacity:.4}
+  .cal .day.today .n{color:var(--accent-ink);background:var(--accent);border-radius:var(--pill);padding:0 7px;align-self:flex-start}
+  .cal .chipev{border:0;text-align:left;font-size:11.5px;font-weight:700;color:#fff;background:var(--cc);border-radius:6px;padding:3px 6px;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .cal .chipev.past{opacity:.55}
+
+  .cta{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-top:28px;padding:20px 22px;border-radius:var(--r);background:var(--accent-soft)}
+  .cta p{color:var(--muted);margin-top:2px;font-size:14px}
+  .cta .acts{display:flex;gap:8px;flex-wrap:wrap}
+
+  /* 좌우 패널 */
+  .split{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:32px;align-items:start}
+  .lead{display:flex;flex-direction:column;gap:10px}
+  .lead h2{margin-top:2px}
+  .lead > p{color:var(--muted)}
+  .steps{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:8px}
+  .steps li{display:grid;grid-template-columns:30px 1fr;gap:10px;align-items:start;padding:10px 0;border-top:1px solid var(--line)}
+  .steps li:last-child{border-bottom:1px solid var(--line)}
+  .steps li b{font-size:13px;color:var(--accent);font-weight:800;padding-top:2px}
+  .steps li span{font-weight:700;color:var(--navy)}
+  .steps li small{display:block;color:var(--muted);font-size:13px;font-weight:500;margin-top:1px}
+  .note{border-left:3px solid var(--accent);background:var(--accent-soft);border-radius:0 var(--r-sm) var(--r-sm) 0;padding:12px 14px;margin-top:14px}
+  .note b{display:block;color:var(--navy);margin-bottom:2px;font-size:14px}
+  .note p{color:var(--fg);font-size:13.5px}
+  .faq{margin-top:18px}
+  .faq h3{font-size:15px;margin-bottom:4px;color:var(--muted)}
+  .faq details{border-bottom:1px solid var(--line)}
+  .faq summary{cursor:pointer;list-style:none;padding:12px 26px 12px 0;font-weight:700;color:var(--navy);position:relative;font-size:14.5px}
+  .faq summary::-webkit-details-marker{display:none}
+  .faq summary::after{content:"+";position:absolute;right:2px;top:10px;font-size:18px;color:var(--accent)}
+  .faq details[open] summary::after{content:"−"}
+  .faq details p{margin:0 0 12px;color:var(--muted);font-size:14px}
+  .faq .btn{margin:0 0 12px}
+
+  .form{border:1px solid var(--line);border-radius:var(--r);padding:24px;background:var(--surface)}
+  .form h3{font-size:18px;margin-bottom:14px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .fld{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+  .grid2 .fld{margin-bottom:0}
+  .grid2 + .fld,.grid2 + .grid2{margin-top:12px}
+  .fld label,.fld .lbl{font-size:13px;font-weight:700;color:var(--navy)}
+  .fld label .req{color:var(--accent);margin-left:2px}
+  .fld input,.fld select,.fld textarea{border:1px solid var(--line);border-radius:var(--r-sm);padding:9px 12px;background:var(--surface);color:var(--fg);width:100%}
+  .fld textarea{min-height:90px;resize:vertical}
+  .fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px var(--accent-soft)}
+  .fld .err{color:var(--bad);font-size:12px;font-weight:600}
+  .fld.bad input,.fld.bad select,.fld.bad textarea{border-color:var(--bad)}
+  .demo{display:flex;gap:8px;align-items:flex-start;background:var(--mist);border-radius:var(--r-sm);padding:11px 13px;font-size:13px;margin-top:4px}
+  .demo input{margin-top:3px;width:15px;height:15px;accent-color:var(--accent);flex:none}
+  .form .submit{width:100%;margin-top:14px;padding:11px}
+  .hintline{font-size:13px;color:var(--muted);margin:-2px 0 12px}
+  .errline{color:var(--bad);font-size:12px;font-weight:600;margin:6px 0 0}
+
+  .xcards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:22px}
+  .xcard{border-radius:var(--r);padding:22px;color:#fff;display:flex;flex-direction:column;gap:8px;min-height:200px;transition:transform .12s}
+  .xcard:hover{transform:translateY(-2px)}
+  .xcard h3{color:#fff;font-size:19px}
+  .xcard p{color:rgba(255,255,255,.88);font-size:14px}
+  .xcard .btn{margin-top:auto;align-self:flex-start;background:#fff;color:#0f2a4a}
+  .xcard .btn:hover{background:#e8f1fe}
+  .x1{background:#3182f6}.x2{background:#334966}.x3{background:#3f7f75}
+  .propose{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin:16px 0 40px;padding:18px 22px;border-radius:var(--r);background:var(--surface);border:1px solid var(--line)}
+  .propose p{color:var(--muted);font-size:14px;margin-top:2px}
+
+  footer{margin-top:64px;border-top:1px solid var(--line);padding:26px 0 calc(36px + env(safe-area-inset-bottom, 0px));font-size:12.5px;color:var(--muted)}
+  footer .wrap{display:flex;flex-direction:column;gap:8px}
+  footer .disc{max-width:820px}
+
+  /* 모달 */
+  .modal{position:fixed;inset:0;z-index:80;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(11,31,58,.5)}
+  .sheet{background:var(--surface);color:var(--fg);border-radius:var(--r);width:min(600px,100%);max-height:calc(100vh - 40px);overflow:auto;padding:24px 24px 20px;position:relative;box-shadow:0 30px 70px rgba(0,0,0,.25)}
+  .sheet .x{position:absolute;right:12px;top:12px;width:34px;height:34px;border-radius:50%;border:0;background:var(--mist);font-size:18px}
+  .sheet h3{font-size:20px;padding-right:40px}
+  .sheet .sub{color:var(--muted);margin:4px 0 14px;font-size:14px}
+  .dl{display:grid;grid-template-columns:96px 1fr;gap:7px 12px;margin:12px 0;font-size:14px}
+  .dl dt{color:var(--muted);font-weight:700}
+  .dl dd{margin:0}
+  .prog{margin:4px 0 0;padding-left:18px}
+  .sheet .foot{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:16px}
+  .done-ic{width:48px;height:48px;border-radius:50%;background:var(--ok-soft);color:var(--ok);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;margin-bottom:10px}
+  .rec{border:1px solid var(--line);border-radius:var(--r-sm);padding:11px 13px;margin-top:8px}
+  .rec .top{display:flex;justify-content:space-between;gap:8px;align-items:center}
+  .rec b{color:var(--navy)}
+  .rec small{color:var(--muted)}
+  .authtabs{display:flex;gap:6px;background:var(--mist);padding:4px;border-radius:var(--pill);margin:12px 0}
+  .authtabs button{flex:1;border:0;background:transparent;padding:8px;border-radius:var(--pill);font-weight:700;color:var(--muted)}
+  .authtabs button[aria-selected="true"]{background:var(--surface);color:var(--navy)}
+  .msg{font-size:13px;font-weight:600;margin:4px 0 0;min-height:20px}
+  .msg.bad{color:var(--bad)}.msg.good{color:var(--ok)}
+  .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom, 0px));transform:translateX(-50%);z-index:90;background:#0f2a4a;color:#fff;padding:11px 18px;border-radius:var(--pill);font-weight:700;font-size:14px;box-shadow:0 10px 30px rgba(0,0,0,.25);max-width:calc(100% - 32px)}
+
+  @media (max-width: 960px){
+    .hero{grid-template-columns:1fr}
+    .hero .copy{padding:28px 24px 0}
+    .hero h2{font-size:28px}
+    .stage{min-height:300px}
+    .split{grid-template-columns:1fr}
+    .xcards{grid-template-columns:1fr}
+  }
+  @media (max-width: 640px){
+    .gnb .wrap{gap:10px;height:auto;padding-block:10px;flex-wrap:wrap}
+    .brand .lab{display:none}
+    .nav{order:3;width:100%;overflow-x:auto}
+    h1{font-size:26px}
+    .ev{grid-template-columns:52px minmax(0,1fr);gap:12px}
+    .ev .acts{grid-column:1 / -1;flex-direction:row;min-width:0;justify-content:flex-start}
+    .grid2{grid-template-columns:1fr}
+    .filters .push{margin-left:0}
+    .search{max-width:none}
+    .book{width:78px;height:108px;margin:-54px 0 0 -39px}
+    .book .cover b{font-size:14px}
+    .dl{grid-template-columns:1fr}
+    .overview .acts{width:100%}
+  }
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto}
+    .book,.book.anim,.book .cover,.book .pages,.ev,.xcard{transition:none}
+  }
+</style>
+</head>
+<body>
+
+<header class="gnb">
+  <div class="wrap">
+    <a class="brand" href="#" data-preview="홈 화면" aria-label="유진투자증권 Insight Lab 홈">
+      <span class="mark" aria-hidden="true"></span><span>유진투자증권</span><span class="lab">Insight Lab</span>
+    </a>
+    <nav class="nav" aria-label="주요 메뉴">
+      <a href="#" data-preview="홈 화면">Home</a>
+      <a href="#" aria-current="page">Events</a>
+      <a href="#" data-preview="리서치 화면">Research</a>
+      <a href="#" data-preview="퀀트 화면">Quant</a>
+    </nav>
+    <div class="acct" id="acct"></div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="head">
+    <div class="t">
+      <div><span class="flag">시연용 가상 화면</span></div>
+      <h1>세미나·컨퍼런스</h1>
+      <p>콥데이·IPO·NDR·컨퍼런스·WM 세미나 일정을 확인하고 바로 신청해요.</p>
+    </div>
+  </section>
+
+  <div class="tabrow">
+    <div class="tabs" role="tablist" aria-label="이벤트 메뉴">
+      <button role="tab" id="tab-events" aria-controls="panel-events" data-tab="events">기업행사/컨퍼런스</button>
+      <button role="tab" id="tab-seminar" aria-controls="panel-seminar" data-tab="seminar">세미나/탐방 요청</button>
+      <button role="tab" id="tab-external" aria-controls="panel-external" data-tab="external">외부 행사</button>
+    </div>
+    <button class="btn ghost" id="openMine" type="button">내 신청·문의 <span class="count" id="mineCount">0</span></button>
+  </div>
+
+  <!-- 기업행사/컨퍼런스 -->
+  <section id="panel-events" role="tabpanel" aria-labelledby="tab-events">
+    <div class="hero">
+      <div class="copy">
+        <div class="eyebrow">이번 분기 행사</div>
+        <h2 id="heroTitle"></h2>
+        <p class="next" id="heroNext"></p>
+        <p class="hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 19V5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2z"/><path d="M4 19a2 2 0 0 1 2-2h12"/></svg>책 아이콘을 누르면 행사 개요를 확인할 수 있어요</p>
+      </div>
+      <div class="stage" id="stage" aria-label="행사 카테고리">
+        <button class="orbit-ctrl" id="orbitCtrl" type="button" aria-pressed="false">멈추기</button>
+        <div class="ring" aria-hidden="true"></div>
+      </div>
+    </div>
+    <div class="overview" id="overview" aria-live="polite"></div>
+
+    <section class="sec" id="schedule" aria-labelledby="schedTitle">
+      <div class="sec-head">
+        <h2 id="schedTitle">행사 일정</h2>
+        <div class="seg" role="group" aria-label="기간">
+          <button type="button" data-period="upcoming" aria-pressed="true">예정</button>
+          <button type="button" data-period="past" aria-pressed="false">지난 행사</button>
+        </div>
+      </div>
+      <div class="cats" id="cats" role="group" aria-label="카테고리"></div>
+      <div class="filters">
+        <label class="search">
+          <span class="sr">행사 검색</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input id="q" type="search" placeholder="행사명·기업·주제 검색" autocomplete="off">
+        </label>
+        <label><span class="sr">참여 대상</span><select class="sel" id="aud"></select></label>
+        <label><span class="sr">담당 애널리스트</span><select class="sel" id="analyst"></select></label>
+        <label class="chk"><input type="checkbox" id="onlyOpen"> 신청 가능만</label>
+        <div class="seg push" role="group" aria-label="보기 방식">
+          <button type="button" data-view="list" aria-pressed="true">목록</button>
+          <button type="button" data-view="calendar" aria-pressed="false">캘린더</button>
+        </div>
+      </div>
+      <div id="listView"></div>
+      <div id="calView" hidden></div>
+      <p class="sr" id="live" aria-live="polite"></p>
+
+      <div class="cta">
+        <div>
+          <h3>원하는 행사가 없나요?</h3>
+          <p>관심 섹터나 애널리스트를 골라 개별 세미나를 요청하거나, 외부 행사 주선을 문의해요.</p>
+        </div>
+        <div class="acts">
+          <button class="btn" type="button" data-goto="seminar">세미나 요청</button>
+          <button class="btn ghost" type="button" data-goto="external">외부 행사 문의</button>
+        </div>
+      </div>
+    </section>
+  </section>
+
+  <!-- 세미나/탐방 요청 -->
+  <section id="panel-seminar" role="tabpanel" aria-labelledby="tab-seminar" hidden>
+    <div class="split">
+      <div class="lead">
+        <div class="eyebrow">ANALYST SEMINAR</div>
+        <h2>애널리스트 세미나 요청</h2>
+        <p>관심 섹터나 애널리스트를 고르고 궁금한 내용을 남겨주세요. 유진 리서치 비서 유리가 일정을 조율해 이메일로 안내해 드려요.</p>
+        <ol class="steps">
+          <li><b>01</b><span>요청 남기기<small>섹터 또는 애널리스트, 희망 일정과 주제</small></span></li>
+          <li><b>02</b><span>담당 애널리스트에게 전달<small>유리가 진행 가능 여부를 확인해요</small></span></li>
+          <li><b>03</b><span>일정 조율·확정<small>입력한 이메일로 안내해 드려요</small></span></li>
+        </ol>
+        <div class="faq">
+          <h3>자주 묻는 질문</h3>
+          <details><summary>애널리스트를 몰라도 요청할 수 있나요?</summary><p>네. ‘섹터로 선택’에서 관심 산업을 고르면 담당 애널리스트와 연결해 드려요.</p></details>
+          <details><summary>요청하면 일정이 바로 확정되나요?</summary><p>아니에요. 애널리스트 일정을 확인한 뒤 이메일로 조율해요. 희망 날짜와 실제 날짜가 다를 수 있어요.</p></details>
+          <details><summary>행사 참가 신청과 어떻게 다른가요?</summary><p>기업행사는 정해진 일정에 참여하고, 개별 세미나는 필요한 내용과 참석 대상에 맞춰 따로 진행해요.</p></details>
+          <details><summary>실적발표 관련 문의도 되나요?</summary><p>네. 관심 기업과 확인하고 싶은 분기를 남겨주세요.</p><button class="btn soft sm" type="button" id="earningsBtn">실적발표 문의</button></details>
+        </div>
+      </div>
+
+      <form class="form" id="seminarForm" novalidate>
+        <h3>세미나 요청</h3>
+        <div class="fld">
+          <span class="lbl">어떻게 고를까요?</span>
+          <div class="seg" role="group" aria-label="세미나 요청 기준">
+            <button type="button" data-basis="sector" aria-pressed="true">섹터로 선택</button>
+            <button type="button" data-basis="analyst" aria-pressed="false">애널리스트로 선택</button>
+          </div>
+        </div>
+        <div class="fld" id="fSectorWrap"><label for="sSector">관심 섹터<span class="req">*</span></label><select id="sSector" name="관심 섹터" data-req></select></div>
+        <div class="fld" id="fAnalystWrap" hidden><label for="sAnalyst">애널리스트<span class="req">*</span></label><select id="sAnalyst" name="애널리스트"></select></div>
+        <div class="fld"><label for="sTopic">궁금한 내용<span class="req">*</span></label><textarea id="sTopic" name="궁금한 내용" data-req placeholder="예: 메모리 업황 전망과 하반기 실적 점검"></textarea></div>
+        <div class="grid2">
+          <div class="fld"><label for="sDate">희망 일정</label><input id="sDate" name="희망 일정" type="date"></div>
+          <div class="fld"><label for="sMode">진행 방식</label><select id="sMode" name="진행 방식"><option>온라인(화상)</option><option>방문(기관 사무실)</option><option>유진 본사</option><option>협의 후 결정</option></select></div>
+        </div>
+        <div class="grid2">
+          <div class="fld"><label for="sAud">참석 대상</label><select id="sAud" name="참석 대상"><option>운용역·애널리스트</option><option>법인 경영진·재무 담당</option><option>WM 고객</option><option>기타</option></select></div>
+          <div class="fld"><label for="sHead">예상 인원</label><input id="sHead" name="예상 인원" type="number" min="1" inputmode="numeric" placeholder="명"></div>
+        </div>
+        <div class="grid2">
+          <div class="fld"><label for="sName">이름<span class="req">*</span></label><input id="sName" name="이름" data-req autocomplete="name"></div>
+          <div class="fld"><label for="sOrg">소속<span class="req">*</span></label><input id="sOrg" name="소속" data-req autocomplete="organization"></div>
+        </div>
+        <div class="grid2">
+          <div class="fld"><label for="sEmail">이메일<span class="req">*</span></label><input id="sEmail" name="이메일" type="email" data-req data-email autocomplete="email"></div>
+          <div class="fld"><label for="sTel">연락처</label><input id="sTel" name="연락처" type="tel" autocomplete="tel"></div>
+        </div>
+        <div class="note"><b>일정은 이메일로 안내해 드려요</b><p>유리가 담당 애널리스트에게 요청을 전달하고, 조율 결과와 확정 여부를 이메일로 보내 드려요. 요청만으로 일정이 확정되지는 않아요.</p></div>
+        <label class="demo"><input type="checkbox" data-demo> <span>실제 접수·전송이 없는 시연 화면이에요. 테스트 값으로 입력해주세요.</span></label>
+        <button class="btn submit" type="submit">요청 내용 확인</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- 외부 행사 -->
+  <section id="panel-external" role="tabpanel" aria-labelledby="tab-external" hidden>
+    <div class="lead">
+      <div class="eyebrow">EXTERNAL EVENTS</div>
+      <h2>외부 행사 주선</h2>
+      <p>산업 세미나, 기업 인사이트 세션, 연사 초청까지. 기관에 필요한 외부 행사를 연결해 드려요.</p>
+    </div>
+    <div class="xcards">
+      <article class="xcard x1"><h3>산업·테마 세미나</h3><p>반도체 업황, AI 밸류체인 등 관심 산업을 다루는 외부 전문가 세미나예요.</p><button class="btn sm" type="button" data-xtype="산업·테마 세미나">주선 문의</button></article>
+      <article class="xcard x2"><h3>기업 인사이트 세션</h3><p>기업 관계자와 AI 도입 사례, 산업 현장의 변화를 직접 들어요.</p><button class="btn sm" type="button" data-xtype="기업 인사이트 세션">주선 문의</button></article>
+      <article class="xcard x3"><h3>연사 초청·행사 협업</h3><p>기관 행사에 필요한 외부 연사 초청과 공동 프로그램을 함께 만들어요.</p><button class="btn sm" type="button" data-xtype="연사 초청·행사 협업">주선 문의</button></article>
+    </div>
+    <div class="propose">
+      <div>
+        <h3>찾는 행사가 없나요?</h3>
+        <p>“반도체 기업의 현장 이야기를 듣고 싶어요”처럼 원하는 주제를 남기면 주선 가능 여부를 확인해 드려요.</p>
+      </div>
+      <button class="btn" type="button" id="proposeBtn">행사 제안하기</button>
+    </div>
+
+    <div class="split" id="xFormArea">
+      <div class="lead">
+        <h2>행사 문의·제안</h2>
+        <p>원하는 행사나 주제를 알려주세요. 관계자와 협의한 뒤 전화나 이메일로 안내해 드려요.</p>
+        <ol class="steps">
+          <li><b>01</b><span>행사 선택 또는 주제 제안</span></li>
+          <li><b>02</b><span>주선 가능 여부 검토<small>행사 관계자와 협의해요</small></span></li>
+          <li><b>03</b><span>전화·이메일로 개별 안내</span></li>
+        </ol>
+        <div class="note"><b>진행 여부는 협의 후 안내해 드려요</b><p>문의만으로 참가나 일정이 확정되지는 않아요.</p></div>
+      </div>
+
+      <form class="form" id="extForm" novalidate>
+        <div class="fld">
+          <div class="seg" role="group" aria-label="문의 방식">
+            <button type="button" data-xmode="inquiry" aria-pressed="true">행사 주선 문의</button>
+            <button type="button" data-xmode="propose" aria-pressed="false">행사 제안</button>
+          </div>
+        </div>
+        <h3 id="xTitle">행사 주선 문의</h3>
+        <div class="fld"><label for="xType">행사 유형<span class="req">*</span></label><select id="xType" name="행사 유형" data-req><option value="">선택해주세요</option><option>산업·테마 세미나</option><option>기업 인사이트 세션</option><option>연사 초청·행사 협업</option><option>기타</option></select></div>
+        <div class="fld"><label for="xTopic" id="xTopicLbl">관심 행사 또는 주제<span class="req">*</span></label><input id="xTopic" name="관심 행사 또는 주제" data-req></div>
+        <div class="grid2">
+          <div class="fld"><label for="xDate">희망 일정</label><input id="xDate" name="희망 일정" type="date"></div>
+          <div class="fld"><label for="xPlace">장소 또는 방식</label><input id="xPlace" name="장소 또는 방식" placeholder="예: 기관 사무실, 온라인"></div>
+        </div>
+        <div class="fld" style="margin-top:12px"><label for="xNeed" id="xNeedLbl">필요한 내용</label><textarea id="xNeed" name="필요한 내용" placeholder="행사 목적, 참석 대상, 궁금한 내용을 남겨주세요."></textarea></div>
+        <div class="grid2">
+          <div class="fld"><label for="xName">이름<span class="req">*</span></label><input id="xName" name="이름" data-req autocomplete="name"></div>
+          <div class="fld"><label for="xOrg">소속<span class="req">*</span></label><input id="xOrg" name="소속" data-req autocomplete="organization"></div>
+        </div>
+        <div class="grid2">
+          <div class="fld"><label for="xEmail">이메일<span class="req">*</span></label><input id="xEmail" name="이메일" type="email" data-req data-email autocomplete="email"></div>
+          <div class="fld"><label for="xTel">연락처</label><input id="xTel" name="연락처" type="tel" autocomplete="tel"></div>
+        </div>
+        <label class="demo"><input type="checkbox" data-demo> <span>실제 접수·전송이 없는 시연 화면이에요. 테스트 값으로 입력해주세요.</span></label>
+        <button class="btn submit" type="submit" id="xSubmit">입력 내용 확인</button>
+      </form>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p class="disc">이 화면의 리포트·수치·백테스트 결과는 정보 제공을 위한 자료이며, 투자를 권유하는 내용은 아니에요. 과거의 성과가 미래의 수익을 보장하지는 않아요. 금융투자상품은 원금 손실이 발생할 수 있어요. 투자에 대한 최종 판단과 책임은 투자자 본인에게 있어요.</p>
+    <p><b>시연용 가상 화면</b> · 행사·기업·인물·일정은 모두 가상 데이터예요.</p>
+  </div>
+</footer>
+
+<div class="modal" id="modal" hidden><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="mTitle" id="sheet"></div></div>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+(function(){
+  'use strict';
+
+  /* ---------- 데이터 (시연용 가상) ---------- */
+  var CATS = [
+    { id:'corpday',    filter:'콥데이',       book:'콥데이',        color:'var(--c-corpday)', hex:'#3182f6',
+      desc:'매분기 줌으로 진행하는 기업 IR이에요.' },
+    { id:'ipo',        filter:'IPO',         book:'IPO',           color:'var(--c-ipo)', hex:'#334966',
+      desc:'매달 정기적으로 IPO와 비상장 투자 시장을 함께 다뤄요.' },
+    { id:'ndr',        filter:'NDR',         book:'NDR',           color:'var(--c-ndr)', hex:'#b8613f',
+      desc:'기업 IR팀이 기관을 직접 찾아가는 1:1·소그룹 미팅이에요. 초청 기반이라 참여는 문의로 진행해요.' },
+    { id:'conference', filter:'Conference',  book:'특화 컨퍼런스',  color:'var(--c-conference)', hex:'#3f7f75',
+      desc:'섹터·테마별 컨퍼런스에서 업황과 기업 전략을 함께 봐요.' },
+    { id:'wm',         filter:'WM특화세미나', book:'WM Seminar',    color:'var(--c-wm)', hex:'#9a7a2c',
+      desc:'자산관리 고객 눈높이에 맞춘 시장 전망과 테마 세미나예요.' }
+  ];
+  var BOOK_ORDER = ['corpday','ipo','ndr','conference','wm'];
+  var FILTER_ORDER = ['corpday','ndr','ipo','conference','wm'];
+  var AUDS = ['기관','법인','WM'];
+  var ANALYSTS = [
+    { name:'김도윤', sector:'반도체' },
+    { name:'이서연', sector:'2차전지·소재' },
+    { name:'박지훈', sector:'인터넷·AI' },
+    { name:'정우진', sector:'스몰캡·IPO' },
+    { name:'최하늘', sector:'시장전략·매크로' }
+  ];
+  var SECTORS = ['반도체','2차전지·소재','인터넷·AI','바이오·헬스케어','자동차','금융','스몰캡·IPO','시장전략·매크로'];
+
+  var EVENTS = [
+    { id:'corp-2026q3', cat:'corpday', title:'3분기 Corporate Day', company:'참여기업 24개사', date:'2026-11-04', end:'2026-11-06',
+      time:'09:30–16:30', place:'온라인(Zoom)', mode:'온라인', aud:['기관','법인','WM'], elig:'기관투자자·법인·WM 고객',
+      cap:300, left:142, analyst:'최하늘', status:'open',
+      detail:'3일 동안 오전/오후 총 24개 기업의 콥데이가 진행될 예정이에요',
+      program:['11/4(수) 오전 4개사 · 오후 4개사','11/5(목) 오전 4개사 · 오후 4개사','11/6(금) 오전 4개사 · 오후 4개사'] },
+    { id:'corp-2026q4', cat:'corpday', title:'4분기 Corporate Day', company:'참여기업 추후 안내', date:'2027-02-01', tbd:true,
+      time:'추후 안내', place:'온라인(Zoom)', mode:'온라인', aud:['기관','법인','WM'], elig:'기관투자자·법인·WM 고객',
+      cap:0, left:0, analyst:'최하늘', status:'soon',
+      detail:'분기마다 열리는 온라인 Corporate Day. 일정과 참여기업은 추후 안내돼요.', program:[] },
+    { id:'ipo-2610', cat:'ipo', title:'10월 IPO 기업설명회 · 가온메디칼', company:'가온메디칼(가상)', date:'2026-10-15',
+      time:'15:00–16:30', place:'온라인(Zoom)', mode:'온라인', aud:['기관','법인'], elig:'기관투자자·법인 고객',
+      cap:80, left:0, analyst:'정우진', status:'open',
+      detail:'공모 일정 전 회사 개요·성장 전략·공모 구조를 설명하고 질의응답을 진행해요.',
+      program:['회사 개요','성장 전략','공모 구조','질의응답'] },
+    { id:'ipo-2611', cat:'ipo', title:'11월 IPO 기업설명회 · 새봄로보틱스', company:'새봄로보틱스(가상)', date:'2026-11-12',
+      time:'15:00–16:30', place:'온라인(Zoom)', mode:'온라인', aud:['기관','법인'], elig:'기관투자자·법인 고객',
+      cap:80, left:9, analyst:'정우진', status:'open',
+      detail:'공모 일정 전 회사 개요·성장 전략·공모 구조를 설명하고 질의응답을 진행해요.',
+      program:['회사 개요','성장 전략','공모 구조','질의응답'] },
+    { id:'ipo-2612', cat:'ipo', title:'12월 IPO·비상장 마켓 리뷰', company:'유진투자증권 리서치센터', date:'2026-12-10',
+      time:'16:00–17:00', place:'온라인(Zoom)', mode:'온라인', aud:['기관','법인','WM'], elig:'기관투자자·법인·WM 고객',
+      cap:150, left:120, analyst:'정우진', status:'open',
+      detail:'매달 정기적으로 IPO와 비상장 투자 시장을 함께 다뤄요.',
+      program:['월간 공모 시장 리뷰','비상장 투자 동향','질의응답'] },
+    { id:'ndr-semi', cat:'ndr', title:'반도체 소부장 NDR · 한결소재', company:'한결소재(가상)', date:'2026-11-18',
+      time:'10:00–17:00', place:'여의도(기관 방문)', mode:'오프라인', aud:['기관'], elig:'기관투자자',
+      cap:0, left:0, analyst:'김도윤', status:'invite',
+      detail:'기업 IR팀이 기관을 직접 찾아가는 1:1·소그룹 미팅이에요. 초청 기반이라 참여는 문의로 진행해요.',
+      program:['1:1 미팅 (50분)','소그룹 미팅 (60분)'] },
+    { id:'ndr-battery', cat:'ndr', title:'2차전지 NDR · 누리에너지', company:'누리에너지(가상)', date:'2026-12-02',
+      time:'10:00–17:00', place:'여의도(기관 방문)', mode:'오프라인', aud:['기관'], elig:'기관투자자',
+      cap:0, left:0, analyst:'이서연', status:'invite',
+      detail:'기업 IR팀이 기관을 직접 찾아가는 1:1·소그룹 미팅이에요. 초청 기반이라 참여는 문의로 진행해요.',
+      program:['1:1 미팅 (50분)','소그룹 미팅 (60분)'] },
+    { id:'conf-ai', cat:'conference', title:'AI 밸류체인 컨퍼런스 2026', company:'참여기업 8개사', date:'2026-11-25',
+      time:'13:00–17:30', place:'여의도 콘퍼런스홀 · 온라인 중계', mode:'하이브리드', aud:['기관','법인'], elig:'기관투자자·법인 고객',
+      cap:120, left:18, analyst:'박지훈', status:'open',
+      detail:'AI 인프라부터 서비스까지 밸류체인별 기업 발표와 애널리스트 패널을 진행해요.',
+      program:['키노트: AI 투자 사이클 점검','세션 1: 반도체·인프라','세션 2: 소프트웨어·서비스','애널리스트 패널 토론'] },
+    { id:'conf-semi', cat:'conference', title:'반도체 업황 점검 컨퍼런스', company:'참여기업 6개사', date:'2026-10-21',
+      time:'14:00–17:00', place:'여의도 콘퍼런스홀', mode:'오프라인', aud:['기관','법인'], elig:'기관투자자·법인 고객',
+      cap:100, left:0, analyst:'김도윤', status:'open',
+      detail:'메모리·비메모리 업황과 소부장 기업의 대응 전략을 함께 점검했어요.',
+      program:['업황 점검','기업 발표','질의응답'] },
+    { id:'wm-tax', cat:'wm', title:'연말 절세·자산배분 WM특화세미나', company:'유진투자증권 리서치센터', date:'2026-11-20',
+      time:'16:00–17:30', place:'온라인(Zoom)', mode:'온라인', aud:['WM'], elig:'WM 고객',
+      cap:60, left:0, analyst:'최하늘', status:'open',
+      detail:'연말을 앞두고 자산배분 점검과 절세 포인트를 함께 살펴봐요.',
+      program:['연말 자산배분 점검','절세 포인트','질의응답'] },
+    { id:'wm-outlook', cat:'wm', title:'2027 시장 전망 WM특화세미나', company:'유진투자증권 리서치센터', date:'2026-12-08',
+      time:'15:00–16:30', place:'여의도 본사 세미나실', mode:'오프라인', aud:['WM','법인'], elig:'WM·법인 고객',
+      cap:50, left:31, analyst:'최하늘', status:'open',
+      detail:'내년 시장 전망과 주목할 테마를 WM 고객 눈높이로 풀어드려요.',
+      program:['2027 시장 전망','주목할 테마','질의응답'] }
+  ];
+
+  /* ---------- 유틸 ---------- */
+  var $ = function(s, r){ return (r || document).querySelector(s); };
+  var $$ = function(s, r){ return [].slice.call((r || document).querySelectorAll(s)); };
+  var DOW = ['일','월','화','수','목','금','토'];
+  var TODAY = new Date(); TODAY.setHours(0,0,0,0);
+  var catOf = function(id){ return CATS.filter(function(c){ return c.id === id; })[0]; };
+  var evOf = function(id){ return EVENTS.filter(function(e){ return e.id === id; })[0]; };
+  function d(s){ var p = s.split('-'); return new Date(+p[0], +p[1]-1, +p[2]); }
+  function pad(n){ return String(n).padStart(2, '0'); }
+  function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function hasBatchim(w){ var c = String(w).trim().slice(-1).charCodeAt(0); return c >= 0xAC00 && c <= 0xD7A3 && (c - 0xAC00) % 28 !== 0; }
+  function josa(w, a, b){ return w + (hasBatchim(w) ? a : b); }
+  function fmtShort(e){ // 11.04(수) · 11.04(수)~06(금) · 2027.02 예정
+    var s = d(e.date);
+    if (e.tbd) return s.getFullYear() + '.' + pad(s.getMonth()+1) + ' 예정';
+    var out = pad(s.getMonth()+1) + '.' + pad(s.getDate()) + '(' + DOW[s.getDay()] + ')';
+    if (e.end) { var x = d(e.end); out += '~' + pad(x.getDate()) + '(' + DOW[x.getDay()] + ')'; }
+    return out;
+  }
+  function fmtLong(e){
+    var s = d(e.date);
+    if (e.tbd) return s.getFullYear() + '.' + pad(s.getMonth()+1) + ' 예정 · 일정 추후 안내';
+    var out = s.getFullYear() + '.' + pad(s.getMonth()+1) + '.' + pad(s.getDate()) + '(' + DOW[s.getDay()] + ')';
+    if (e.end) { var x = d(e.end); out += ' ~ ' + pad(x.getMonth()+1) + '.' + pad(x.getDate()) + '(' + DOW[x.getDay()] + ')'; }
+    return out + ' ' + e.time;
+  }
+  function isPast(e){ return !e.tbd && d(e.end || e.date) < TODAY; }
+  function store(k, v){ try { if (v === undefined) return JSON.parse(localStorage.getItem(k)); localStorage.setItem(k, JSON.stringify(v)); } catch (err) { return null; } }
+
+  /* ---------- 기록·세션 ---------- */
+  var REC_KEY = 'il_events_records', USER_KEY = 'il_users', SES_KEY = 'il_session', DEMO_SES_KEY = 'il.session'; // il.session: 런처가 저장하는 시연 세션
+  var memRecords = store(REC_KEY) || [];
+  function records(){ return memRecords; }
+  function saveRecords(){ store(REC_KEY, memRecords); renderMineCount(); }
+  function addRecord(r){ r.id = 'r' + Date.now(); r.at = new Date().toISOString(); memRecords.unshift(r); saveRecords(); }
+  function appliedTo(evId){ return memRecords.some(function(r){ return r.eventId === evId && r.type === '행사 신청'; }); }
+  var session = store(DEMO_SES_KEY) || store(SES_KEY);
+  function sessionLabel(){
+    if (!session) return '';
+    if (session.name) return session.name + ' · ' + (session.org || session.branch || session.cust_type || '');
+    return session.email || '';
+  }
+
+  function status(e){
+    if (appliedTo(e.id)) return { key:'mine', label:'신청 완료' };
+    if (isPast(e)) return { key:'past', label:'종료' };
+    if (e.status === 'soon') return { key:'soon', label:'오픈 예정' };
+    if (e.status === 'invite') return { key:'invite', label:'초청' };
+    if (e.left <= 0) return { key:'full', label:'마감' };
+    if (e.left <= 10) return { key:'hot', label:'마감 임박 · ' + e.left + '석' };
+    return { key:'open', label:'신청 가능 · ' + e.left + '석' };
+  }
+  function canApply(e){ var k = status(e).key; return k === 'open' || k === 'hot'; }
+  var upcoming = function(){ return EVENTS.filter(function(e){ return !isPast(e); }); };
+
+  /* ---------- 상태 ---------- */
+  var state = { tab:'events', period:'upcoming', aud:'all', analyst:'all', onlyOpen:false, cat:'all', q:'', view:'list', month:null, picked:null };
+  (function readUrl(){
+    var p = new URLSearchParams(location.search);
+    if (['events','seminar','external'].indexOf(p.get('tab')) > -1) state.tab = p.get('tab');
+    if (p.get('cat') && catOf(p.get('cat'))) state.cat = p.get('cat');
+    if (p.get('view') === 'calendar') state.view = 'calendar';
+  })();
+  function writeUrl(){
+    var p = new URLSearchParams();
+    if (state.tab !== 'events') p.set('tab', state.tab);
+    if (state.tab === 'events' && state.cat !== 'all') p.set('cat', state.cat);
+    if (state.tab === 'events' && state.view === 'calendar') p.set('view', 'calendar');
+    var qs = p.toString();
+    try { history.replaceState(null, '', location.pathname + (qs ? '?' + qs : '') + location.hash); } catch (e) {}
+  }
+
+  var toastT;
+  function toast(msg){ var t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(function(){ t.hidden = true; }, 2600); }
+  function announce(msg){ var l = $('#live'); l.textContent = ''; setTimeout(function(){ l.textContent = msg; }, 30); }
+
+  /* ---------- 탭 ---------- */
+  function setTab(tab, focus){
+    state.tab = tab;
+    $$('.tabs [role=tab]').forEach(function(b){
+      var on = b.dataset.tab === tab;
+      b.setAttribute('aria-selected', on); b.tabIndex = on ? 0 : -1;
+      if (on && focus) b.focus();
+    });
+    ['events','seminar','external'].forEach(function(t){ $('#panel-' + t).hidden = t !== tab; });
+    orbit.visible(tab === 'events');
+    writeUrl();
+  }
+  $$('.tabs [role=tab]').forEach(function(b, i, all){
+    b.addEventListener('click', function(){ setTab(b.dataset.tab); });
+    b.addEventListener('keydown', function(e){
+      var n = null;
+      if (e.key === 'ArrowRight') n = all[(i+1) % all.length];
+      if (e.key === 'ArrowLeft') n = all[(i-1+all.length) % all.length];
+      if (n) { e.preventDefault(); setTab(n.dataset.tab, true); }
+    });
+  });
+  $$('[data-goto]').forEach(function(b){
+    b.addEventListener('click', function(){
+      setTab(b.dataset.goto);
+      (b.dataset.goto === 'external' ? $('#xFormArea') : $('#panel-seminar')).scrollIntoView({ block:'start' });
+    });
+  });
+  $$('[data-preview]').forEach(function(a){
+    a.addEventListener('click', function(e){ e.preventDefault(); toast(josa(a.dataset.preview, '은', '는') + ' 정식 오픈 시 제공돼요. 지금은 미리보기 화면이에요.'); });
+  });
+
+  /* ---------- 히어로 숫자 ---------- */
+  function renderHero(){
+    var up = upcoming(), avail = up.filter(canApply);
+    var next = up.filter(function(e){ return !e.tbd; }).sort(function(a, b){ return d(a.date) - d(b.date); })[0];
+    $('#heroTitle').innerHTML = '지금 신청할 수 있는 행사 <b class="num">' + avail.length + '건</b>';
+    $('#heroNext').innerHTML = next ? '다음 행사 · <b>' + esc(next.title) + '</b> ' + esc(fmtShort(next)) : '예정된 행사가 없어요';
+  }
+
+  /* ---------- 책 ---------- */
+  var orbit = (function(){
+    var stage = $('#stage'), books = [], base = 0, raf = 0, last = 0, running = false, shown = true;
+    var paused = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+    var SPEED = 0.00018;
+
+    BOOK_ORDER.forEach(function(id, i){
+      var c = catOf(id);
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'book'; b.dataset.cat = id;
+      b.style.setProperty('--bc', c.color);
+      b.setAttribute('aria-pressed', 'false');
+      b.innerHTML = '<span class="body"><span class="pages" aria-hidden="true"></span>' +
+        '<span class="cover"><b>' + esc(c.book) + '</b><small class="bc-count"></small></span></span>';
+      stage.appendChild(b);
+      books.push(b);
+      b.addEventListener('click', function(){ pick(state.picked === id ? null : id); });
+      b.addEventListener('keydown', function(e){
+        var n = null;
+        if (e.key === 'ArrowRight') n = books[(i+1) % books.length];
+        if (e.key === 'ArrowLeft') n = books[(i-1+books.length) % books.length];
+        if (n) { e.preventDefault(); n.focus(); }
+        if (e.key === 'Escape' && state.picked) { e.preventDefault(); pick(null); }
+      });
+    });
+
+    function size(){ var r = stage.getBoundingClientRect(); return { rx: Math.max(100, r.width * 0.36), ry: Math.max(30, r.height * 0.15) }; }
+    function place(){
+      var s = size(), n = books.length;
+      books.forEach(function(b, i){
+        var x, y, sc, z, open = b.dataset.cat === state.picked;
+        if (open) { x = 0; y = 6; sc = 1.35; z = 300; b.style.opacity = '1'; }
+        else {
+          var a = base + i * (Math.PI * 2 / n), depth = Math.cos(a);
+          x = Math.sin(a) * s.rx; y = depth * s.ry; sc = 0.74 + 0.26 * (depth + 1) / 2; z = Math.round(100 + depth * 90);
+          b.style.opacity = state.picked ? '' : String(0.6 + 0.4 * (depth + 1) / 2);
+        }
+        b.style.transform = 'translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px) scale(' + sc.toFixed(3) + ')';
+        b.style.zIndex = z;
+      });
+    }
+    function tick(t){
+      if (!last) last = t;
+      var dt = Math.min(64, t - last); last = t;
+      base += dt * SPEED; place();
+      raf = requestAnimationFrame(tick);
+    }
+    function sync(){
+      var should = shown && !paused && !state.picked;
+      if (should && !running) { running = true; last = 0; raf = requestAnimationFrame(tick); }
+      if (!should && running) { running = false; cancelAnimationFrame(raf); }
+      var ctrl = $('#orbitCtrl');
+      ctrl.textContent = paused ? '재생' : '멈추기';
+      ctrl.setAttribute('aria-pressed', String(paused));
+    }
+    $('#orbitCtrl').addEventListener('click', function(){ paused = !paused; sync(); });
+    addEventListener('resize', place);
+
+    function fillInside(){
+      books.forEach(function(b){
+        var id = b.dataset.cat, up = upcoming().filter(function(e){ return e.cat === id; });
+        var av = up.filter(canApply);
+        var next = up.slice().sort(function(a, c){ return d(a.date) - d(c.date); })[0];
+        b.querySelector('.bc-count').textContent = '예정 ' + up.length + '건';
+        b.querySelector('.pages').innerHTML =
+          '<b>' + esc(catOf(id).book) + '</b>' +
+          '<span class="kv"><span>예정</span><span>' + up.length + '건</span></span>' +
+          '<span class="kv"><span>신청 가능</span><span>' + av.length + '건</span></span>' +
+          '<span class="nx">' + (next ? '다음 ' + esc(fmtShort(next)) + '<br>' + esc(next.title) : '예정된 행사가 없어요') + '</span>';
+        b.setAttribute('aria-label', catOf(id).book + ' 개요 보기, 예정 ' + up.length + '건, 신청 가능 ' + av.length + '건');
+      });
+    }
+
+    function applyPick(id, animate){
+      state.picked = id;
+      books.forEach(function(b){
+        var on = b.dataset.cat === id;
+        if (animate) b.classList.add('anim');
+        b.classList.toggle('open', on);
+        b.setAttribute('aria-pressed', String(on));
+      });
+      stage.classList.toggle('picked', !!id);
+      place();
+      if (animate) setTimeout(function(){ books.forEach(function(b){ b.classList.remove('anim'); }); }, 600);
+      sync();
+    }
+    function pick(id){ applyPick(id, true); setCat(id || 'all', true); renderOverview(); }
+
+    return {
+      init: function(){ fillInside(); place(); sync(); },
+      refresh: fillInside,
+      pick: pick,
+      visible: function(v){ shown = v; sync(); if (v) place(); },
+      syncFromFilter: function(cat){ var id = cat === 'all' ? null : cat; if (state.picked !== id) applyPick(id, false); }
+    };
+  })();
+
+  function renderOverview(){
+    var o = $('#overview');
+    if (!state.picked) { o.className = 'overview'; o.innerHTML = ''; return; }
+    var c = catOf(state.picked);
+    var up = upcoming().filter(function(e){ return e.cat === c.id; }), av = up.filter(canApply);
+    var next = up.filter(function(e){ return !e.tbd; }).sort(function(a, b){ return d(a.date) - d(b.date); })[0];
+    o.style.setProperty('--oc', c.color);
+    o.className = 'overview on';
+    o.innerHTML = '<div class="t"><h3>' + esc(c.book) + '</h3><p>' + esc(c.desc) + '</p>' +
+      (next ? '<p>다음 행사 · <b>' + esc(next.title) + '</b> ' + esc(fmtShort(next)) + '</p>' : '') + '</div>' +
+      '<div class="stats num"><span>예정 <b>' + up.length + '</b>건</span><span>신청 가능 <b>' + av.length + '</b>건</span></div>' +
+      '<div class="acts"><button class="link" type="button" id="oClear">전체 보기</button><button class="btn sm" type="button" id="oGo">일정 보기 ↓</button></div>';
+    $('#oClear').addEventListener('click', function(){ orbit.pick(null); });
+    $('#oGo').addEventListener('click', function(){ $('#schedule').scrollIntoView({ block:'start' }); });
+  }
+
+  /* ---------- 필터 ---------- */
+  (function buildControls(){
+    var aud = $('#aud'), an = $('#analyst');
+    aud.innerHTML = '<option value="all">대상 전체</option>' + AUDS.map(function(a){ return '<option value="' + a + '">' + a + '</option>'; }).join('');
+    an.innerHTML = '<option value="all">담당 전체</option>' + ANALYSTS.map(function(a){ return '<option value="' + a.name + '">' + a.name + ' · ' + a.sector + '</option>'; }).join('');
+    aud.addEventListener('change', function(){ state.aud = aud.value; render(); });
+    an.addEventListener('change', function(){ state.analyst = an.value; render(); });
+    $('#onlyOpen').addEventListener('change', function(e){ state.onlyOpen = e.target.checked; render(); });
+    $('#q').addEventListener('input', function(e){ state.q = e.target.value.trim(); render(); });
+    $$('[data-period]').forEach(function(b){ b.addEventListener('click', function(){
+      state.period = b.dataset.period;
+      $$('[data-period]').forEach(function(x){ x.setAttribute('aria-pressed', String(x === b)); });
+      state.month = null; render();
+    }); });
+    $$('[data-view]').forEach(function(b){ b.addEventListener('click', function(){
+      state.view = b.dataset.view;
+      $$('[data-view]').forEach(function(x){ x.setAttribute('aria-pressed', String(x === b)); });
+      writeUrl(); render();
+    }); });
+    var cats = $('#cats');
+    var items = [{ id:'all', label:'전체' }].concat(FILTER_ORDER.map(function(id){ var c = catOf(id); return { id:id, label:c.filter, color:c.color }; }));
+    cats.innerHTML = items.map(function(it){
+      return '<button type="button" data-cat="' + it.id + '" aria-pressed="false"' + (it.color ? ' style="--dot:' + it.color + '"' : '') + '>' + (it.color ? '<i aria-hidden="true"></i>' : '') + esc(it.label) + '</button>';
+    }).join('');
+    $$('button', cats).forEach(function(b){ b.addEventListener('click', function(){ setCat(b.dataset.cat, true); orbit.syncFromFilter(b.dataset.cat); renderOverview(); }); });
+  })();
+
+  function setCat(cat, speak){
+    state.cat = cat; state.month = null;
+    $$('#cats button').forEach(function(b){ b.setAttribute('aria-pressed', String(b.dataset.cat === cat)); });
+    writeUrl();
+    var n = render();
+    if (speak) announce(cat === 'all' ? '전체 일정을 표시해요.' : catOf(cat).filter + ' 일정 ' + n + '건으로 목록을 정리했어요.');
+  }
+
+  function filtered(ignorePeriod){
+    var q = state.q.toLowerCase();
+    return EVENTS.filter(function(e){
+      if (!ignorePeriod) { if (state.period === 'past' ? !isPast(e) : isPast(e)) return false; }
+      if (state.cat !== 'all' && e.cat !== state.cat) return false;
+      if (state.aud !== 'all' && e.aud.indexOf(state.aud) < 0) return false;
+      if (state.analyst !== 'all' && e.analyst !== state.analyst) return false;
+      if (state.onlyOpen && !canApply(e)) return false;
+      if (q) {
+        var hay = [e.title, e.company, e.detail, catOf(e.cat).filter, catOf(e.cat).book, e.program.join(' ')].join(' ').toLowerCase();
+        if (hay.indexOf(q) < 0) return false;
+      }
+      return true;
+    }).sort(function(a, b){ return state.period === 'past' ? d(b.date) - d(a.date) : d(a.date) - d(b.date); });
+  }
+
+  /* ---------- 목록 ---------- */
+  function badgeHtml(e){
+    var s = status(e);
+    return '<span class="bdg ' + s.key + '">' + s.label + '</span>' + e.aud.map(function(a){ return '<span class="bdg aud">' + a + '</span>'; }).join('');
+  }
+  function actionHtml(e){
+    var s = status(e).key, main = '';
+    if (s === 'open' || s === 'hot') main = '<button class="btn sm" type="button" data-apply="' + e.id + '">신청하기</button>';
+    else if (s === 'invite') main = '<button class="btn sm" type="button" data-ask="' + e.id + '">참여 문의</button>';
+    else if (s === 'mine') main = '<button class="btn sm" type="button" disabled>신청 완료</button>';
+    else if (s === 'full') main = '<button class="btn sm soft" type="button" data-ask="' + e.id + '">대기 문의</button>';
+    else if (s === 'soon') main = '<button class="btn sm" type="button" disabled>오픈 예정</button>';
+    return main + '<button class="link" type="button" data-detail="' + e.id + '">상세</button>';
+  }
+  function renderList(list){
+    var box = $('#listView');
+    if (!list.length) { box.innerHTML = '<div class="empty">조건에 맞는 일정이 없어요.</div>'; return; }
+    var groups = {}, order = [];
+    list.forEach(function(e){
+      var t = d(e.date), k = t.getFullYear() + '년 ' + (t.getMonth()+1) + '월';
+      if (!groups[k]) { groups[k] = []; order.push(k); }
+      groups[k].push(e);
+    });
+    box.innerHTML = order.map(function(k){
+      return '<div class="month"><h3>' + k + '</h3>' + groups[k].map(function(e){
+        var t = d(e.date), c = catOf(e.cat);
+        return '<article class="ev' + (isPast(e) ? ' past' : '') + '" style="--cc:' + c.color + '">' +
+          '<div class="d num">' + (e.tbd ? '<b>–</b><span>미정</span>' : '<b>' + pad(t.getMonth()+1) + '.' + pad(t.getDate()) + '</b><span>' + DOW[t.getDay()] + '</span>') + '</div>' +
+          '<div><div class="cat">' + esc(c.filter) + '</div><h4>' + esc(e.title) + '</h4>' +
+          '<div class="meta">' + esc(e.tbd ? '일정 추후 안내' : (e.end ? fmtShort(e) + ' ' : '') + e.time) + ' · ' + esc(e.place) + '</div>' +
+          '<div class="badges">' + badgeHtml(e) + '</div></div>' +
+          '<div class="acts">' + actionHtml(e) + '</div></article>';
+      }).join('') + '</div>';
+    }).join('');
+  }
+
+  /* ---------- 캘린더 ---------- */
+  function renderCal(list){
+    var box = $('#calView');
+    if (!state.month) {
+      var first = list.filter(function(e){ return !e.tbd; })[0];
+      var m = first ? d(first.date) : new Date(TODAY);
+      state.month = new Date(m.getFullYear(), m.getMonth(), 1);
+    }
+    var y = state.month.getFullYear(), mo = state.month.getMonth();
+    var start = new Date(y, mo, 1 - new Date(y, mo, 1).getDay());
+    var inMonth = list.filter(function(e){
+      if (e.tbd) return false;
+      return d(e.date) <= new Date(y, mo + 1, 0) && d(e.end || e.date) >= new Date(y, mo, 1);
+    });
+    var cells = '';
+    for (var i = 0; i < 42; i++) {
+      var day = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);
+      if (i >= 35 && day.getMonth() !== mo) break;
+      var evs = inMonth.filter(function(e){ return d(e.date) <= day && d(e.end || e.date) >= day; });
+      cells += '<div class="day' + (day.getMonth() !== mo ? ' out' : '') + (+day === +TODAY ? ' today' : '') + '"><span class="n">' + day.getDate() + '</span>' +
+        evs.map(function(e){ return '<button type="button" class="chipev' + (isPast(e) ? ' past' : '') + '" style="--cc:' + catOf(e.cat).color + '" data-detail="' + e.id + '" title="' + esc(e.title) + '">' + esc(e.title) + '</button>'; }).join('') + '</div>';
+    }
+    box.innerHTML = '<div class="cal-head"><button type="button" id="mPrev" aria-label="이전 달">‹</button><b class="num">' + y + '년 ' + (mo+1) + '월</b><button type="button" id="mNext" aria-label="다음 달">›</button></div>' +
+      (inMonth.length ? '' : '<div class="empty" style="margin:0 0 12px">이 달에는 맞는 일정이 없어요. ‹ › 로 다른 달을 확인해주세요.</div>') +
+      '<div class="cal-scroll"><div class="cal">' + DOW.map(function(w){ return '<div class="dow">' + w + '</div>'; }).join('') + cells + '</div></div>';
+    $('#mPrev').addEventListener('click', function(){ state.month = new Date(y, mo - 1, 1); render(); $('#mPrev').focus(); });
+    $('#mNext').addEventListener('click', function(){ state.month = new Date(y, mo + 1, 1); render(); $('#mNext').focus(); });
+  }
+
+  function render(){
+    var list = filtered(state.view === 'calendar');
+    $('#listView').hidden = state.view !== 'list';
+    $('#calView').hidden = state.view !== 'calendar';
+    if (state.view === 'list') renderList(list); else renderCal(list);
+    return list.length;
+  }
+
+  document.addEventListener('click', function(e){
+    var t = e.target.closest('[data-detail],[data-apply],[data-ask]');
+    if (!t) return;
+    if (t.dataset.detail) openDetail(evOf(t.dataset.detail));
+    else if (t.dataset.apply) openApply(evOf(t.dataset.apply));
+    else if (t.dataset.ask) openAsk(evOf(t.dataset.ask));
+  });
+
+  /* ---------- 모달 ---------- */
+  var lastFocus = null;
+  function openModal(html){
+    lastFocus = document.activeElement;
+    $('#sheet').innerHTML = '<button class="x" type="button" aria-label="닫기" data-close>×</button>' + html;
+    $('#modal').hidden = false;
+    document.body.style.overflow = 'hidden';
+    ($('#sheet').querySelector('input,select,textarea,button:not(.x)') || $('#sheet .x')).focus();
+  }
+  function closeModal(){
+    $('#modal').hidden = true; document.body.style.overflow = '';
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+  $('#modal').addEventListener('click', function(e){ if (e.target.id === 'modal' || e.target.closest('[data-close]')) closeModal(); });
+  document.addEventListener('keydown', function(e){
+    if ($('#modal').hidden) return;
+    if (e.key === 'Escape') { e.preventDefault(); closeModal(); }
+    if (e.key === 'Tab') {
+      var f = $$('button,input,select,textarea,a[href]', $('#sheet')).filter(function(x){ return !x.disabled && x.offsetParent !== null; });
+      if (!f.length) return;
+      if (e.shiftKey && document.activeElement === f[0]) { e.preventDefault(); f[f.length-1].focus(); }
+      else if (!e.shiftKey && document.activeElement === f[f.length-1]) { e.preventDefault(); f[0].focus(); }
+    }
+  });
+
+  var YURI = '<div class="note"><b>일정은 이메일로 안내해 드려요</b><p>유리가 담당 애널리스트에게 요청을 전달하고, 조율 결과와 확정 여부를 이메일로 보내 드려요. 요청만으로 일정이 확정되지는 않아요.</p></div>';
+  var DEMO_CHK = '<label class="demo"><input type="checkbox" data-demo> <span>실제 접수·전송이 없는 시연 화면이에요. 테스트 값으로 입력해주세요.</span></label>';
+  function loginHint(){ return session ? '' : '<p class="hintline">로그인하면 이메일이 자동으로 채워지고 신청 내역을 계정 기준으로 볼 수 있어요.</p>'; }
+  function fld(id, label, type, req, extra){
+    extra = extra || '';
+    var input = type === 'textarea' ? '<textarea id="' + id + '" name="' + label + '"' + (req ? ' data-req' : '') + extra + '></textarea>'
+      : '<input id="' + id + '" name="' + label + '" type="' + type + '"' + (req ? ' data-req' : '') + (type === 'email' ? ' data-email' : '') + extra + '>';
+    return '<div class="fld"><label for="' + id + '">' + label + (req ? '<span class="req">*</span>' : '') + '</label>' + input + '</div>';
+  }
+  function contactFields(p){
+    var nm = session && session.name ? ' value="' + esc(session.name) + '"' : '';
+    var og = session && (session.org || session.branch) ? ' value="' + esc(session.org || session.branch) + '"' : '';
+    var em = session && session.email ? ' value="' + esc(session.email) + '"' : '';
+    return '<div class="grid2">' + fld(p + 'Name', '이름', 'text', true, ' autocomplete="name"' + nm) + fld(p + 'Org', '소속', 'text', true, ' autocomplete="organization"' + og) + '</div>' +
+      '<div class="grid2">' + fld(p + 'Email', '이메일', 'email', true, ' autocomplete="email"' + em) + fld(p + 'Tel', '연락처', 'tel', false, ' autocomplete="tel"') + '</div>';
+  }
+
+  function validate(form){
+    var ok = true, firstBad = null;
+    $$('.err,.errline', form).forEach(function(x){ x.remove(); });
+    $$('.fld.bad', form).forEach(function(x){ x.classList.remove('bad'); });
+    $$('[data-req]', form).forEach(function(el){
+      if (el.closest('[hidden]')) return;
+      var v = (el.value || '').trim(), msg = '';
+      if (!v) msg = josa(el.name, '을', '를') + ' 입력해주세요.';
+      else if (el.dataset.email !== undefined && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) msg = '이메일 형식을 확인해주세요.';
+      if (msg) { ok = false; var f = el.closest('.fld'); f.classList.add('bad'); f.insertAdjacentHTML('beforeend', '<span class="err">' + msg + '</span>'); firstBad = firstBad || el; }
+    });
+    $$('[data-req-check]', form).forEach(function(el){
+      if (!el.checked) { ok = false; el.closest('label').insertAdjacentHTML('afterend', '<p class="errline">자격 조건 확인에 체크해주세요.</p>'); firstBad = firstBad || el; }
+    });
+    var demo = $('[data-demo]', form);
+    if (demo && !demo.checked) { ok = false; demo.closest('label').insertAdjacentHTML('afterend', '<p class="errline">시연 확인에 체크해주세요.</p>'); firstBad = firstBad || demo; }
+    if (firstBad) firstBad.focus();
+    return ok;
+  }
+  function collect(form){
+    return $$('input,select,textarea', form).filter(function(el){
+      return el.name && el.type !== 'checkbox' && !el.closest('[hidden]') && String(el.value).trim();
+    }).map(function(el){ return [el.name, String(el.value).trim()]; });
+  }
+
+  function confirmStep(opt){
+    openModal('<h3 id="mTitle">' + esc(opt.title) + ' · 입력 내용 확인</h3>' +
+      '<p class="sub">입력 내용은 이 브라우저의 시연 기록으로만 남고 실제로 전송되지 않아요.</p>' +
+      '<dl class="dl">' + opt.fields.map(function(f){ return '<dt>' + esc(f[0]) + '</dt><dd>' + esc(f[1]) + '</dd>'; }).join('') + '</dl>' +
+      (opt.yuri ? YURI : '') +
+      '<div class="foot"><button class="btn ghost" type="button" id="cBack">수정하기</button><button class="btn" type="button" id="cOk">기록하기</button></div>');
+    $('#cBack').addEventListener('click', function(){ if (opt.back) opt.back(); else closeModal(); });
+    $('#cOk').addEventListener('click', function(){
+      addRecord({ type:opt.type, title:opt.recTitle, eventId:opt.eventId || null, fields:opt.fields, email:session ? session.email : null });
+      if (opt.after) opt.after();
+      render(); orbit.refresh(); renderHero(); renderOverview();
+      toast(josa(opt.type, '이', '가') + ' 기록됐어요.');
+      openModal('<div class="done-ic" aria-hidden="true">✓</div><h3 id="mTitle">' + esc(josa(opt.type, '이', '가')) + ' 기록됐어요</h3>' +
+        '<p class="sub">‘내 신청·문의’와 일정 목록의 신청 상태에 바로 반영했어요. 실제 접수·이메일 발송은 일어나지 않았어요.</p>' +
+        (opt.yuri ? YURI : '') +
+        '<div class="foot"><button class="btn ghost" type="button" data-close>닫기</button><button class="btn" type="button" id="dMine">내 신청·문의 보기</button></div>');
+      $('#dMine').addEventListener('click', openMine);
+    });
+  }
+
+  function openDetail(e){
+    var c = catOf(e.cat), s = status(e).key, btn = '';
+    if (s === 'open' || s === 'hot') btn = '<button class="btn" type="button" data-apply="' + e.id + '">신청하기</button>';
+    else if (s === 'invite' || s === 'full') btn = '<button class="btn" type="button" data-ask="' + e.id + '">' + (s === 'invite' ? '참여 문의' : '대기 문의') + '</button>';
+    openModal('<div class="eyebrow" style="color:' + c.color + '">' + esc(c.filter) + '</div><h3 id="mTitle">' + esc(e.title) + '</h3>' +
+      '<p class="sub">' + esc(e.detail) + '</p>' +
+      '<div class="badges">' + badgeHtml(e) + '</div>' +
+      '<dl class="dl"><dt>일시</dt><dd>' + esc(fmtLong(e)) + '</dd><dt>장소</dt><dd>' + esc(e.place) + ' · ' + esc(e.mode) + '</dd>' +
+      '<dt>참여 자격</dt><dd>' + esc(e.elig) + '</dd><dt>기업</dt><dd>' + esc(e.company) + '</dd><dt>담당</dt><dd>' + esc(e.analyst) + '</dd>' +
+      (e.cap ? '<dt>정원</dt><dd>' + e.cap + '명' + (isPast(e) ? '' : ' · 잔여 ' + Math.max(0, e.left) + '석') + '</dd>' : '') +
+      (e.program.length ? '<dt>프로그램</dt><dd><ul class="prog">' + e.program.map(function(p){ return '<li>' + esc(p) + '</li>'; }).join('') + '</ul></dd>' : '') + '</dl>' +
+      '<div class="foot"><button class="btn ghost" type="button" data-close>닫기</button>' + btn + '</div>');
+  }
+
+  function openApply(e){
+    if (!canApply(e)) return openDetail(e);
+    openModal('<div class="eyebrow">' + esc(catOf(e.cat).filter) + '</div><h3 id="mTitle">' + esc(e.title) + ' 신청</h3>' +
+      '<p class="sub">' + esc(fmtLong(e)) + ' · ' + esc(e.place) + '</p>' + loginHint() +
+      '<form id="mForm" novalidate>' + contactFields('a') +
+      '<div class="fld" style="margin-top:12px"><label for="aQ">미리 묻고 싶은 내용</label><textarea id="aQ" name="사전 질문" placeholder="행사에서 확인하고 싶은 내용을 적어주세요."></textarea></div>' +
+      '<label class="demo"><input type="checkbox" data-req-check> <span>' + esc(e.elig) + ' 대상이며 위 자격 조건에 해당해요.</span></label>' +
+      DEMO_CHK + '<button class="btn submit" type="submit">입력 내용 확인</button></form>');
+    $('#mForm').addEventListener('submit', function(ev){
+      ev.preventDefault();
+      if (!validate(this)) return;
+      var fields = [['행사', e.title], ['일시', fmtLong(e)]].concat(collect(this));
+      confirmStep({ title:'행사 신청', type:'행사 신청', recTitle:e.title, eventId:e.id, fields:fields, back:function(){ openApply(e); } });
+    });
+  }
+
+  function openAsk(e, kind){
+    kind = kind || (e && e.cat === 'ndr' ? 'ndr' : 'general');
+    var type = kind === 'ndr' ? '참여 문의' : kind === 'earnings' ? '실적발표 문의' : '일반 문의';
+    var desc = kind === 'ndr' ? 'NDR은 초청으로 참여하는 행사예요. 관심 섹터를 남기면 담당 애널리스트가 미팅 가능 시간을 안내해요.'
+      : kind === 'earnings' ? '관심 기업과 확인하고 싶은 분기를 남겨주세요.' : '희망 주제와 담당자를 골라 문의해주세요.';
+    var sectorOpts = SECTORS.map(function(s){ return '<option>' + s + '</option>'; }).join('');
+    var anOpts = '<option value="">담당자 선택</option>' + ANALYSTS.map(function(a){ return '<option>' + a.name + ' · ' + a.sector + '</option>'; }).join('');
+    var body = kind === 'ndr'
+      ? '<div class="fld"><label for="kSector">관심 섹터<span class="req">*</span></label><select id="kSector" name="관심 섹터" data-req>' + sectorOpts + '</select></div>'
+      : kind === 'earnings'
+        ? '<div class="grid2">' + fld('kCo', '관심 기업', 'text', true) + fld('kQ', '확인하고 싶은 분기', 'text', false, ' placeholder="예: 2026년 3분기"') + '</div>' +
+          '<div class="fld" style="margin-top:12px"><label for="kAn">담당자</label><select id="kAn" name="담당자">' + anOpts + '</select></div>'
+        : '<div class="fld"><label for="kTopic">희망 주제<span class="req">*</span></label><input id="kTopic" name="희망 주제" data-req value="' + (e ? esc(e.title) : '') + '"></div>' +
+          '<div class="fld"><label for="kAn">담당자</label><select id="kAn" name="담당자">' + anOpts + '</select></div>';
+    openModal('<h3 id="mTitle">' + (e ? esc(e.title) + ' · ' : '') + type + '</h3><p class="sub">' + desc + '</p>' +
+      '<p class="hintline">공개 일정에 올리지 않는 개별 문의예요 · 시연에서는 서버로 전송하지 않아요.</p>' + loginHint() +
+      '<form id="mForm" novalidate>' + body + contactFields('k') +
+      '<div class="fld" style="margin-top:12px"><label for="kMsg">문의 내용</label><textarea id="kMsg" name="문의 내용" placeholder="궁금한 내용을 적어주세요."></textarea></div>' +
+      (kind !== 'ndr' ? YURI : '') + DEMO_CHK + '<button class="btn submit" type="submit">입력 내용 확인</button></form>');
+    $('#mForm').addEventListener('submit', function(ev){
+      ev.preventDefault();
+      if (!validate(this)) return;
+      var fields = (e ? [['행사', e.title]] : []).concat(collect(this));
+      confirmStep({ title:type, type:type, recTitle:e ? e.title : (kind === 'earnings' ? '실적발표 문의' : '개별 문의'), eventId:e ? e.id : null,
+        fields:fields, yuri:kind !== 'ndr', back:function(){ openAsk(e, kind); } });
+    });
+  }
+  $('#earningsBtn').addEventListener('click', function(){ openAsk(null, 'earnings'); });
+
+  /* ---------- 세미나 요청 폼 ---------- */
+  (function seminar(){
+    var form = $('#seminarForm');
+    $('#sSector').innerHTML = '<option value="">섹터 선택</option>' + SECTORS.map(function(s){ return '<option>' + s + '</option>'; }).join('');
+    $('#sAnalyst').innerHTML = '<option value="">애널리스트 선택</option>' + ANALYSTS.map(function(a){ return '<option>' + a.name + ' · ' + a.sector + '</option>'; }).join('');
+    function basis(b){
+      $$('[data-basis]', form).forEach(function(x){ x.setAttribute('aria-pressed', String(x.dataset.basis === b)); });
+      $('#fSectorWrap').hidden = b !== 'sector'; $('#fAnalystWrap').hidden = b !== 'analyst';
+      if (b === 'sector') { $('#sSector').setAttribute('data-req', ''); $('#sAnalyst').removeAttribute('data-req'); }
+      else { $('#sAnalyst').setAttribute('data-req', ''); $('#sSector').removeAttribute('data-req'); }
+    }
+    $$('[data-basis]', form).forEach(function(x){ x.addEventListener('click', function(){ basis(x.dataset.basis); }); });
+    basis('sector');
+    form.addEventListener('submit', function(ev){
+      ev.preventDefault();
+      if (!validate(form)) return;
+      var b = $('[data-basis][aria-pressed=true]', form).textContent;
+      confirmStep({ title:'세미나 요청', type:'세미나 요청', recTitle:(b === '섹터로 선택' ? $('#sSector').value : $('#sAnalyst').value) + ' 세미나', fields:[['요청 기준', b]].concat(collect(form)), yuri:true,
+        after:function(){ form.reset(); basis('sector'); fillSession(); } });
+    });
+  })();
+
+  /* ---------- 외부 행사 폼 ---------- */
+  (function external(){
+    var form = $('#extForm'), mode = 'inquiry';
+    function setMode(m){
+      mode = m;
+      $$('[data-xmode]', form).forEach(function(x){ x.setAttribute('aria-pressed', String(x.dataset.xmode === m)); });
+      var p = m === 'propose';
+      $('#xTitle').textContent = p ? '행사 제안' : '행사 주선 문의';
+      $('#xTopicLbl').innerHTML = (p ? '제안하는 주제' : '관심 행사 또는 주제') + '<span class="req">*</span>';
+      $('#xTopic').name = p ? '제안하는 주제' : '관심 행사 또는 주제';
+      $('#xTopic').placeholder = p ? '예: 반도체 기업의 현장 이야기를 듣고 싶어요' : '';
+      $('#xNeedLbl').textContent = p ? '제안 배경' : '필요한 내용';
+      $('#xNeed').name = p ? '제안 배경' : '필요한 내용';
+      $('#xSubmit').textContent = p ? '제안 내용 확인' : '입력 내용 확인';
+    }
+    $$('[data-xmode]', form).forEach(function(x){ x.addEventListener('click', function(){ setMode(x.dataset.xmode); }); });
+    $$('[data-xtype]').forEach(function(b){ b.addEventListener('click', function(){
+      setMode('inquiry'); $('#xType').value = b.dataset.xtype;
+      $('#xFormArea').scrollIntoView({ block:'start' }); $('#xTopic').focus({ preventScroll:true });
+    }); });
+    $('#proposeBtn').addEventListener('click', function(){
+      setMode('propose'); $('#xFormArea').scrollIntoView({ block:'start' }); $('#xType').focus({ preventScroll:true });
+    });
+    form.addEventListener('submit', function(ev){
+      ev.preventDefault();
+      if (!validate(form)) return;
+      var type = mode === 'propose' ? '외부 행사 제안' : '외부 행사 주선 문의';
+      confirmStep({ title:type, type:type, recTitle:$('#xTopic').value.trim(), fields:collect(form), after:function(){ form.reset(); setMode('inquiry'); fillSession(); } });
+    });
+  })();
+
+  /* ---------- 내 신청·문의 ---------- */
+  function renderMineCount(){ $('#mineCount').textContent = records().length; }
+  function openMine(){
+    var list = records();
+    openModal('<h3 id="mTitle">내 신청·문의</h3><p class="sub">이 브라우저에서 진행한 시연 기록이에요.</p>' +
+      (session ? '' : '<p class="hintline">로그인하면 신청 폼의 이메일이 자동으로 채워져요.</p>') +
+      (list.length ? list.map(function(r){
+        var at = new Date(r.at);
+        return '<div class="rec"><div class="top"><span class="bdg mine">' + esc(r.type) + '</span><button class="link" type="button" data-rm="' + r.id + '">기록 삭제</button></div>' +
+          '<b>' + esc(r.title) + '</b><br><small class="num">' + at.getFullYear() + '.' + pad(at.getMonth()+1) + '.' + pad(at.getDate()) + ' ' + pad(at.getHours()) + ':' + pad(at.getMinutes()) + ' 기록</small></div>';
+      }).join('') : '<div class="empty">아직 신청·문의 기록이 없어요.</div>') +
+      '<div class="foot"><button class="btn ghost" type="button" data-close>닫기</button></div>');
+    $$('[data-rm]', $('#sheet')).forEach(function(b){ b.addEventListener('click', function(){
+      memRecords = memRecords.filter(function(r){ return r.id !== b.dataset.rm; });
+      saveRecords(); render(); orbit.refresh(); renderHero(); renderOverview(); openMine();
+    }); });
+  }
+  $('#openMine').addEventListener('click', openMine);
+
+  /* ---------- 계정 (시연용 · 이 브라우저에만 저장) ---------- */
+  function fillSession(){
+    if (!session) return;
+    [['#sEmail', session.email], ['#xEmail', session.email], ['#sName', session.name], ['#xName', session.name],
+     ['#sOrg', session.org || session.branch], ['#xOrg', session.org || session.branch]].forEach(function(p){
+      var el = $(p[0]); if (el && p[1] && !el.value) el.value = p[1];
+    });
+  }
+  function renderAcct(){
+    var a = $('#acct');
+    if (session) {
+      a.innerHTML = (session.seg ? '<span class="seg-chip">' + esc(session.seg) + '</span>' : '') +
+        '<span class="who">' + esc(sessionLabel()) + '</span><button class="btn ghost sm" type="button" id="logout">로그아웃</button>';
+      $('#logout').addEventListener('click', function(){ session = null; store(SES_KEY, null); store(DEMO_SES_KEY, null); renderAcct(); toast('로그아웃됐어요.'); });
+    } else {
+      a.innerHTML = '<button class="btn sm" type="button" id="login">로그인</button>';
+      $('#login').addEventListener('click', function(){ openAuth('login'); });
+    }
+  }
+  function hash(s){
+    try {
+      if (window.crypto && crypto.subtle && window.TextEncoder) {
+        return crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)).then(function(buf){
+          return [].map.call(new Uint8Array(buf), function(b){ return b.toString(16).padStart(2, '0'); }).join('');
+        });
+      }
+    } catch (e) {}
+    return Promise.resolve('p' + s.length + s.split('').reverse().join(''));
+  }
+  function openAuth(mode){
+    openModal('<h3 id="mTitle">' + (mode === 'login' ? '로그인' : '가입') + '</h3>' +
+      '<div class="authtabs" role="tablist"><button type="button" role="tab" data-am="login" aria-selected="' + (mode === 'login') + '">로그인</button><button type="button" role="tab" data-am="signup" aria-selected="' + (mode === 'signup') + '">가입</button></div>' +
+      (mode === 'signup' ? '<p class="hintline">가입 시 정보 제공·투자 위험 고지에 동의하게 돼요. 본 화면은 시연용 프로토타입이에요.</p>' : '') +
+      '<form id="authForm" novalidate>' +
+      '<div class="fld"><label for="uEmail">이메일</label><input id="uEmail" type="email" autocomplete="email"></div>' +
+      '<div class="fld"><label for="uPw">비밀번호</label><input id="uPw" type="password" autocomplete="' + (mode === 'login' ? 'current-password' : 'new-password') + '"></div>' +
+      '<p class="msg" id="authMsg" role="alert"></p>' +
+      '<button class="btn submit" type="submit">' + (mode === 'login' ? '로그인' : '가입하기') + '</button></form>');
+    $$('[data-am]', $('#sheet')).forEach(function(b){ b.addEventListener('click', function(){ openAuth(b.dataset.am); }); });
+    $('#authForm').addEventListener('submit', function(ev){
+      ev.preventDefault();
+      var em = $('#uEmail').value.trim().toLowerCase(), pw = $('#uPw').value, msg = $('#authMsg');
+      function say(t, good){ msg.textContent = t; msg.className = 'msg ' + (good ? 'good' : 'bad'); }
+      if (!em || !pw) return say('이메일과 비밀번호를 입력해주세요.');
+      if (mode === 'signup' && pw.length < 6) return say('비밀번호는 6자 이상으로 입력해주세요.');
+      var users = store(USER_KEY) || {};
+      hash(pw).then(function(h){
+        if (mode === 'signup') {
+          if (users[em]) return say('이미 가입된 이메일이에요. 로그인해주세요.');
+          users[em] = h; store(USER_KEY, users);
+          session = { email:em }; store(SES_KEY, session);
+          renderAcct(); fillSession(); closeModal(); toast('가입 완료! 환영해요.');
+        } else {
+          if (users[em] !== h) return say('이메일 또는 비밀번호가 올바르지 않아요.');
+          session = { email:em }; store(SES_KEY, session);
+          renderAcct(); fillSession(); closeModal(); toast('로그인됐어요.');
+        }
+      }).catch(function(){ say('오류가 발생했어요.'); });
+    });
+  }
+
+  /* ---------- 시작 ---------- */
+  renderAcct(); fillSession(); renderMineCount(); renderHero();
+  $$('[data-view]').forEach(function(x){ x.setAttribute('aria-pressed', String(x.dataset.view === state.view)); });
+  orbit.init();
+  setTab(state.tab);
+  if (state.cat !== 'all') orbit.syncFromFilter(state.cat);
+  setCat(state.cat, false);
+  renderOverview();
+})();
+</script>
+</body>
+</html>

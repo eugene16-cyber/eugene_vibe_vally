@@ -180,7 +180,7 @@
   header.className = 'gnb';
   header.innerHTML =
     '<div class="gnb__in">' +
-      '<a class="logo" href="home.html" aria-label="유진투자증권 Insight Lab 홈"><span class="logo__mark" aria-hidden="true">E</span>유진투자증권<span class="logo__bar" aria-hidden="true"></span><span class="logo__sub">Insight Lab</span></a>' +
+      '<a class="logo" href="home.html" aria-label="유진투자증권 Insight Lab 홈"><span class="logo__wm">유진투자증권</span><span class="logo__bar" aria-hidden="true"></span><span class="logo__sub">Insight Lab</span></a>' +
       '<nav class="gnb__menu" aria-label="주 메뉴">' + links + '</nav>' +
       '<div class="gnb__right">' +
         '<a class="gnb__me" href="home.html#my" aria-label="' + esc(name) + '님의 라운지"><span class="avatar" aria-hidden="true">' + esc(name.charAt(0)) + '</span>' + esc(name) + '님</a>' +

@@ -28,18 +28,32 @@
   }).join('');
 
   /* ---------- 라운지 메뉴 — 지금 있는 페이지들 ---------- */
+  // 선 아이콘 — 24px 격자 · 선 굵기 1.75 · 둥근 끝 (이모지 대신)
+  var ICONS = {
+    market: '<path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 5-6"/>',
+    stockev: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="m12.5 12.5-2 3h3l-2 3"/>',
+    reports: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/>',
+    conf: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M8 21h8"/>',
+    seminar: '<rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M12 16v4M8 20h8M7 12l3-3 2 2 4-4"/>',
+    cardnews: '<rect x="7" y="7" width="14" height="14" rx="2"/><path d="M17 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h2"/>',
+    desk: '<path d="M6 3h12v18l-6-4-6 4z"/>',
+    qa: '<path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12h5"/>',
+    quant: '<path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 1.7 3h10.6a2 2 0 0 0 1.7-3l-5-9V3"/><path d="M7.5 15h9"/>',
+    global: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>',
+    theme: '<circle cx="9" cy="14" r="5"/><circle cx="16.5" cy="7.5" r="3.5"/><circle cx="18" cy="16.5" r="2"/>'
+  };
   var MODULES = {
-    market:   { ic: '📈', k: 'RESEARCH', t: '오늘의 시황', d: '국내 · 해외 지수와 업종 흐름, 투자자별 수급', href: 'market.html' },
-    stockev:  { ic: '⚡', k: 'EVENT-DRIVEN', t: '종목 이벤트', d: '공시 · 실적 이벤트와 다가오는 일정', href: 'market.html#stock-events', inst: true },
-    reports:  { ic: '📄', k: 'REPORTS', t: '리서치 리포트', d: '관심 섹터 심층 리포트 모아 보기 · 저장', href: 'reports.html' + ((p.sectors || [])[0] ? '?q=' + encodeURIComponent(p.sectors[0].replace(/·.*/, '')) : '') },
-    conf:     { ic: '🎤', k: 'EVENTS', t: '행사 · 컨퍼런스', d: '콥데이 · IPO · AI 컨퍼런스 · WM 세미나 신청', href: 'conferences.html' },
-    seminar:  { ic: '🧑‍🏫', k: 'SEMINAR', t: '세미나 · 탐방 요청', d: '섹터 · 애널리스트를 골라 세미나 · NDR 요청', href: 'conferences.html#seminar' },
-    cardnews: { ic: '🗂️', k: 'CARD NEWS', t: '카드뉴스', d: '오늘의 리서치를 카드 한 장으로', href: '#cardnews' },
-    desk:     { ic: '🗄️', k: 'MY RESEARCH', t: '나의 리서치 · 신청 내역', d: '저장한 리서치 · 받은 자료 · 행사 신청', href: '#history' },
-    qa:       { ic: '💬', k: 'Q&A', t: '유리에게 질문', d: '리포트를 근거로 답하는 검수 완료 질문', href: '#qa' },
-    quant:    { ic: '🧪', k: 'QUANT', t: 'Quant Studio', d: '테마로 전략을 만들고 10년 데이터로 검증', href: 'quant.html', inst: true },
-    global:   { ic: '🌐', k: 'GLOBAL', t: '해외 증시', d: '미국 · 아시아 지수, 신고가 · 실적 일정', href: 'global.html' },
-    theme:    { ic: '🫧', k: 'THEME', t: '테마 로테이션', d: '지금 돈이 몰리는 테마와 구성 종목', href: isWM ? 'market.html#theme-rotation' : 'quant.html#theme' }
+    market:   { k: 'RESEARCH', t: '오늘의 시황', d: '국내 · 해외 지수와 업종 흐름, 투자자별 수급', href: 'market.html' },
+    stockev:  { k: 'EVENT-DRIVEN', t: '종목 이벤트', d: '공시 · 실적 이벤트와 다가오는 일정', href: 'market.html#stock-events', inst: true },
+    reports:  { k: 'REPORTS', t: '리서치 리포트', d: '관심 섹터 심층 리포트 모아 보기 · 저장', href: 'reports.html' + ((p.sectors || [])[0] ? '?q=' + encodeURIComponent(p.sectors[0].replace(/·.*/, '')) : '') },
+    conf:     { k: 'EVENTS', t: '행사 · 컨퍼런스', d: '콥데이 · IPO · AI 컨퍼런스 · WM 세미나 신청', href: 'conferences.html' },
+    seminar:  { k: 'SEMINAR', t: '세미나 · 탐방 요청', d: '섹터 · 애널리스트를 골라 세미나 · NDR 요청', href: 'conferences.html#seminar' },
+    cardnews: { k: 'CARD NEWS', t: '카드뉴스', d: '오늘의 리서치를 카드 한 장으로', href: '#cardnews' },
+    desk:     { k: 'MY RESEARCH', t: '나의 리서치 · 신청 내역', d: '저장한 리서치 · 받은 자료 · 행사 신청', href: '#history' },
+    qa:       { k: 'Q&A', t: '유리에게 질문', d: '리포트를 근거로 답하는 검수 완료 질문', href: '#qa' },
+    quant:    { k: 'QUANT', t: 'Quant Studio', d: '테마로 전략을 만들고 10년 데이터로 검증', href: 'quant.html', inst: true },
+    global:   { k: 'GLOBAL', t: '해외 증시', d: '미국 · 아시아 지수, 신고가 · 실적 일정', href: 'global.html' },
+    theme:    { k: 'THEME', t: '테마 로테이션', d: '지금 돈이 몰리는 테마와 구성 종목', href: isWM ? 'market.html#theme-rotation' : 'quant.html#theme' }
   };
   // 고객 분류별 추천 구성 — 같은 페이지를 사람마다 다르게 배치 (첫 번째는 넓게)
   var PRESETS = {
@@ -73,7 +87,7 @@
     $('#lg-grid').innerHTML = state.order.map(function (id, i) {
       var m = MODULES[id], wide = state.wide.indexOf(id) > -1;
       return '<li class="lg-card' + (wide ? ' is-wide' : '') + (id === lastId ? fill : '') + (editing ? ' is-edit' : '') + '" data-id="' + id + '">' +
-        '<a href="' + esc(m.href) + '"' + (editing ? ' tabindex="-1"' : '') + '><span class="lg-card__top"><span class="lg-card__ic" aria-hidden="true">' + m.ic + '</span>' +
+        '<a href="' + esc(m.href) + '"' + (editing ? ' tabindex="-1"' : '') + '><span class="lg-card__top"><span class="lg-card__ic" aria-hidden="true"><svg viewBox="0 0 24 24">' + ICONS[id] + '</svg></span>' +
         '<span><span class="lg-card__k">' + m.k + '</span><br><span class="lg-card__t">' + esc(m.t) + '</span></span></span>' +
         '<span class="lg-card__d">' + esc(m.d) + '</span>' + (live[id] ? '<span class="lg-card__live">' + live[id] + '</span>' : '') + '</a>' +
         (editing ? '<span class="lg-ctl">' +
