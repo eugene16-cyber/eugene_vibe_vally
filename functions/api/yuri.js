@@ -23,8 +23,7 @@ function prompt(body) {
       `고객 프로필: ${JSON.stringify(body.profile || {})}`,
       body.offers ? `참고 — 지금 안내할 수 있는 행사 · 리포트(언급할 때는 이 안에서만): ${JSON.stringify(body.offers)}` : '',
       '출력 형식: {"title": "...", "hint": "..."}'
-    ].filter(Boolean).join('
-');
+    ].filter(Boolean).join('\n');
   }
   if (body.task === 'extract') {
     return [
