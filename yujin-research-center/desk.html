@@ -8,14 +8,139 @@
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
 <link rel="stylesheet" href="assets/app.css?v=20261029a">
+<link rel="stylesheet" href="assets/cardnews/cardnews.css?v=20261029c">
+<link rel="stylesheet" href="assets/desk.css?v=20261029c">
 <script src="assets/config.js?v=20261029a"></script>
 <script src="assets/config.local.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" defer></script>
 <script src="assets/partials.js?v=20261029a" defer></script>
+<!-- 웨이브 2 병합 후(트랙 B 파일이 생기면) 아래 두 줄 주석을 푼다 — 없을 때는 desk.js가 localStorage를 직접 읽는다 -->
+<!-- <script src="assets/events-data.js?v=20261029c" defer></script> -->
+<!-- <script src="assets/conf-records.js?v=20261029c" defer></script> -->
+<script src="assets/saved-research.js?v=20261029c" defer></script>
+<script src="assets/cardnews/cardnews.js?v=20261029c" defer></script>
+<script src="assets/desk.js?v=20261029c" defer></script>
 </head>
-<body data-page-title="Private Desk">
-<main id="main">
-  <section class="section"><div class="wrap"><div class="card"><div class="card__body"><span class="badge badge--muted">준비 중</span><p style="margin-top:10px" class="muted">리서치 워크스페이스 · 카드뉴스 · 나의 리서치 · 신청 내역을 M3에서 채워요.</p></div></div></div></section>
+<body data-page="desk">
+<main id="main" class="desk">
+
+  <!-- 1. 인사 헤더 -->
+  <section class="desk-hero">
+    <div class="wrap desk-hero__in">
+      <div class="desk-hero__who">
+        <span class="desk-hero__avatar" id="desk-avatar" aria-hidden="true">·</span>
+        <div>
+          <div class="sec-eyebrow">PRIVATE DESK</div>
+          <h1 class="desk-hero__title" id="desk-title">Private Desk</h1>
+          <div class="desk-hero__badges" id="desk-badges"></div>
+        </div>
+      </div>
+      <nav class="desk-sum" aria-label="요약">
+        <a class="desk-sum__card" href="#cardnews"><span class="desk-sum__label">새 카드뉴스 · 7일</span><b class="num" id="sum-cn">0</b><span class="desk-sum__go">카드뉴스 →</span></a>
+        <a class="desk-sum__card" href="#research"><span class="desk-sum__label">저장한 리서치</span><b class="num" id="sum-saved">0</b><span class="desk-sum__go">나의 리서치 →</span></a>
+        <a class="desk-sum__card" href="#events"><span class="desk-sum__label">신청한 행사</span><b class="num" id="sum-events">0</b><span class="desk-sum__go">신청 내역 →</span></a>
+      </nav>
+    </div>
+  </section>
+
+  <!-- 2. 리서치 워크스페이스 -->
+  <section class="section desk-sec" id="workspace">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="sec-eyebrow">WORKSPACE</div>
+        <h2 class="sec-title" id="ws-title">리서치 워크스페이스</h2>
+        <p class="sec-sub">관심 분야에 맞춘 브리핑과 자료를 한곳에 모았어요.</p>
+      </div>
+      <div class="ws">
+        <div class="ws__main">
+          <article class="card ws-brief" id="ws-brief" aria-live="polite"></article>
+          <article class="card">
+            <div class="card__body">
+              <div class="ws-h"><h3>맞춤 자료함</h3><span class="ws-h__note" id="ws-fmt"></span></div>
+              <div class="ws-files" id="ws-files"></div>
+            </div>
+          </article>
+        </div>
+        <div class="ws__side">
+          <article class="card">
+            <div class="card__body">
+              <div class="ws-h"><h3>상담 · 담당자</h3></div>
+              <div id="ws-consult"></div>
+              <div class="ws-mgr">
+                <div><span class="ws-mgr__eyebrow" id="ws-mgr-role">담당</span><b id="ws-mgr-title">담당자 연결 · 상담 요청</b><p>궁금한 리포트나 미팅 요청을 남겨 주세요.</p></div>
+                <button type="button" class="btn btn--sm ws-mgr__btn" id="ws-consult-btn">상담 요청</button>
+              </div>
+            </div>
+          </article>
+          <article class="card">
+            <div class="card__body">
+              <div class="ws-h"><h3>관심 종목 · 테마</h3></div>
+              <ul class="ws-tags" id="ws-tags" aria-label="관심 종목 · 테마"></ul>
+              <form class="ws-add" id="ws-add" autocomplete="off">
+                <label class="sr-only" for="ws-add-input">관심 종목 · 테마 추가</label>
+                <input class="input" id="ws-add-input" maxlength="20" placeholder="예: 전력기기">
+                <button class="btn btn--secondary btn--sm" type="submit">+ 추가</button>
+              </form>
+              <div class="ws-alerts" role="group" aria-label="알림 설정">
+                <div class="ws-alerts__h">알림</div>
+                <label class="tgl"><span>새 리포트 · 관심 테마</span><input type="checkbox" data-alert="report"><i aria-hidden="true"></i></label>
+                <label class="tgl"><span>신청한 행사 일정</span><input type="checkbox" data-alert="events"><i aria-hidden="true"></i></label>
+                <label class="tgl"><span>새 카드뉴스</span><input type="checkbox" data-alert="cardnews"><i aria-hidden="true"></i></label>
+                <p class="form-note">시연 화면이라 설정만 저장되고 실제 알림은 보내지 않아요.</p>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. 카드뉴스 -->
+  <section class="section section--gray desk-sec" id="cardnews">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="sec-eyebrow">CARD NEWS</div>
+        <h2 class="sec-title">오늘의 리서치, 카드 한 장으로</h2>
+        <p class="sec-sub">리포트의 핵심 숫자를 카드 몇 장으로 정리했어요. 카드를 누르면 넘겨 볼 수 있어요.</p>
+      </div>
+      <div class="tabs" role="tablist" aria-label="카드뉴스 분류" id="cn-tabs">
+        <button role="tab" aria-selected="true" data-tab="rec" aria-controls="cn-grid">추천</button>
+        <button role="tab" aria-selected="false" data-tab="market" aria-controls="cn-grid">시황·전략</button>
+        <button role="tab" aria-selected="false" data-tab="industry" aria-controls="cn-grid">산업·테마</button>
+        <button role="tab" aria-selected="false" data-tab="company" aria-controls="cn-grid">기업 리포트</button>
+      </div>
+      <div class="cn-grid" id="cn-grid" role="tabpanel" aria-label="카드뉴스 목록"></div>
+      <div class="cn-more"><button type="button" class="btn btn--text" id="cn-more" aria-expanded="false">카드뉴스 전체 보기 →</button></div>
+    </div>
+  </section>
+
+  <!-- 4. 나의 리서치 | 내 이벤트 신청 내역 -->
+  <section class="section desk-sec">
+    <div class="wrap desk-two">
+      <article class="card" id="research">
+        <div class="card__body">
+          <div class="ws-h"><h3>나의 리서치</h3></div>
+          <div class="tabs" role="tablist" aria-label="나의 리서치" id="rs-tabs">
+            <button role="tab" aria-selected="true" data-tab="saved" aria-controls="rs-list">저장한 리서치</button>
+            <button role="tab" aria-selected="false" data-tab="received" aria-controls="rs-list">받은 자료</button>
+          </div>
+          <div class="chips rs-chips" id="rs-chips" role="group" aria-label="카테고리"></div>
+          <ul class="rs-list" id="rs-list" role="tabpanel" aria-label="나의 리서치 목록"></ul>
+          <button type="button" class="btn btn--text" id="rs-more" hidden>전체 보기 →</button>
+        </div>
+      </article>
+      <article class="card" id="events">
+        <div class="card__body">
+          <div class="ws-h"><h3>내 이벤트 신청 내역</h3><a class="btn btn--text" href="conferences.html">Events →</a></div>
+          <div class="tabs" role="tablist" aria-label="이벤트 신청 내역" id="ev-tabs">
+            <button role="tab" aria-selected="true" data-tab="up" aria-controls="ev-list">다가오는 행사</button>
+            <button role="tab" aria-selected="false" data-tab="past" aria-controls="ev-list">지난 행사</button>
+          </div>
+          <ul class="ev-list" id="ev-list" role="tabpanel" aria-label="이벤트 신청 목록"></ul>
+        </div>
+      </article>
+    </div>
+  </section>
 </main>
 </body>
 </html>
