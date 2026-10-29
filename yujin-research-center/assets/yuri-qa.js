@@ -200,7 +200,7 @@
   function msg(cls, html) { logEl.hidden = false; var el = document.createElement('div'); el.className = 'yq-m ' + cls; el.innerHTML = html; logEl.appendChild(el); logEl.scrollTop = logEl.scrollHeight; return el; }
   function remember(q) {
     var l = []; try { l = JSON.parse(localStorage.getItem(Q_KEY) || '[]'); } catch (e) {}
-    l = [{ q: q, at: new Date().toISOString() }].concat(l.filter(function (x) { return x.q !== q; })).slice(0, 8);
+    l = [{ q: q, at: new Date().toISOString() }].concat(l.filter(function (x) { return x.q !== q; })).slice(0, 20);
     try { localStorage.setItem(Q_KEY, JSON.stringify(l)); } catch (e) {}
   }
   // 원문 근거 카드 — 인용 문장 · 리포트 상세 · 원문 PDF
@@ -323,6 +323,9 @@
   $('.yq-ask', box).addEventListener('submit', function (e) { e.preventDefault(); ask(input.value); input.value = ''; input.placeholder = inline ? '리서치센터 리포트에 무엇이든 물어보세요' : '질문을 입력하거나 마이크를 눌러 말해 주세요'; });
   window.YuriQA = { open: inline ? focusInline : open, close: close, ask: ask };
   if (inline) open(); else if (/#qa$/.test(location.hash)) open();
+  // Research '내가 한 질문'에서 home.html?q=… 로 오면 그 질문을 바로 다시 보여 준다
+  var q0 = inline && new URLSearchParams(location.search).get('q');
+  if (q0) setTimeout(function () { ask(q0); host.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 300);
 
   /* ---------- 가입 상담에서 넘어왔으면: 큰 구가 작아져 버튼 자리로 ---------- */
   var docked = null;

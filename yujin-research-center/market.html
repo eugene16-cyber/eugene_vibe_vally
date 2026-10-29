@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
 <link rel="stylesheet" href="assets/app.css?v=20261029j">
 <link rel="stylesheet" href="assets/cardnews/cardnews.css?v=20261029c">
-<link rel="stylesheet" href="assets/desk.css?v=20261029c">
+<link rel="stylesheet" href="assets/desk.css?v=20261029s">
 <script src="assets/config.js?v=20261029a"></script>
 <script src="assets/config.local.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" defer></script>
@@ -18,7 +18,7 @@
 <script src="assets/conf-records.js?v=20261029c" defer></script>
 <script src="assets/saved-research.js?v=20261029c" defer></script>
 <script src="assets/cardnews/cardnews.js?v=20261029c" defer></script>
-<script src="assets/desk.js?v=20261029q" defer></script>
+<script src="assets/desk.js?v=20261029s" defer></script>
 </head>
 <body data-page-eyebrow="RESEARCH" data-page-title="Research" data-page-desc="리포트 핵심을 카드뉴스로 넘겨 보고, 마음에 드는 자료는 ☆로 저장해 두세요. 저장한 리서치와 행사 신청 내역도 여기서 확인해요.">
 <main id="main">
@@ -42,7 +42,7 @@
     </div>
   </section>
 
-  <!-- 4. 나의 리서치 | 내 이벤트 신청 내역 -->
+  <!-- 4. 나의 리서치 | 내가 한 질문 -->
   <section class="section desk-sec" id="history">
     <div class="wrap desk-two">
       <article class="card" id="research">
@@ -57,14 +57,12 @@
           <button type="button" class="btn btn--text" id="rs-more" hidden>전체 보기 →</button>
         </div>
       </article>
-      <article class="card" id="events">
+      <article class="card" id="my-questions">
         <div class="card__body">
-          <div class="ws-h"><h3>내 이벤트 신청 내역</h3><a class="btn btn--text" href="conferences.html">Events →</a></div>
-          <div class="tabs" role="tablist" aria-label="이벤트 신청 내역" id="ev-tabs">
-            <button role="tab" aria-selected="true" data-tab="up" aria-controls="ev-list">다가오는 행사</button>
-            <button role="tab" aria-selected="false" data-tab="past" aria-controls="ev-list">지난 행사</button>
-          </div>
-          <ul class="ev-list" id="ev-list" role="tabpanel" aria-label="이벤트 신청 목록"></ul>
+          <div class="ws-h"><h3>내가 한 질문</h3><a class="btn btn--text" href="home.html">질문하기 →</a></div>
+          <p class="muted qh-note">Home 근거형 Q&amp;A에서 물어본 질문이에요. 누르면 원문 근거와 함께 다시 볼 수 있어요.</p>
+          <ul class="qh-list" id="qh-list" aria-label="내가 한 질문 목록"></ul>
+          <button type="button" class="btn btn--text qh-clear" id="qh-clear" hidden>기록 지우기</button>
         </div>
       </article>
     </div>

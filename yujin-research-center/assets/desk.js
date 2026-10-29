@@ -347,7 +347,7 @@
     put('#sum-events', 'textContent', rows.filter(function (x) { return !x.past; }).length);
     var l = rows.filter(function (x) { return evTab === 'past' ? x.past : !x.past; })
       .sort(function (a, b) { return (evTab === 'past' ? -1 : 1) * String(a.date || '9').localeCompare(String(b.date || '9')); });
-    $('#ev-list').innerHTML = l.length ? l.map(function (x) {
+    $ws('#ev-list').innerHTML = l.length ? l.map(function (x) {
       var st = statusOf(x);
       return '<li><button type="button" class="ev-row" data-rec="' + esc(x.rec.id) + '">' +
         '<span class="ev-row__date"><b class="num">' + (x.date ? x.date.slice(5).replace('-', '.') : '미정') + '</b><span>' + (x.date ? wd(x.date) : '') + '</span></span>' +
@@ -359,7 +359,7 @@
           (rows.length ? '' : '<br><button type="button" class="btn btn--secondary btn--sm ev-seed" id="ev-seed">예시 신청 내역 넣어보기</button>')
         : '지난 행사 기록이 없어요.') + '</li>';
   }
-  $('#ev-list').addEventListener('click', function (e) {
+  $ws('#ev-list').addEventListener('click', function (e) {
     if (e.target.closest('#ev-seed')) { seedExample(); return; }
     var b = e.target.closest('[data-rec]'); if (!b) return;
     var x = evRows().filter(function (r) { return String(r.rec.id) === b.getAttribute('data-rec'); })[0];
@@ -400,9 +400,33 @@
     renderEvents();
     toast('예시 신청 내역을 넣었어요. 행을 눌러 상세 · 취소를 확인해 보세요.');
   }
-  wireTabsA11y($('#ev-tabs'), function (k) { evTab = k; renderEvents(); });
+  wireTabsA11y($ws('#ev-tabs'), function (k) { evTab = k; renderEvents(); });
   if (window.ILConf && ILConf.onChange) ILConf.onChange(renderEvents);
   window.addEventListener('storage', function (e) { if (e.key === CONF_KEY) renderEvents(); });
+
+  /* ---------- 내가 한 질문 (Home 근거형 Q&A가 il.home-questions에 남긴 기록) ---------- */
+  var QH_KEY = 'il.home-questions';
+  function renderQuestions() {
+    var el = $('#qh-list'); if (!el) return;
+    var l = []; try { l = JSON.parse(localStorage.getItem(QH_KEY) || '[]'); } catch (e) {}
+    var when = function (iso) { var d = new Date(iso); return isNaN(d) ? '' : (d.getMonth() + 1) + '.' + d.getDate() + ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); };
+    el.innerHTML = l.length ? l.map(function (x, i) {
+      return '<li><a class="qh-row" href="home.html?q=' + encodeURIComponent(x.q) + '"><span class="qh-row__q">Q</span><span class="qh-row__txt"><b>' + esc(x.q) + '</b><span class="muted">' + when(x.at) + ' · 다시 보기</span></span></a>' +
+        '<button type="button" class="qh-del" data-del="' + i + '" aria-label="이 질문 기록 삭제">✕</button></li>';
+    }).join('') : '<li class="ws-empty">아직 물어본 질문이 없어요.<br><a class="btn btn--text" href="home.html">Home에서 리포트에 물어보기 →</a></li>';
+    $('#qh-clear').hidden = !l.length;
+  }
+  if ($('#qh-list')) {
+    $('#qh-list').addEventListener('click', function (e) {
+      var d = e.target.closest('[data-del]'); if (!d) return;
+      var l = []; try { l = JSON.parse(localStorage.getItem(QH_KEY) || '[]'); } catch (er) {}
+      l.splice(+d.dataset.del, 1);
+      try { localStorage.setItem(QH_KEY, JSON.stringify(l)); } catch (er) {}
+      renderQuestions();
+    });
+    $('#qh-clear').addEventListener('click', function () { try { localStorage.removeItem(QH_KEY); } catch (e) {} renderQuestions(); });
+    window.addEventListener('storage', function (e) { if (e.key === QH_KEY) renderQuestions(); });
+  }
 
   /* ---------- 요약 숫자 ---------- */
   function renderSummary() {
@@ -415,7 +439,7 @@
 
   /* ---------- 첫 그림 (코드 기본값) ---------- */
   renderBrief(); renderFiles(); renderConsult(); renderTags();
-  renderCards(); renderResearch(); renderEvents(); renderSummary();
+  renderCards(); renderResearch(); renderEvents(); renderQuestions(); renderSummary();
 
   /* ---------- Supabase 덮어쓰기 (9장 불러오기 패턴) ---------- */
   var q = function (p) { return p.then(function (r) { return r; }, function () { return { data: null }; }); };

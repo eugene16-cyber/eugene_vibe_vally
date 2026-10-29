@@ -158,3 +158,18 @@
   .ws-mgr{flex-wrap:wrap}
   .ws-mgr__btn{margin-left:0}
 }
+
+/* 내가 한 질문 (Research) */
+.qh-note{margin:-4px 0 10px;font-size:13px}
+.qh-list{list-style:none;margin:0;padding:0}
+.qh-list li{display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--gray-100)}
+.qh-list li.ws-empty{display:block;border:0}
+.qh-row{flex:1;min-width:0;display:flex;align-items:center;gap:12px;padding:12px 4px;color:inherit;transition:background var(--dur-micro)}
+.qh-row:hover{background:#f6f8fb}
+.qh-row__q{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--surface-tint);color:var(--blue-cta);font-weight:800;font-size:13px}
+.qh-row__txt{min-width:0;display:flex;flex-direction:column}
+.qh-row__txt b{font-size:14.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.qh-row__txt span{font-size:12.5px}
+.qh-del{flex:none;width:32px;height:32px;border-radius:50%;color:var(--ink-500);font-size:12px}
+.qh-del:hover{background:var(--gray-100)}
+.qh-clear{margin-top:8px}
