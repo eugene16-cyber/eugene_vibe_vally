@@ -26,3 +26,6 @@ __pycache__/
 dist/
 tools/shots/
 yujin-research-center/assets/config.local.js
+
+# 외부 저장소에서 받은 Jarvis 앱 — 반입 여부 확인 전까지 커밋하지 않음
+jarvis/
