@@ -1259,7 +1259,7 @@ function onArrival() {
 }
 
 // 질문 트리 · 슬롯 · 추천은 assets/yuri-flow.js(YuriFlow, 어드민 설정)에서 — 이 화면은 대화 UI만 맡는다
-const RC = "";  // 사이트 루트에 있음 — iframe에서 열려도 이동은 최상위 창에서
+const RC = "";  // 사이트 루트 기준 경로
 let flow;
 function resetState() { flow = window.YuriFlow.create(); }
 
@@ -1462,6 +1462,7 @@ async function finish() {
   setThinking(false);
   const session = flow.session();
   try { localStorage.setItem("il.session", JSON.stringify(session)); localStorage.setItem("il.profile", JSON.stringify(session.profile)); } catch (e) {}
+  try { window.name = "il:" + JSON.stringify(session); } catch (e) {}  // 저장소가 막힌 환경(미리보기 iframe 등) 대비
   renderResult(session);
   setBusy(false);
 }
@@ -1510,13 +1511,16 @@ log.addEventListener("click", (e) => {
 function startDemo() {
   let s = null;
   try { s = JSON.parse(localStorage.getItem("il.session") || "null"); } catch (e) {}
+  if (!s && /^il:/.test(window.name || "")) { try { s = JSON.parse(window.name.slice(3)); } catch (e) {} }
+  if (!s && flow) s = flow.session();
   if (!s) return;
   s.status = "approved"; s.via = "demo";
   try { localStorage.setItem("il.session", JSON.stringify(s)); } catch (e) {}
+  try { window.name = "il:" + JSON.stringify(s); } catch (e) {}
   try { sessionStorage.setItem("il.yuri-dock", "1"); } catch (e) {}  // Home에서 유리 구가 버튼 자리로 작아진다
   setStatus("YURI WELCOME", "opening your lounge");
   beamIn();
-  setTimeout(() => { (window.top || window).location.href = `${RC}home.html`; }, reduceMotion ? 0 : 900);
+  setTimeout(() => { location.href = `${RC}home.html`; }, reduceMotion ? 0 : 900);  // 같은 창 안에서 이동 (미리보기 · 임베드에서도 동작)
 }
 
 /* 대화창 열고 닫기 — 열리면 구가 남은 자리로 비켜 선다 */

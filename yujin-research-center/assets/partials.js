@@ -23,7 +23,12 @@
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
     });
   };
-  var session = function () { try { return JSON.parse(localStorage.getItem('il.session') || 'null'); } catch (e) { return null; } };
+  var session = function () {
+    var s = null;
+    try { s = JSON.parse(localStorage.getItem('il.session') || 'null'); } catch (e) {}
+    if (!s && /^il:/.test(window.name || '')) { try { s = JSON.parse(window.name.slice(3)); } catch (e) {} }  // 저장소가 막힌 환경
+    return s;
+  };
 
   var toastEl, toastTimer;
   function toast(msg) {
@@ -117,6 +122,7 @@
   function signOut() {
     var done = function () {
       try { localStorage.removeItem('il.session'); } catch (e) {}
+      if (/^il:/.test(window.name || '')) window.name = '';
       location.href = 'index.html';
     };
     if (sb) sb.auth.signOut().then(done, done); else done();
@@ -165,8 +171,7 @@
   var MENU = [
     { id: 'home', label: 'Home', href: 'home.html' },
     { id: 'conferences', label: 'Events', href: 'conferences.html' },
-    { id: 'market', label: 'Research', href: 'market.html' },
-    { id: 'quant', label: 'Quant Studio', href: 'quant.html', inst: true }
+    { id: 'market', label: 'Research', href: 'market.html' }
   ];
   var isPage = function (id) { return new RegExp('(^|/)' + id + '(\\.html)?$').test(location.pathname); };
   var items = MENU.filter(function (m) { return !(m.inst && seg === 'wm'); });
@@ -183,7 +188,7 @@
       '<a class="logo" href="home.html" aria-label="유진투자증권 Insight Lab 홈"><span class="logo__wm">유진투자증권</span><span class="logo__bar" aria-hidden="true"></span><span class="logo__sub">Insight Lab</span></a>' +
       '<nav class="gnb__menu" aria-label="주 메뉴">' + links + '</nav>' +
       '<div class="gnb__right">' +
-        '<a class="gnb__me" href="home.html#my" aria-label="' + esc(name) + '님의 라운지"><span class="avatar" aria-hidden="true">' + esc(name.charAt(0)) + '</span>' + esc(name) + '님</a>' +
+        '<a class="gnb__me" href="home.html" aria-label="' + esc(name) + '님의 라운지"><span class="avatar" aria-hidden="true">' + esc(name.charAt(0)) + '</span>' + esc(name) + '님</a>' +
         '<button class="gnb__out" type="button" data-signout>로그아웃</button>' +
       '</div>' +
       '<button class="gnb__burger" type="button" aria-label="메뉴 열기" aria-expanded="false" aria-controls="il-drawer">☰</button>' +

@@ -1,4 +1,5 @@
-// 유리 근거형 Q&A — 가입 상담 화면이 작아져 오른쪽 아래 버튼이 되고, 누르면 채팅창으로 다시 열린다
+// 유리 근거형 Q&A — 페이지에 #yq-host가 있으면 그 자리에 넓은 채팅창("무엇이든 물어보세요!")으로,
+//   없으면 오른쪽 아래 버튼 → 누르면 채팅창으로 열린다. 가입 상담 채팅창이 가로로 넓어지며 이어진다.
 // · 음성 질문(Web Speech, ko-KR) → 리포트 원문에서 근거를 찾고 → Gemini(/api/yuri 'qa')가 원문 안에서만 답한다. 음성으로 물으면 소리로도 답한다.
 // · 서버 AI가 없으면 원문에서 찾은 문장을 그대로 보여 준다. 모든 답에 '원문 근거' 카드(인용 문장 · 리포트 · 원문 PDF)를 붙인다.
 (function () {
@@ -60,6 +61,28 @@
     '.yq-ask button{flex:none;width:34px;height:32px;border-radius:8px;border:1px solid rgba(63,243,255,.18);background:transparent;color:#7fa9b8;display:grid;place-items:center}',
     '.yq-ask button svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}',
     '.yq-mic[aria-pressed=true]{color:#221500;background:#f5c518;border-color:#f5c518;animation:yq-beat .9s ease-in-out infinite}',
+    // 인라인 — Home 맨 위, 구글 검색창처럼 흰 둥근 검색바 하나 + 질문 칩. 답은 물었을 때만 아래에 펼쳐진다
+    '.yq.yq--inline{position:relative;right:auto;bottom:auto;z-index:1;width:100%;max-width:760px;height:auto;margin:0 auto;transform:none;opacity:1;visibility:visible;display:block;background:transparent;border:0;box-shadow:none;backdrop-filter:none;text-align:left}',
+    '.yq--inline .yq-head,.yq--inline .yq-box-h{display:none}',
+    '.yq--inline .yq-box{margin:0;border:0;background:transparent;overflow:visible}',
+    '.yq--inline .yq-ask{height:60px;padding:0 8px 0 10px;gap:6px;border-radius:999px;background:#fff;border:1px solid #dfe1e5;box-shadow:0 10px 30px -12px rgba(0,0,0,.5);transition:box-shadow .25s,border-color .25s}',
+    '.yq--inline .yq-ask:focus-within{box-shadow:0 1px 6px rgba(32,33,36,.28),0 10px 30px -12px rgba(0,0,0,.5)}',
+    '.yq--inline .yq-ask>span{display:none}',
+    '.yq--inline .yq-ask .yq-orb{width:30px;height:30px;margin-left:6px}',
+    '.yq--inline .yq-ask input{height:56px;color:#202124;font-size:17px}.yq--inline .yq-ask input::placeholder{color:#9aa0a6}',
+    '.yq--inline .yq-ask button{width:44px;height:44px;border-radius:50%;border:0;color:#5f6368;background:transparent}',
+    '.yq--inline .yq-ask button:hover{background:#f1f3f4}',
+    '.yq--inline .yq-mic[aria-pressed=true]{color:#221500;background:#f5c518}',
+    '.yq--inline[data-mood=listening] .yq-ask,.yq--inline[data-mood=thinking] .yq-ask,.yq--inline[data-mood=speaking] .yq-ask{border-color:#f5c518;box-shadow:0 0 0 3px rgba(245,197,24,.45),0 10px 30px -12px rgba(0,0,0,.5)}',
+    '.yq--inline[data-mood=listening] .yq-ask .yq-orb,.yq--inline[data-mood=thinking] .yq-ask .yq-orb,.yq--inline[data-mood=speaking] .yq-ask .yq-orb{background:radial-gradient(circle at 38% 32%,#fffbe6,#f5c518 45%,#a06c00 80%,#221500 100%);box-shadow:0 0 16px rgba(245,197,24,.9);animation:yq-beat .8s ease-in-out infinite}',
+    '.yq--inline .yq-opts{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;max-height:none;overflow:visible;margin-top:16px}',
+    '.yq--inline .yq-opt{width:auto;padding:7px 14px;border:1px solid rgba(255,255,255,.18);border-radius:999px;background:rgba(255,255,255,.07);font-size:13px;color:#e4fbff}',
+    '.yq--inline .yq-opt:hover,.yq--inline .yq-opt:focus-visible{background:rgba(255,255,255,.16)}',
+    '.yq--inline .yq-opt i,.yq--inline .yq-opt small{display:none}',
+    '.yq--inline .yq-log{margin-top:18px;max-height:min(460px,56vh);padding:14px;border-radius:14px;background:rgba(3,16,26,.9);border:1px solid rgba(63,243,255,.25)}',
+    '.yq--inline .yq-log[hidden]{display:none}',
+    '.yq--inline.is-grow{animation:yq-grow .9s cubic-bezier(.16,1,.3,1) both}',
+    '@keyframes yq-grow{0%{max-width:440px;opacity:.6}100%{max-width:760px;opacity:1}}',
     '@media (max-width:560px){.yq{right:8px;bottom:8px;width:calc(100vw - 16px);height:calc(100svh - 80px)}.yq-fab>span{display:none}.yq-fab{padding:0 8px}}',
     '@media (prefers-reduced-motion:reduce){.yq,.yq-dock,.yq-orb,.yq-mic{transition:none;animation:none!important}}'
   ].join('\n');
@@ -150,15 +173,27 @@
     '<div class="yq-box"><div class="yq-box-h">검수 완료 질문<span>하나 선택 · 직접 입력 · 음성</span></div><div class="yq-opts"></div>' +
     '<form class="yq-ask"><span aria-hidden="true">✎</span><label class="sr-only" for="yq-in">질문 입력</label><input id="yq-in" autocomplete="off" placeholder="질문을 입력하거나 마이크를 눌러 말해 주세요">' +
     '<button type="button" class="yq-mic" aria-pressed="false" aria-label="음성으로 질문하기">' + MIC + '</button><button type="submit" aria-label="보내기">' + SEND + '</button></form></div>';
-  document.body.appendChild(fab); document.body.appendChild(box);
+  var host = document.getElementById('yq-host'), inline = !!host;
+  if (inline) { box.classList.add('yq--inline', 'is-open'); box.removeAttribute('role'); host.appendChild(box); }
+  else { document.body.appendChild(fab); document.body.appendChild(box); }
   var logEl = $('.yq-log', box), optsEl = $('.yq-opts', box), input = $('#yq-in', box), micBtn = $('.yq-mic', box), statusEl = $('#yq-status', box);
-  optsEl.innerHTML = PRESETS.map(function (q, i) {
+  // 넓은 모양에서는 입력줄을 창 맨 아래 전체 폭으로
+  if (inline) {
+    var askF = $('.yq-ask', box);
+    askF.insertBefore(Object.assign(document.createElement('i'), { className: 'yq-orb' }), askF.firstChild);
+    input.placeholder = '리서치센터 리포트에 무엇이든 물어보세요';
+    $('.yq-box', box).insertBefore(askF, optsEl);   // 검색바 → 칩 순서
+    box.insertBefore($('.yq-box', box), logEl);     // 검색 영역 → 답
+    logEl.hidden = true;
+  }
+  // 예시 질문은 관심 분야 순서로 3개만 보여 준다
+  optsEl.innerHTML = PRESETS.slice(0, 3).map(function (q, i) {
     return '<button type="button" class="yq-opt" data-q="' + q.id + '"><i>' + (i + 1) + '</i><span>' + esc(q.q) + '<small>#' + esc(q.tag) + ' · 검수 완료</small></span></button>';
   }).join('');
 
   var STATUS = { idle: '근거형 Q&A · 말로 물어보셔도 돼요', listening: '듣고 있어요…', thinking: '원문에서 근거를 찾고 있어요…', speaking: '답하고 있어요' };
   function setMood(m) { box.dataset.mood = m; statusEl.textContent = STATUS[m] || STATUS.idle; }
-  function msg(cls, html) { var el = document.createElement('div'); el.className = 'yq-m ' + cls; el.innerHTML = html; logEl.appendChild(el); logEl.scrollTop = logEl.scrollHeight; return el; }
+  function msg(cls, html) { logEl.hidden = false; var el = document.createElement('div'); el.className = 'yq-m ' + cls; el.innerHTML = html; logEl.appendChild(el); logEl.scrollTop = logEl.scrollHeight; return el; }
   function remember(q) {
     var l = []; try { l = JSON.parse(localStorage.getItem(Q_KEY) || '[]'); } catch (e) {}
     l = [{ q: q, at: new Date().toISOString() }].concat(l.filter(function (x) { return x.q !== q; })).slice(0, 8);
@@ -248,11 +283,14 @@
   /* ---------- 열기 · 닫기 ---------- */
   function open() {
     box.classList.add('is-open'); fab.setAttribute('aria-expanded', 'true');
-    if (!logEl.children.length) msg('bot', '<b class="t">' + esc(s.name || '고객') + '님, 무엇이 궁금하세요?</b><span class="h">마이크를 누르고 말해 주셔도 돼요. 리포트 원문을 근거로 답해 드려요.</span>');
-    var b = $('.yq-opt', box); if (b) b.focus({ preventScroll: true });
+    if (!inline && !logEl.children.length) msg('bot', '<b class="t">' + esc(s.name || '고객') + '님, 무엇이 궁금하세요?</b><span class="h">마이크를 누르고 말해 주셔도 돼요. 리포트 원문을 근거로 답해 드려요.</span>');
+    if (!inline) { var b = $('.yq-opt', box); if (b) b.focus({ preventScroll: true }); }
   }
+  // 라운지 '유리에게 질문' 카드 등에서 부르면: 넓은 모양은 그 자리로 스크롤하고 입력창에 커서
+  function focusInline() { box.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' }); input.focus({ preventScroll: true }); }
   function close() {
     stopMic(); if ('speechSynthesis' in window) speechSynthesis.cancel(); setMood('idle');
+    if (inline) return;
     box.classList.remove('is-open'); fab.setAttribute('aria-expanded', 'false'); fab.focus({ preventScroll: true });
   }
   fab.addEventListener('click', open);
@@ -265,14 +303,15 @@
     var b = e.target.closest('[data-q]'); if (!b) return;
     ask(PRESETS.filter(function (q) { return q.id === b.dataset.q; })[0].q);
   });
-  $('.yq-ask', box).addEventListener('submit', function (e) { e.preventDefault(); ask(input.value); input.value = ''; input.placeholder = '질문을 입력하거나 마이크를 눌러 말해 주세요'; });
-  window.YuriQA = { open: open, close: close, ask: ask };
-  if (/#qa$/.test(location.hash)) open();
+  $('.yq-ask', box).addEventListener('submit', function (e) { e.preventDefault(); ask(input.value); input.value = ''; input.placeholder = inline ? '리서치센터 리포트에 무엇이든 물어보세요' : '질문을 입력하거나 마이크를 눌러 말해 주세요'; });
+  window.YuriQA = { open: inline ? focusInline : open, close: close, ask: ask };
+  if (inline) open(); else if (/#qa$/.test(location.hash)) open();
 
   /* ---------- 가입 상담에서 넘어왔으면: 큰 구가 작아져 버튼 자리로 ---------- */
   var docked = null;
   try { docked = sessionStorage.getItem('il.yuri-dock'); sessionStorage.removeItem('il.yuri-dock'); } catch (e) {}
-  if (docked && !reduce) {
+  if (docked && inline && !reduce) { box.classList.add('is-grow'); }
+  else if (docked && !reduce) {
     var orb = document.createElement('div'); orb.className = 'yq-dock'; document.body.appendChild(orb);
     fab.style.opacity = '0';
     requestAnimationFrame(function () {

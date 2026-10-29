@@ -1,162 +1,109 @@
 <!doctype html>
 <html lang="ko">
 <head>
-<script src="assets/gate.js"></script>
+<script src="assets/gate.js?v=20261029k"></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Home · 유진 Insight Lab</title>
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
 <link rel="stylesheet" href="assets/app.css?v=20261029j">
-<link rel="stylesheet" href="assets/cardnews/cardnews.css?v=20261029c">
-<link rel="stylesheet" href="assets/desk.css?v=20261029c">
-<link rel="stylesheet" href="assets/home.css?v=20261029j">
+<link rel="stylesheet" href="assets/orbit-books.css?v=20261029c">
+<link rel="stylesheet" href="assets/home.css?v=20261029n">
 <script src="assets/config.js?v=20261029a"></script>
 <script src="assets/config.local.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" defer></script>
-<script src="assets/partials.js?v=20261029j" defer></script>
+<script src="assets/partials.js?v=20261029n" defer></script>
 <script src="assets/events-data.js?v=20261029c" defer></script>
-<script src="assets/conf-records.js?v=20261029c" defer></script>
-<script src="assets/saved-research.js?v=20261029c" defer></script>
-<script src="assets/cardnews/cardnews.js?v=20261029c" defer></script>
-<script src="assets/home.js?v=20261029j" defer></script>
-<script src="assets/desk.js?v=20261029i" defer></script>
-<script src="assets/yuri-qa.js?v=20261029j" defer></script>
+<script src="assets/orbit-books.js?v=20261029c" defer></script>
+<script src="assets/home.js?v=20261029n" defer></script>
+<script src="assets/cn-story.js?v=20261029m" defer></script>
+<script src="assets/yuri-qa.js?v=20261029n" defer></script>
 </head>
-<body data-no-crumb data-nav="dark">
+<body data-no-crumb>
 <main id="main">
 
-  <!-- 맞춤형 서비스 라운지 — 제목 · 가입 상담 기반 추천 -->
+  <!-- 1. 무엇이든 물어보세요 — 가입 상담 채팅창이 가로로 넓어진 근거형 Q&A (음성 인식) -->
   <section class="hm-top" aria-labelledby="hm-main">
-    <div class="wrap">
-      <h1 class="hm-top__title" id="hm-main"></h1>
-      <div class="hm-recs" aria-labelledby="hm-recs-title">
-        <div class="hm-recs__head">
-          <h2 class="hm-recs__title" id="hm-recs-title">맞춤 서비스 추천</h2>
-          <p class="hm-recs__meta" id="hm-recs-meta"></p>
-        </div>
-        <ul class="hm-recs__list" id="hm-recs"></ul>
-      </div>
+    <div class="wrap hm-top__wrap">
+      <h1 class="sr-only" id="hm-main">근거형 Q&amp;A</h1>
+      <p class="hm-top__k" id="hm-who"></p>
+      <div class="hm-qa" id="yq-host"></div>
     </div>
   </section>
 
-  <!-- 내 라운지 — 고객 분류별 기본 구성, 직접 꾸미기 -->
-  <section class="lg" id="lounge" aria-labelledby="lg-title">
+  <!-- 2. 유진 Event — Orbit Books → 행사 상세(Events) -->
+  <section class="section hm-ev" id="event" aria-labelledby="ev-title">
     <div class="wrap">
-      <div class="lg-head">
+      <div class="sec-head hm-head">
         <div>
-          <h2 class="lg-title" id="lg-title">내 라운지</h2>
-          <p class="lg-meta" id="lg-meta" aria-live="polite"></p>
+          <p class="sec-eyebrow">EUGENE EVENT</p>
+          <h2 class="sec-title" id="ev-title">책을 골라 행사를 살펴보세요</h2>
+          <p class="sec-sub">Corporate Day부터 WM 세미나까지, 리서치센터 행사 여섯 갈래예요.</p>
         </div>
-        <button class="btn btn--secondary btn--sm" type="button" id="lg-edit" aria-pressed="false">라운지 꾸미기</button>
-      </div>
-      <ul class="lg-grid" id="lg-grid"></ul>
-      <div class="lg-tray" id="lg-tray" hidden>
-        <p class="lg-tray__k">추가할 수 있는 메뉴</p>
-        <div class="lg-tray__list" id="lg-tray-list"></div>
-        <button class="btn btn--text" type="button" id="lg-reset">추천 구성으로 되돌리기</button>
       </div>
     </div>
+    <div class="hm-orbit" id="hm-orbit"></div>
+    <div class="wrap hm-cta"><a class="btn btn--primary" href="conferences.html">행사 · 컨퍼런스 전체 보기 →</a></div>
   </section>
-  <!-- 2. 리서치 워크스페이스 -->
-  <section class="section desk-sec" id="my">
-    <span id="workspace"></span>
-    <div class="wrap">
-      <div class="sec-head">
-        <div class="sec-eyebrow">MY RESEARCH</div>
-        <h2 class="sec-title" id="ws-title">리서치 워크스페이스</h2>
-        <p class="sec-sub">관심 분야에 맞춘 브리핑과 자료를 한곳에 모았어요.</p>
+
+  <!-- 3. 리서치 카드뉴스 — 스크롤하면 카드가 넘어간다 → 리서치 상세(Research) -->
+  <section class="cns" id="research" aria-labelledby="cns-title">
+    <div class="cns__sticky">
+      <div class="cns__grid" aria-hidden="true"></div>
+      <div class="cns__in">
+        <div class="cns__side">
+          <p class="cns__k">RESEARCH CARD NEWS</p>
+          <h2 class="cns__title" id="cns-title">수많은 리포트,<br>한 장의 카드로.</h2>
+          <ol class="cns__steps">
+            <li class="is-on"><b>01</b><h3>매일 아침, 시황 세 줄.</h3><p>전일 시장의 핵심만 세 줄로. 출근길 1분이면 충분해요.</p></li>
+            <li><b>02</b><h3>테마는 한 장으로.</h3><p>복잡한 밸류체인을 키워드와 차트 한 장으로 정리해요.</p></li>
+            <li><b>03</b><h3>리포트는 3분 요약.</h3><p>원문의 논리를 지키면서 체크포인트부터 보여 드려요.</p></li>
+          </ol>
+          <a class="btn btn--primary cns__cta" href="market.html">리서치 자세히 보기 →</a>
+        </div>
+        <div class="cns__stage">
+          <div class="cns__phone" aria-label="카드뉴스 화면 예시" role="img">
+            <div class="cns__status"><span>8:00</span><i></i><span>●●● ▮</span></div>
+            <div class="cns__app"><span class="cns__logo">e</span><b>유진 카드뉴스</b><span class="cns__follow">팔로우</span></div>
+            <div class="cns__view"><div class="cns__slides" id="cns-slides">
+              <article class="cnc cnc--navy"><p class="cnc__m" id="cnc-date">EUGENE DAILY</p><h4>오늘 시장,<br>세 줄 요약</h4>
+                <ol class="cnc__list" id="cnc-daily"><li>외국인 순매수 전환 여부 점검</li><li>강세 · 약세 업종 한눈에</li><li>환율 흐름과 위험선호</li></ol>
+                <svg class="cnc__spark" viewBox="0 0 120 36" aria-hidden="true"><path d="M2 30 L22 24 L40 27 L60 16 L80 19 L100 9 L118 6"/></svg>
+                <p class="cnc__f">유진투자증권 리서치센터</p></article>
+              <article class="cnc cnc--peri"><p class="cnc__m">THEME IN ONE PAGE</p><h4>AI 반도체,<br>다음 승부처는<br>전력.</h4>
+                <div class="cnc__bars" aria-hidden="true"><i style="--h:38%"></i><i style="--h:56%"></i><i style="--h:47%"></i><i style="--h:72%"></i><i style="--h:88%"></i></div>
+                <p class="cnc__keys"><span>HBM</span><span>전력 인프라</span><span>패키징</span></p><p class="cnc__f">테마 리포트 요약 · 예시</p></article>
+              <article class="cnc cnc--white"><p class="cnc__m">REPORT IN 3 MIN</p><h4>실적 시즌,<br>이것만 체크.</h4>
+                <ol class="cnc__check"><li>가이던스 상향 기업</li><li>마진이 개선되는 업종</li><li>컨센서스와의 괴리</li></ol>
+                <p class="cnc__link">원문 리포트 보기 →</p><p class="cnc__f">유진투자증권 리서치센터</p></article>
+            </div></div>
+            <div class="cns__dots" aria-hidden="true"><i class="is-on"></i><i></i><i></i></div>
+            <div class="cns__acts" aria-hidden="true"><span>♡ 1.2k</span><span>저장</span><span>공유 ↗</span></div>
+          </div>
+          <p class="cns__label" id="cns-label">DAILY MARKET · 오늘의 시황</p>
+          <span class="cns__cur" data-c="analyst">애널리스트</span>
+          <span class="cns__cur" data-c="ai">AI 요약</span>
+          <span class="cns__cur" data-c="editor">에디터</span>
+          <span class="cns__cur" data-c="comp">컴플라이언스</span>
+        </div>
       </div>
-      <div class="ws">
-        <div class="ws__main">
-          <article class="card ws-brief" id="ws-brief" aria-live="polite"></article>
-          <article class="card">
-            <div class="card__body">
-              <div class="ws-h"><h3>맞춤 자료함</h3><span class="ws-h__note" id="ws-fmt"></span></div>
-              <div class="ws-files" id="ws-files"></div>
-            </div>
-          </article>
+      <!-- 스크롤 끝: 휴대폰 카드가 리포트 카드뉴스 보관함으로 이어진다 -->
+      <div class="cna" id="cna" aria-labelledby="cna-title">
+        <div class="cna__head">
+          <b id="cna-title">EUGENE CARD NEWS</b>
+          <div class="cna__tabs" role="tablist" aria-label="카드뉴스 분류" id="cna-tabs">
+            <button role="tab" aria-selected="true" data-tab="all">전체</button>
+            <button role="tab" aria-selected="false" data-tab="market">시황</button>
+            <button role="tab" aria-selected="false" data-tab="theme">테마</button>
+            <button role="tab" aria-selected="false" data-tab="report">리포트</button>
+          </div>
         </div>
-        <div class="ws__side">
-          <article class="card">
-            <div class="card__body">
-              <div class="ws-h"><h3>상담 · 담당자</h3></div>
-              <div id="ws-consult"></div>
-              <div class="ws-mgr">
-                <div><span class="ws-mgr__eyebrow" id="ws-mgr-role">담당</span><b id="ws-mgr-title">담당자 연결 · 상담 요청</b><p>궁금한 리포트나 미팅 요청을 남겨 주세요.</p></div>
-                <button type="button" class="btn btn--sm ws-mgr__btn" id="ws-consult-btn">상담 요청</button>
-              </div>
-            </div>
-          </article>
-          <article class="card">
-            <div class="card__body">
-              <div class="ws-h"><h3>관심 종목 · 테마</h3></div>
-              <ul class="ws-tags" id="ws-tags" aria-label="관심 종목 · 테마"></ul>
-              <form class="ws-add" id="ws-add" autocomplete="off">
-                <label class="sr-only" for="ws-add-input">관심 종목 · 테마 추가</label>
-                <input class="input" id="ws-add-input" maxlength="20" placeholder="예: 전력기기">
-                <button class="btn btn--secondary btn--sm" type="submit">+ 추가</button>
-              </form>
-              <div class="ws-alerts" role="group" aria-label="알림 설정">
-                <div class="ws-alerts__h">알림</div>
-                <label class="tgl"><span>새 리포트 · 관심 테마</span><input type="checkbox" data-alert="report"><i aria-hidden="true"></i></label>
-                <label class="tgl"><span>신청한 행사 일정</span><input type="checkbox" data-alert="events"><i aria-hidden="true"></i></label>
-                <label class="tgl"><span>새 카드뉴스</span><input type="checkbox" data-alert="cardnews"><i aria-hidden="true"></i></label>
-                <p class="form-note">시연 화면이라 설정만 저장되고 실제 알림은 보내지 않아요.</p>
-              </div>
-            </div>
-          </article>
-        </div>
+        <div class="cna__grid" id="cna-grid"></div>
       </div>
     </div>
   </section>
 
-  <!-- 3. 카드뉴스 -->
-  <section class="section section--gray desk-sec" id="cardnews">
-    <div class="wrap">
-      <div class="sec-head">
-        <div class="sec-eyebrow">CARD NEWS</div>
-        <h2 class="sec-title">오늘의 리서치, 카드 한 장으로</h2>
-        <p class="sec-sub">리포트의 핵심 숫자를 카드 몇 장으로 정리했어요. 카드를 누르면 넘겨 볼 수 있어요.</p>
-      </div>
-      <div class="tabs" role="tablist" aria-label="카드뉴스 분류" id="cn-tabs">
-        <button role="tab" aria-selected="true" data-tab="rec" aria-controls="cn-grid">추천</button>
-        <button role="tab" aria-selected="false" data-tab="market" aria-controls="cn-grid">시황·전략</button>
-        <button role="tab" aria-selected="false" data-tab="industry" aria-controls="cn-grid">산업·테마</button>
-        <button role="tab" aria-selected="false" data-tab="company" aria-controls="cn-grid">기업 리포트</button>
-      </div>
-      <div class="cn-grid" id="cn-grid" role="tabpanel" aria-label="카드뉴스 목록"></div>
-      <div class="cn-more"><button type="button" class="btn btn--text" id="cn-more" aria-expanded="false">카드뉴스 전체 보기 →</button></div>
-    </div>
-  </section>
-
-  <!-- 4. 나의 리서치 | 내 이벤트 신청 내역 -->
-  <section class="section desk-sec" id="history">
-    <div class="wrap desk-two">
-      <article class="card" id="research">
-        <div class="card__body">
-          <div class="ws-h"><h3>나의 리서치</h3></div>
-          <div class="tabs" role="tablist" aria-label="나의 리서치" id="rs-tabs">
-            <button role="tab" aria-selected="true" data-tab="saved" aria-controls="rs-list">저장한 리서치</button>
-            <button role="tab" aria-selected="false" data-tab="received" aria-controls="rs-list">받은 자료</button>
-          </div>
-          <div class="chips rs-chips" id="rs-chips" role="group" aria-label="카테고리"></div>
-          <ul class="rs-list" id="rs-list" role="tabpanel" aria-label="나의 리서치 목록"></ul>
-          <button type="button" class="btn btn--text" id="rs-more" hidden>전체 보기 →</button>
-        </div>
-      </article>
-      <article class="card" id="events">
-        <div class="card__body">
-          <div class="ws-h"><h3>내 이벤트 신청 내역</h3><a class="btn btn--text" href="conferences.html">Events →</a></div>
-          <div class="tabs" role="tablist" aria-label="이벤트 신청 내역" id="ev-tabs">
-            <button role="tab" aria-selected="true" data-tab="up" aria-controls="ev-list">다가오는 행사</button>
-            <button role="tab" aria-selected="false" data-tab="past" aria-controls="ev-list">지난 행사</button>
-          </div>
-          <ul class="ev-list" id="ev-list" role="tabpanel" aria-label="이벤트 신청 목록"></ul>
-        </div>
-      </article>
-    </div>
-  </section>
 </main>
 </body>
 </html>

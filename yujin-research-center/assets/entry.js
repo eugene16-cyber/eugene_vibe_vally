@@ -38,6 +38,7 @@
 
   function finish(session) {
     try { localStorage.setItem('il.session', JSON.stringify(session)); } catch (e) {}
+    try { window.name = 'il:' + JSON.stringify(session); } catch (e) {}  // 저장소가 막힌 환경 대비
     if (session.status === 'approved') {
       var back = null;
       try { back = sessionStorage.getItem('il.return'); sessionStorage.removeItem('il.return'); } catch (e) {}

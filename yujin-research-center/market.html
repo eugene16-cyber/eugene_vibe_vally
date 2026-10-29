@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ko">
 <head>
-<script src="assets/gate.js"></script>
+<script src="assets/gate.js?v=20261029k"></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Research · 유진 Insight Lab</title>
@@ -14,8 +14,7 @@
 <script src="assets/config.js?v=20261029a"></script>
 <script src="assets/config.local.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" defer></script>
-<script src="assets/partials.js?v=20261029j" defer></script>
-<script src="assets/anchor.js?v=20261029a" defer></script>
+<script src="assets/partials.js?v=20261029n" defer></script>
 <script src="assets/stock-events.js?v=20261029a" defer></script>
 <script src="assets/theme-rotation.js?v=20261029a" defer></script>
 </head>
@@ -34,14 +33,13 @@
     </div>
   </div>
 
-  <!-- 1. AI 앵커 + 시황 -->
+  <!-- 1. 오늘의 시황 (AI 앵커는 뺐다) -->
   <section class="section mk-first" id="briefing" aria-labelledby="briefing-title">
     <div class="wrap">
       <div class="sec-head">
-        <span class="sec-eyebrow" id="briefing-eyebrow">AI ANCHOR · DAILY BRIEFING</span>
+        <span class="sec-eyebrow" id="briefing-eyebrow">DAILY MARKET</span>
         <h2 class="sec-title" id="briefing-title">오늘의 시황 브리핑</h2>
       </div>
-      <div id="anchor" class="mk-area"></div>
       <div id="below" class="mk-area mk-below"></div>
     </div>
   </section>
@@ -167,37 +165,15 @@ document.addEventListener('DOMContentLoaded', function () {
     if (trh) { trh.hidden = r === 'global'; trg.hidden = r !== 'global'; }
   }
 
-  /* ---------- 1. 앵커 + 시황 ---------- */
+  /* ---------- 1. 시황 제목 (AI 앵커 없음) ---------- */
   function renderAnchorArea() {
-    var el = $id('anchor');
     if (REGION === 'kr') {
-      var d = day(), st = (d.strong_sectors || [])[0] || {}, wk = (d.weak_sectors || []).slice().sort(function (a, b) { return num(a.chg) - num(b.chg); })[0] || {};
-      var f = d.flows && d.flows.kospi || { foreign: d.foreign_net, inst: d.inst_net, retail: d.retail_net };
-      var b = KR.brief && KR.brief.brief_date === d.snapshot_date ? KR.brief : null;
-      var dd = new Date(d.snapshot_date + 'T00:00:00');
-      $id('briefing-eyebrow').textContent = 'AI ANCHOR · 국내 데일리 브리핑';
+      var dd = new Date(day().snapshot_date + 'T00:00:00');
+      $id('briefing-eyebrow').textContent = 'DAILY MARKET · 국내 마감';
       $id('briefing-title').textContent = (dd.getMonth() + 1) + '월 ' + dd.getDate() + '일 국내 증시 마감';
-      renderAnchor(el, {
-        kind: 'market', sample: KR.sample,
-        title: b && b.title || 'KOSPI ' + d.kospi + ' (' + signed(d.kospi_chg) + ') 마감 브리핑',
-        caption: b && b.caption || 'KOSPI · KOSDAQ 마감과 투자자별 수급, 업종 흐름, 환율을 한 번에 정리해요.',
-        videoUrl: b && b.video_url || '', poster: b && b.thumbnail_url || '',
-        chapters: [
-          { title: 'KOSPI ' + d.kospi + ' (' + signed(d.kospi_chg) + ')', sub: 'KOSDAQ ' + d.kosdaq + ' (' + signed(d.kosdaq_chg) + ')', time: '0:00' },
-          { title: '투자자별 순매수', sub: '외국인 ' + signed(f.foreign) + ' · 기관 ' + signed(f.inst) + ' · 개인 ' + signed(f.retail), time: '0:20' },
-          { title: '업종 흐름', sub: '강세 1위 ' + (st.name || '-') + ' ' + (st.chg || '') + ' · 약세 1위 ' + (wk.name || '-') + ' ' + (wk.chg || ''), time: '0:42' },
-          { title: '환율', sub: 'USD/KRW ' + d.usdkrw + ' (' + signed(d.usdkrw_chg) + ')', time: '1:02' }
-        ]
-      });
     } else {
-      $id('briefing-eyebrow').textContent = 'AI ANCHOR · 해외 오버나이트';
+      $id('briefing-eyebrow').textContent = 'OVERNIGHT · 해외';
       $id('briefing-title').textContent = '밤사이 해외 증시';
-      var chs = ['IXIC', 'GSPC', 'DJI', 'N225'].map(function (k, i) {
-        var x = GL.idx[k]; return { title: x[0] + ' ' + fmt(x[1]), sub: sign(x[2]), time: '0:' + (i ? i * 15 : '00') };
-      });
-      chs.push({ title: GL.title, sub: '밤사이 흐름 요약', time: '1:00' });
-      // 해외 앵커 영상은 없으면 지어내지 않는다 — 재생 시 '곧 제공'
-      renderAnchor(el, { kind: 'global', sample: GL.ovSample, title: GL.title, caption: GL.asof + ' 기준 미국 · 아시아 지수 흐름을 정리해요.', videoUrl: '', chapters: chs });
     }
   }
 
@@ -311,7 +287,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function renderAll(animate) {
     renderAsof(); renderAnchorArea(); renderBelow(); renderIndices(); renderHeat();
-    if (animate) ['anchor', 'below', 'indices', 'heatmap'].forEach(function (id) { fade($id(id)); });
+    if (animate) ['below', 'indices', 'heatmap'].forEach(function (id) { fade($id(id)); });
   }
 
   /* ---------- 고객 유형별 모듈 ---------- */
