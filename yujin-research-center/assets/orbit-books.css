@@ -1,0 +1,120 @@
+/* Orbit Books — 행사 카테고리 책 공전 (Events · Home). 동작은 orbit-books.js */
+.ob{position:relative;--ob-ease:cubic-bezier(.16,1,.3,1)}
+.ob__shelf{position:relative;height:600px;overflow:hidden;perspective:1600px;
+  background:radial-gradient(ellipse 46% 42% at 50% 54%,#e4eefc 0%,rgba(242,246,253,.6) 55%,rgba(255,255,255,0) 80%)}
+.ob__center{position:absolute;left:50%;top:53%;width:190px;height:190px;border-radius:50%;transform:translate(-50%,-50%);pointer-events:none;
+  background:radial-gradient(circle at 30% 25%,#fff 4%,#cfe0f8 45%,#5f97e6 92%);box-shadow:inset -12px -9px 24px rgba(11,46,107,.12),0 0 80px rgba(27,116,228,.18);
+  display:grid;place-items:center;color:#3f6fb3;font-family:Georgia,"Times New Roman",serif;font-style:italic;font-size:28px}
+.ob__ring{position:absolute;left:50%;top:53%;width:min(76%,980px);height:250px;border:1px solid rgba(27,116,228,.22);border-radius:50%;
+  transform:translate(-50%,-50%) rotate(-7deg);pointer-events:none}
+.ob__ring--two{width:min(82%,1060px);height:292px;border-style:dashed;border-color:rgba(27,116,228,.16);transform:translate(-50%,-50%) rotate(7deg)}
+.ob__star{position:absolute;left:86%;top:20%;width:7px;height:7px;border-radius:50%;background:var(--blue-point);box-shadow:0 0 0 5px rgba(77,171,247,.15);
+  animation:obStar 5s ease-in-out infinite;pointer-events:none}
+.ob__star--two{left:46%;top:80%;width:5px;height:5px;animation-delay:-2s}
+@keyframes obStar{50%{transform:scale(.6);opacity:.5}}
+.ob__center,.ob__ring,.ob__star{transition:opacity .5s var(--ob-ease)}
+.ob__shelf.is-focus .ob__center,.ob__shelf.is-focus .ob__star{opacity:0}
+.ob__shelf.is-focus .ob__ring{opacity:.2}
+.ob__toggle{position:absolute;right:16px;top:14px;z-index:50;height:30px;padding:0 12px;border-radius:var(--radius-full);border:1px solid var(--color-hairline);
+  background:rgba(255,255,255,.9);font-size:11px;font-weight:600;color:var(--ink-500)}
+.ob__toggle:hover{color:var(--blue-cta)}
+
+/* 책 */
+.ob-book{position:absolute;left:0;top:0;width:178px;height:240px;padding:0;perspective:900px;will-change:transform,opacity;transform-origin:center;
+  text-align:left;-webkit-tap-highlight-color:transparent}
+.ob-book:focus-visible{outline:3px solid var(--blue-cta);outline-offset:6px;border-radius:4px}
+.ob-vol{display:block;position:relative;width:100%;height:100%;transform-style:preserve-3d;
+  transform:rotateY(var(--by,-14deg)) rotateZ(var(--bz,0deg));transition:transform .7s var(--ob-ease)}
+.ob-book.is-open .ob-vol{transform:rotateY(0) rotateZ(0)}
+.ob-paper{position:absolute;inset:3px -6px 3px 2px;border-radius:1px 5px 5px 1px;transform:translateZ(-7px);
+  background:repeating-linear-gradient(to right,#fff 0,#fff 1px,#d4d8df 1px,#d4d8df 2px);box-shadow:10px 14px 18px rgba(11,46,107,.13)}
+.ob-inside{position:absolute;inset:2px 0;transform:translateZ(0);background:#fffdf8;border:1px solid #e4e3dd;border-radius:1px 4px 4px 1px;
+  padding:18px 16px;color:var(--ink-800);display:flex;flex-direction:column;gap:10px;font-size:12px;line-height:1.55}
+.ob-inside small{font-size:10px;color:var(--gray-400);letter-spacing:.06em}
+.ob-inside strong{font-size:15px;font-weight:800;color:var(--blue-navy);padding-bottom:8px;border-bottom:1px solid #e4e3dd;line-height:1.35}
+.ob-in__n{font-size:12px;color:var(--ink-500)}
+.ob-in__n b{color:var(--blue-cta)}
+.ob-cover{position:absolute;inset:0;transform:translateZ(4px);transform-origin:left center;transform-style:preserve-3d;transition:transform 1s var(--ob-ease),background .3s;
+  border-radius:1px 4px 4px 1px;background:var(--cover);color:var(--ctext,#fff);padding:18px 17px 13px;display:flex;flex-direction:column;overflow:hidden;
+  box-shadow:9px 18px 25px rgba(11,46,107,.14)}
+.ob-cover::before{content:"";position:absolute;left:4px;top:0;bottom:0;width:3px;background:rgba(255,255,255,.08);border-left:1px solid rgba(0,0,0,.1);box-shadow:3px 0 5px rgba(0,0,0,.09)}
+.ob-book[data-light] .ob-cover{border:1px solid rgba(11,46,107,.16)}
+.ob-book[aria-pressed=true] .ob-cover{box-shadow:0 0 0 2px #fff,0 0 0 4px var(--blue-cta),9px 18px 25px rgba(11,46,107,.18)}
+.ob-ed{font-size:9px;letter-spacing:.12em;opacity:.7;margin-bottom:14px}
+.ob-bt{font-size:22px;font-weight:800;letter-spacing:-.02em;line-height:1.18}
+.ob-mk{font-family:Georgia,"Times New Roman",serif;font-size:64px;line-height:1;letter-spacing:-3px;margin-top:14px;opacity:.9}
+.ob-bm{display:none}
+.ob-bf{display:flex;justify-content:space-between;gap:6px;margin-top:auto;padding-top:8px;border-top:1px solid color-mix(in srgb,currentColor 28%,transparent);font-size:10px;font-weight:600}
+/* 펼친 표지 — 뒤집힌 글자는 숨기고 무지 면만 */
+.ob-cover>*{transition:opacity .2s linear}
+.ob-book.is-open .ob-cover{transform:translateZ(4px) rotateY(-130deg);background:color-mix(in srgb,var(--cover) 82%,#000)}
+.ob-book.is-open .ob-cover>*{opacity:0;transition-delay:.25s}
+
+/* 오른쪽 패널 */
+.ob__panel{position:absolute;left:47%;right:2%;top:50%;transform:translateY(-50%);z-index:45;max-width:520px;padding:6px 4px}
+/* 책이 정면으로 돌아오고(0.85s) 다른 책이 거의 사라진 뒤에 들어와서 글자가 책과 겹치지 않아요 */
+.ob__panel.is-in{animation:obPanelIn .55s var(--ob-ease) 1.05s both}
+@keyframes obPanelIn{from{opacity:0;transform:translate(28px,-50%)}to{opacity:1;transform:translateY(-50%)}}
+.ob__x{position:absolute;right:0;top:-6px;width:36px;height:36px;border-radius:50%;border:1px solid var(--color-hairline);background:#fff;color:var(--ink-800);font-size:18px}
+.ob__x:hover{color:var(--blue-cta);border-color:#b9cff3}
+
+/* 패널 내용 (페이지가 opts.panel로 채우는 기본 모양) */
+.obp__k{font-size:11px;font-weight:700;letter-spacing:.14em;color:var(--blue-cta)}
+.obp__t{font-size:40px;font-weight:800;letter-spacing:-.035em;color:var(--blue-navy);margin:10px 44px 0 0;line-height:1.1}
+.obp__t span{display:block;font-size:17px;font-weight:700;color:var(--ink-500);letter-spacing:-.01em;margin-top:8px}
+.obp__d{margin-top:14px;font-size:15px;line-height:1.7;color:var(--color-muted)}
+.obp__stat{display:flex;gap:16px;margin-top:14px;font-size:13.5px;color:var(--ink-800)}
+.obp__stat b{color:var(--blue-cta);font-size:17px;font-variant-numeric:tabular-nums}
+.obp__h{margin:20px 0 6px;font-size:12px;font-weight:800;color:var(--ink-800);letter-spacing:.02em}
+.obp__list{list-style:none;margin:0;padding:0;border-top:1px solid var(--color-hairline)}
+.obp__list button{display:grid;grid-template-columns:78px minmax(0,1fr);gap:12px;width:100%;padding:11px 2px;border-bottom:1px solid var(--color-hairline);text-align:left}
+.obp__list button:hover b{color:var(--blue-cta)}
+.obp__list time{font-weight:800;color:var(--blue-navy);font-size:14px;font-variant-numeric:tabular-nums}
+.obp__list b{display:block;font-size:14.5px;line-height:1.4}
+.obp__list em{display:block;font-style:normal;font-size:12px;color:var(--color-muted);margin-top:2px}
+.obp__none{font-size:14px;color:var(--color-muted)}
+.obp__acts{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:18px}
+
+/* 아래 카테고리 탭 · 화살표 */
+.ob__tabs{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:6px}
+.ob__tablist{display:flex;gap:4px;flex-wrap:wrap;justify-content:center}
+.ob__tab{font-size:15px;font-weight:600;color:var(--gray-400);padding:8px 10px;position:relative}
+.ob__tab:hover{color:var(--ink-800)}
+.ob__tab[aria-pressed=true]{color:var(--blue-navy);font-weight:800}
+.ob__tab[aria-pressed=true]::after{content:"";position:absolute;left:10px;right:10px;bottom:2px;height:2px;border-radius:2px;background:var(--blue-navy)}
+.ob__arrow{width:40px;height:40px;flex:none;border-radius:50%;background:var(--blue-navy);color:#fff;font-size:20px;line-height:1}
+.ob__arrow:hover{background:var(--blue-cta)}
+
+@media (max-width:980px){
+  .ob__panel{left:44%}
+  .obp__t{font-size:30px}
+}
+/* 모바일 — 공전 대신 가로로 넘기는 카드 */
+@media (max-width:760px){
+  .ob__shelf{height:auto;overflow:visible;background:none;perspective:none}
+  .ob__center,.ob__ring,.ob__star,.ob__toggle{display:none}
+  .ob__track{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 16px 12px;margin:0 -16px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .ob__track::-webkit-scrollbar{display:none}
+  .ob-book{position:relative;flex:0 0 72%;max-width:260px;height:150px;scroll-snap-align:center;perspective:none}
+  .ob-vol{transform:none!important;transition:none}
+  .ob-paper,.ob-inside{display:none}
+  .ob-cover,.ob-book.is-open .ob-cover{transform:none;background:var(--cover);border-radius:var(--radius-md);padding:16px;box-shadow:var(--shadow-soft)}
+  .ob-book.is-open .ob-cover>*{opacity:1}
+  .ob-cover::before{display:none}
+  .ob-ed{font-size:9px;margin-bottom:6px}
+  .ob-bt{font-size:19px}
+  .ob-bt br{display:none}
+  .ob-mk{position:absolute;right:14px;top:10px;font-size:40px;opacity:.25;margin:0}
+  .ob-bm{display:block;font-size:var(--text-micro);opacity:.85;margin-top:6px}
+  .ob-book:active .ob-cover{transform:scale(.98)}
+  .ob__panel,.ob__panel.is-in{position:relative;left:auto;right:auto;top:auto;transform:none;max-width:none;margin-top:14px;animation:none}
+  .obp__t{font-size:28px}
+  .ob__tabs{justify-content:flex-start}
+  .ob__tablist{flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;scrollbar-width:none;min-width:0}
+  .ob__tablist::-webkit-scrollbar{display:none}
+  .ob__tab{flex:0 0 auto}
+  .ob__arrow{width:34px;height:34px;font-size:17px}
+}
+@media (prefers-reduced-motion:reduce){
+  .ob__shelf *,.ob__panel{animation:none!important;transition:none!important}
+}
