@@ -315,3 +315,57 @@
   .yqa__grid:not(.is-solo) .yqa__card{height:auto;max-height:520px}
   .yqa__grid:not(.is-solo) .yqa__view{height:520px}
 }
+
+/* ---------- 근거형 Q&A 결과 — 다크 글래스 (남색 배경 위에 반투명 카드) ---------- */
+.yqa{--yd-line:rgba(255,255,255,.12);--yd-fill:rgba(255,255,255,.05);--yd-chip:rgba(255,255,255,.08);--yd-ink:#eef2f8;--yd-sub:#a3adbd;--yd-blue:#6aa8ff;--yd-up:#ff7a7a;--yd-down:#78aaff}
+.yqa__card,.yqa__view{background:linear-gradient(180deg,rgba(40,60,110,.42),rgba(16,26,52,.5));border:1px solid var(--yd-line);border-radius:24px;color:var(--yd-ink);box-shadow:0 24px 60px -30px rgba(0,0,0,.7);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.yqa__card{padding:28px 30px 22px;scrollbar-color:rgba(255,255,255,.18) transparent}
+.yqa__q{font-size:17px;color:var(--yd-blue)}
+.yqa__meta{color:var(--yd-sub);font-size:13px}
+.yqa__badge{background:var(--yd-chip);color:var(--yd-sub)}
+.yqa__badge.is-ok{background:rgba(61,220,151,.16);color:#7ee6b2}
+.yqa__badge.is-ai{background:rgba(245,197,24,.16);color:#ffd866}
+.yqa__lead{font-size:16.5px;font-weight:600;color:var(--yd-ink)}
+.yqa__lead sup{color:var(--yd-blue)}
+.yqa__pts{gap:22px;padding-left:20px}
+.yqa__pts li::marker{color:var(--yd-ink)}
+.yqa__pt-h{justify-content:space-between;flex-wrap:nowrap;align-items:flex-start}
+.yqa__pt-h b{color:var(--yd-ink);font-size:16px}
+.yqa__fit{flex:none;background:var(--yd-chip);color:#cfd6e2}
+.yqa__fit.is-ok{background:rgba(61,220,151,.16);color:#7ee6b2}
+.yqa__pts p{margin-top:10px;font-size:15px;color:#d5dbe5}
+.yqa__src{margin-top:10px;padding:8px 12px;border-radius:10px;background:var(--yd-chip);color:#c3cad6;font-size:13.5px}
+.yqa__src:hover{background:rgba(106,168,255,.18);color:#fff}
+.yqa__foot{border-top-color:var(--yd-line);color:var(--yd-sub)}
+.yqa__go{background:#2f7bff}
+.yqa__note{color:var(--yd-sub)}
+.yqa__wait{color:var(--yd-sub)}
+.yqa__vh{padding:26px 28px 8px}
+.yqa__vh b{color:#fff;font-size:19px}
+.yqa__vh span{color:var(--yd-sub);font-size:13px}
+.yqa__x{background:transparent;border-color:rgba(255,255,255,.25);color:#e6ebf3;width:42px;height:42px}
+.yqa__vnav{padding:8px 28px 18px;margin:0 0 0;border-bottom:1px solid var(--yd-line)}
+.yqa__vnav button{background:transparent;border-color:rgba(255,255,255,.22);color:#e6ebf3}
+.yqa__vnav span{color:var(--yd-sub)}
+.yqa__vnav a{color:var(--yd-blue)}
+.yqa__vbody{padding:18px 28px 24px;font-size:15.5px;color:#d5dbe5}
+.yqa__vbody mark{background:rgba(245,197,24,.2);color:#ffe08a;padding:2px 4px}
+.yqa__w{color:#fff;font-weight:800}
+.yqa__sum{color:var(--yd-ink)}
+.yqa__sum b.up,.yqa__kv b.up,.yqa__chart .up{color:var(--yd-up);fill:var(--yd-up)}
+.yqa__sum b.down,.yqa__kv b.down,.yqa__chart .down{color:var(--yd-down);fill:var(--yd-down)}
+.yqa__chart .z{stroke:rgba(255,255,255,.18)}
+.yqa__chart text.k{fill:var(--yd-sub)}
+.yqa__sub{color:var(--yd-sub)}
+.yqa__kv div{background:var(--yd-fill);border-color:var(--yd-line)}
+.yqa__kv span{color:var(--yd-sub)}
+.yqa__kv b{color:#fff}
+.yqa__list li{border-bottom-color:var(--yd-line)}
+.yqa__list li button{color:#9cc0ff}
+.yqa__rep a{background:var(--yd-fill);border-color:var(--yd-line)}
+.yqa__rep a:hover{border-color:rgba(106,168,255,.5)}
+.yqa__rep b{color:var(--yd-ink)}
+.yqa__rep span{color:var(--yd-sub)}
+.yqa__tag{background:var(--yd-chip);border-color:var(--yd-line);color:#e6ebf3}
+.yqa__tag.is-stock{background:rgba(106,168,255,.16);border-color:rgba(106,168,255,.4);color:#b8d3ff}
+.yqa__tag.is-theme{background:rgba(170,130,255,.16);border-color:rgba(170,130,255,.4);color:#d6c6ff}

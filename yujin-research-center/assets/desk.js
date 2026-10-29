@@ -355,7 +355,7 @@
         '<span class="badge ' + st.c + '">' + esc(st.t) + '</span>' +
       '</button></li>';
     }).join('') : '<li class="rs-empty">' + (evTab === 'up'
-        ? '다가오는 신청 행사가 없어요. <a class="btn btn--text" href="conferences.html">Events에서 일정 보기 →</a>' +
+        ? '다가오는 신청 행사가 없어요. <a class="btn btn--text" href="conferences.html">VIP 라운지에서 일정 보기 →</a>' +
           (rows.length ? '' : '<br><button type="button" class="btn btn--secondary btn--sm ev-seed" id="ev-seed">예시 신청 내역 넣어보기</button>')
         : '지난 행사 기록이 없어요.') + '</li>';
   }
@@ -380,7 +380,7 @@
       (e.intro ? '<p class="ev-intro">' + esc(e.intro) + '</p>' : '') +
       '<div class="ev-acts"><a class="btn btn--secondary btn--sm" href="conferences.html' + (e.id ? '?event=' + encodeURIComponent(e.id) : '') + '">행사 페이지에서 보기</a>' +
       (x.past ? '' : '<button type="button" class="btn btn--sm ev-cancel" data-cancel>신청 취소</button>') + '</div>' +
-      '<p class="form-note" style="margin-top:14px">신청 내용 수정은 아직 지원하지 않아요. 바꾸려면 취소한 뒤 Events에서 다시 신청해 주세요.</p></div>',
+      '<p class="form-note" style="margin-top:14px">신청 내용 수정은 아직 지원하지 않아요. 바꾸려면 취소한 뒤 VIP 라운지에서 다시 신청해 주세요.</p></div>',
       { label: '행사 신청 상세', width: 520 });
     var cb = $('[data-cancel]', m.el);
     if (cb) cb.addEventListener('click', function () {

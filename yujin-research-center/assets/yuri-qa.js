@@ -154,9 +154,11 @@
   function aiAnswer(q, docs) {
     return aiOn.then(function (on) {
       if (!on || !docs.length) return null;
-      return fetch((cfg.apiBase || '') + '/api/yuri', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      // AI가 12초 안에 답하지 않으면 원문 검색 결과로 먼저 보여 준다(시연 중 오래 기다리지 않게)
+      var late = new Promise(function (res) { setTimeout(function () { res(null); }, 12000); });
+      return Promise.race([late, fetch((cfg.apiBase || '') + '/api/yuri', { method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ task: 'qa', question: q, docs: docs.map(function (r) { return { title: r.title, date: r.published_at, text: r.summary }; }) }) })
-        .then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
+        .then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })]);
     });
   }
 

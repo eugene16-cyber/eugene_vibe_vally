@@ -170,7 +170,7 @@
   /* ---------- 상단 메뉴 · 드로어 ---------- */
   var MENU = [
     { id: 'home', label: 'Home', href: 'home.html' },
-    { id: 'conferences', label: 'Events', href: 'conferences.html' },
+    { id: 'conferences', label: 'VIP 라운지', href: 'conferences.html' },
     { id: 'market', label: 'Research', href: 'market.html' }
   ];
   var isPage = function (id) { return new RegExp('(^|/)' + id + '(\\.html)?$').test(location.pathname); };
