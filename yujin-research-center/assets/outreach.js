@@ -304,7 +304,7 @@
     if (badgeEl) { badgeEl.textContent = waiting; badgeEl.hidden = !waiting; }
 
     host.innerHTML =
-      '<header class="ob-top"><div><p class="ad-k">GROWTH · 신규 유입</p><h2>신규 유입 관리</h2><p class="ad-note">매일 유입 경로 ' + D.SOURCES.length + '곳에서 컨택할 회사를 찾고, 고객 구분 · 발굴 신호에 맞춘 제안 메일을 보내요.</p></div>' +
+      '<header class="ob-top"><div><p class="ad-k">ADMIN · 시연용</p><h2>신규 유입 관리</h2><p class="ad-note">매일 유입 경로 ' + D.SOURCES.length + '곳에서 컨택할 회사를 찾고, 고객 구분 · 발굴 신호에 맞춘 제안 메일을 보내요.</p></div>' +
         '<div class="ob-ctl"><span class="ob-day num">시연 D+' + st.day + (st.mode === 'auto' ? ' · 자동 발송' : ' · 검토 후 발송') + '</span>' +
         '<button class="btn btn--sm ' + (st.auto ? 'btn--primary' : 'btn--secondary') + '" data-act="auto" aria-pressed="' + st.auto + '">' + (st.auto ? '● 자동 운영 중' : '▶ 자동 운영') + '</button>' +
         '<button class="btn btn--sm btn--secondary" data-act="tick">하루 진행</button></div></header>' +
