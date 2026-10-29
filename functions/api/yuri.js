@@ -84,9 +84,11 @@ export async function onRequestPost({ request, env }) {
     })
   });
   let r = await call(MODEL);
-  if (r.status >= 500) r = await call(FALLBACK);
-  if (!r.ok) return json({ error: 'upstream', status: r.status }, 502);
+  // 혼잡(5xx) · 호출 한도 초과(429)면 가벼운 모델로 한 번 더 — 한도가 따로다
+  if (r.status >= 500 || r.status === 429) r = await call(FALLBACK);
+  // 그래도 안 되면 200 + ok:false — 화면은 규칙 기반으로 이어 가고, 브라우저 콘솔에 실패 요청이 남지 않게
+  if (!r.ok) return json({ ok: false, error: 'upstream', status: r.status });
   const data = await r.json();
   const out = data?.candidates?.[0]?.content?.parts?.map((p) => p.text || '').join('') || '';
-  try { return json(JSON.parse(out)); } catch { return json({ error: 'parse' }, 502); }
+  try { return json(JSON.parse(out)); } catch { return json({ ok: false, error: 'parse' }); }
 }
