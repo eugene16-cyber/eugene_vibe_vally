@@ -1,0 +1,68 @@
+/* 종목 이벤트 모듈 (7-4 기관) — stock-events.js */
+.se-filters{display:flex;flex-direction:column;gap:10px;margin:18px 0 14px}
+.se-chiprow{display:flex;align-items:center;gap:12px;min-width:0}
+.se-chiprow__label{flex:none;width:34px;font-size:13px;font-weight:700;color:var(--ink-500)}
+.se-chiprow .chips{flex:1;min-width:0}
+.se-chiprow .chip{height:32px;padding:0 12px;font-size:13.5px}
+.se-stats{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin-bottom:12px;font-size:14px;color:var(--ink-800)}
+.se-stats b{font-weight:800}
+.se-src{font-size:12.5px;margin-left:auto}
+.se-tablecard{overflow:hidden}
+.se-tablecard .tbl-wrap{position:relative} /* 표 안 .sr-only(absolute)가 가로 스크롤 밖으로 새지 않게 */
+.se-tbl td{vertical-align:middle}
+.se-tbl td:first-child{white-space:nowrap}
+.se-tbl b{font-weight:700;color:var(--ink-900)}
+.se-code{margin-left:6px;font-size:12px;font-weight:500;color:var(--gray-400)}
+.se-detail{min-width:220px;color:var(--ink-800)}
+.se-go{width:24px;color:var(--gray-400);font-size:18px;text-align:center}
+.se-none{padding:36px 12px!important;text-align:center;color:var(--color-muted)}
+p.se-none{padding:36px 12px}
+.se-sig{display:inline-block;width:8px;height:8px;margin-right:8px;border-radius:50%;vertical-align:middle;background:var(--gray-200)}
+.se-sig--high{background:var(--blue-cta);box-shadow:0 0 0 3px rgba(49,130,246,.18)}
+.se-sig--medium{background:var(--blue-point)}
+.se-more{margin-top:12px;text-align:center}
+
+.se-bottom{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:16px;margin-top:20px}
+.se-subhead{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.se-subhead h3{font-size:16px;font-weight:700;color:var(--ink-900)}
+.se-cal{list-style:none;margin:0;padding:0}
+.se-cal li{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--gray-100);font-size:14px}
+.se-cal li:first-child{border-top:0}
+.se-dday{flex:none;min-width:44px;height:24px;padding:0 8px;border-radius:var(--radius-sm);background:#e8f1fe;color:var(--blue-main);font-size:12px;font-weight:800;
+  display:inline-flex;align-items:center;justify-content:center}
+.se-cal__date{flex:none;width:76px;color:var(--ink-500);font-size:13px}
+.se-cal__t{min-width:0}
+.se-cal__t b{margin-right:6px}
+.se-alert .muted{font-size:14px;margin-bottom:16px}
+
+.se-sched{display:flex;flex-direction:column;gap:12px}
+.se-sched__day{display:flex;align-items:center;gap:16px;padding:16px 18px;background:#fff;border:1px solid var(--color-hairline);border-radius:var(--radius-md)}
+.se-sched__date{flex:none;width:82px;font-size:13px;color:var(--ink-500)}
+.se-sched__date b{font-size:17px;color:var(--ink-900)}
+
+.se-modal__eyebrow{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:var(--text-micro);font-weight:700;letter-spacing:.08em;color:var(--blue-main)}
+.se-modal .modal__title .se-code{font-size:13px}
+.se-modal__sec{margin-top:20px}
+.se-modal .ai-summary{margin-top:12px}
+.se-curve{width:100%;height:auto;margin-bottom:6px}
+.se-tl{list-style:none;margin:0;padding:0 0 0 14px;border-left:2px solid var(--gray-100)}
+.se-tl li{position:relative;display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;padding:8px 0;font-size:13.5px}
+.se-tl li::before{content:"";position:absolute;left:-19px;top:15px;width:8px;height:8px;border-radius:50%;background:var(--blue-cta)}
+.se-tl li>span:first-child{color:var(--ink-500);width:40px}
+.se-tl li>span:nth-child(2){flex:1;min-width:160px}
+.se-modal__acts{display:flex;gap:8px;margin-top:22px}
+.se-modal__acts .btn{flex:1}
+.se-mtbl{margin-top:14px}
+.se-mtbl th{width:40%;border-bottom:1px solid var(--gray-100);font-size:13px}
+.se-mtbl td{text-align:right}
+.se-bullets{margin:0;padding-left:18px;font-size:14px;line-height:1.7}
+
+@media (max-width:768px){
+  .se-bottom{grid-template-columns:minmax(0,1fr)}
+  .se-chiprow{flex-direction:column;align-items:flex-start;gap:6px}
+  .se-chiprow .chips{flex-wrap:nowrap;overflow-x:auto;max-width:100%;scrollbar-width:none;padding-bottom:2px}
+  .se-chiprow .chips::-webkit-scrollbar{display:none}
+  .se-chiprow .chip{flex:none}
+  .se-sched__day{flex-direction:column;align-items:flex-start;gap:8px}
+  .se-src{margin-left:0}
+}
