@@ -80,7 +80,9 @@ export async function onRequestPost({ request, env }) {
     body: JSON.stringify({
       systemInstruction: { parts: [{ text: RULES }] },
       contents: [{ role: 'user', parts: [{ text }] }],
-      generationConfig: { responseMimeType: 'application/json', temperature: body.task === 'qa' ? 0.2 : 0.4, maxOutputTokens: body.task === 'qa' ? 700 : 400, thinkingConfig: { thinkingBudget: 0 } }
+      generationConfig: { responseMimeType: 'application/json', temperature: body.task === 'qa' ? 0.2 : 0.4, maxOutputTokens: body.task === 'qa' ? 700 : 400,
+        // lite 모델은 thinkingConfig를 받지 않는다(400) — 기본 모델에만 붙인다
+        ...(model === MODEL ? { thinkingConfig: { thinkingBudget: 0 } } : {}) }
     })
   });
   let r = await call(MODEL);
