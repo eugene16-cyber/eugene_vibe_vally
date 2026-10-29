@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<script src="assets/gate.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>해외 증시 · 유진 Insight Lab</title>
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link rel="stylesheet" href="assets/app.css?v=20261029a">
+<link rel="stylesheet" href="assets/global.css?v=20261029d">
+<script src="assets/config.js?v=20261029a"></script>
+<script src="assets/config.local.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" defer></script>
+<script src="assets/partials.js?v=20261029a" defer></script>
+<script src="assets/global.js?v=20261029d" defer></script>
+</head>
+<body data-page-eyebrow="GLOBAL MARKET" data-page-title="해외 증시" data-page-desc="밤사이 해외 지수와 섹터 흐름, 신고가 종목을 한 화면에서 살펴보세요.">
+<main id="main">
+
+  <!-- 해외 지수 그룹 -->
+  <section class="gl-strip" aria-labelledby="gl-idx-t">
+    <div class="wrap">
+      <div class="gl-strip__head"><h2 id="gl-idx-t">해외 주요 지수</h2><span data-src="idx"></span></div>
+      <div class="gl-groups" data-indices></div>
+    </div>
+  </section>
+
+  <!-- 이번 주 실적 띠 -->
+  <section class="gl-earn" aria-label="이번 주 실적 발표">
+    <div class="wrap gl-earn__in">
+      <span class="gl-earn__label">이번 주 실적</span>
+      <div class="gl-earn__track" data-earnings tabindex="0" aria-label="이번 주 실적 발표 일정"></div>
+    </div>
+  </section>
+
+  <!-- 모닝 브리핑 + 섹터·테마 히트맵 -->
+  <section class="section">
+    <div class="wrap gl-top">
+      <article class="card gl-brief"><div class="card__body" data-brief></div></article>
+
+      <div class="gl-heat">
+        <div class="gl-heat__head">
+          <div>
+            <span class="sec-eyebrow">SECTOR · THEME</span>
+            <h2 class="gl-h2">섹터·테마 히트맵</h2>
+          </div>
+          <span data-src="sec"></span>
+        </div>
+        <div class="gl-heat__ctrl">
+          <div class="tabs" role="tablist" aria-label="히트맵 종류" data-heat-kind>
+            <button role="tab" data-tab="sector" aria-selected="true">섹터</button>
+            <button role="tab" data-tab="theme" aria-selected="false">테마</button>
+          </div>
+          <div class="tabs" role="tablist" aria-label="기간" data-heat-period>
+            <button role="tab" data-tab="1d" aria-selected="true">1일</button>
+            <button role="tab" data-tab="1w" aria-selected="false">1주</button>
+            <button role="tab" data-tab="1m" aria-selected="false">1개월</button>
+          </div>
+        </div>
+        <div class="gl-tiles" data-heat aria-live="polite"></div>
+        <p class="gl-note" data-heat-note></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 20일 신고가 · ATH 스크리너 -->
+  <section class="section section--gray" id="highs">
+    <div class="wrap">
+      <div class="sec-head gl-sechead">
+        <div>
+          <span class="sec-eyebrow">NEW HIGHS</span>
+          <h2 class="sec-title">신고가 스크리너</h2>
+          <p class="sec-sub">종목을 누르면 AI Deep Research 요약을 볼 수 있어요.</p>
+        </div>
+        <span data-src="hi"></span>
+      </div>
+      <div class="tabs" role="tablist" aria-label="스크리너" data-hi-tabs>
+        <button role="tab" data-tab="20d" aria-selected="true">20일 신고가</button>
+        <button role="tab" data-tab="ath" aria-selected="false">사상 최고가(ATH)</button>
+        <button role="tab" data-tab="turn" aria-selected="false">전환 후보</button>
+      </div>
+      <p class="gl-hi-desc muted" data-hi-desc></p>
+      <div class="card gl-hi"><div class="tbl-wrap"><table class="tbl gl-tbl">
+        <thead data-hi-head></thead><tbody data-hi-rows></tbody>
+      </table></div><div class="gl-empty" data-hi-empty hidden>조건에 맞는 종목이 없어요.</div></div>
+      <div class="gl-more"><button class="btn btn--secondary" type="button" data-hi-more hidden></button></div>
+    </div>
+  </section>
+
+</main>
+</body>
+</html>
