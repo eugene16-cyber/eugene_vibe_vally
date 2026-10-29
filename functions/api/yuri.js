@@ -30,10 +30,11 @@ function prompt(body) {
     const docs = (body.docs || []).slice(0, 5).map((d, i) => `[${i + 1}] ${d.title} (${d.date || ''})\n${String(d.text || '').slice(0, 900)}`).join('\n\n');
     return [
       '아래 리서치센터 리포트 원문만 근거로 고객 질문에 답해 줘. 원문에 없는 내용은 지어내지 말고, 없으면 "원문에서 확인되지 않아요"라고 해.',
-      '3문장 이내 해요체. 문장 끝에 근거 번호를 [1]처럼 붙여. 종목 매수 · 매도 권유나 수익 전망 표현은 쓰지 마.',
+      'answer는 2~3문장 해요체 요약, 문장 끝에 근거 번호를 [1]처럼 붙여. 종목 매수 · 매도 권유나 수익 전망 표현은 쓰지 마.',
+      'points는 근거 항목 2~3개: title(20자 안팎 핵심), detail(원문 표현을 살린 한 문장), cite(근거 번호), fit(원문이 질문을 직접 뒷받침하면 "유효", 일부만 관련되면 "부분 유효").',
       `질문: ${String(body.question || '').slice(0, 200)}`,
       `원문:\n${docs}`,
-      '출력 형식: {"answer": "...", "cites": [1, 2]}'
+      '출력 형식: {"answer": "...", "points": [{"title": "...", "detail": "...", "cite": 1, "fit": "유효"}]}'
     ].join('\n');
   }
   if (body.task === 'extract') {

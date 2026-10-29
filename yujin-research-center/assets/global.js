@@ -93,7 +93,7 @@
       '<h2 class="gl-brief__t">' + esc(b.title) + '</h2>' +
       '<p class="gl-brief__note">' + esc(b.note) + '</p>' +
       '<div class="gl-brief__chips">' + (b.rows || []).map(function (r) { return '<span class="gl-chip"><span>' + esc(r[0]) + '</span><b class="num ' + dirCls(r[1]) + '">' + sign(r[1], 2) + '</b></span>'; }).join('') + '</div>' +
-      '<a class="btn btn--text gl-brief__more" href="market.html?region=global">Research 해외 시황에서 더 보기 →</a>';
+      '<a class="btn btn--text gl-brief__more" href="today.html?region=global">Research 해외 시황에서 더 보기 →</a>';
   }
 
   /* ---------- 히트맵 ---------- */

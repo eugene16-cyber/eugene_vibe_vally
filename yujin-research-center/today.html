@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<script src="assets/gate.js?v=20261029k"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>오늘의 시황 · 유진 Insight Lab</title>
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link rel="stylesheet" href="assets/app.css?v=20261029j">
+<link rel="stylesheet" href="assets/market.css?v=20261029a">
+<link rel="stylesheet" href="assets/stock-events.css?v=20261029a">
+<link rel="stylesheet" href="assets/theme-rotation.css?v=20261029a">
+<script src="assets/config.js?v=20261029a"></script>
+<script src="assets/config.local.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" defer></script>
+<script src="assets/partials.js?v=20261029q" defer></script>
+<script src="assets/stock-events.js?v=20261029a" defer></script>
+<script src="assets/theme-rotation.js?v=20261029a" defer></script>
+</head>
+<body data-page-eyebrow="RESEARCH · DAILY MARKET" data-page-title="오늘의 시황">
+<main id="main">
+
+  <!-- 국내 / 해외 전환 바 — 상태 하나(REGION)를 아래 모든 영역이 공유 -->
+  <div class="rbar" id="rbar">
+    <div class="wrap rbar__in">
+      <div class="rbar__track" role="tablist" aria-label="시장 선택">
+        <span class="rbar__pill" aria-hidden="true"></span>
+        <button role="tab" type="button" data-tab="kr" aria-selected="true" aria-controls="main"><b>국내</b><span>KOSPI · KOSDAQ</span></button>
+        <button role="tab" type="button" data-tab="global" aria-selected="false" aria-controls="main"><b>해외</b><span>미국 · 아시아</span></button>
+      </div>
+      <p class="rbar__asof" aria-live="polite"><span id="asof">국내 · 종가 기준</span></p>
+    </div>
+  </div>
+
+  <!-- 1. 오늘의 시황 (AI 앵커는 뺐다) -->
+  <section class="section mk-first" id="briefing" aria-labelledby="briefing-title">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="sec-eyebrow" id="briefing-eyebrow">DAILY MARKET</span>
+        <h2 class="sec-title" id="briefing-title">오늘의 시황 브리핑</h2>
+      </div>
+      <div id="below" class="mk-area mk-below"></div>
+    </div>
+  </section>
+
+  <!-- 2. 주요 지수 -->
+  <section class="mk-strip" aria-labelledby="idx-title">
+    <div class="wrap">
+      <div class="mk-strip__head"><h2 id="idx-title">주요 지수</h2><span id="idx-badge"></span></div>
+      <div id="indices" class="mk-area"></div>
+    </div>
+  </section>
+
+  <!-- 3. 업종 히트맵 -->
+  <section class="section" aria-labelledby="heat-title">
+    <div class="wrap">
+      <div class="sec-head mk-heat-head">
+        <div>
+          <span class="sec-eyebrow">SECTOR HEATMAP</span>
+          <h2 class="sec-title" id="heat-title">업종 히트맵</h2>
+          <p class="sec-sub" id="heat-sub"></p>
+        </div>
+        <div id="heat-tabs"></div>
+      </div>
+      <div id="heatmap" class="mk-area"></div>
+    </div>
+  </section>
+
+  <!-- 4. 고객 유형별 — partials.js가 안 쓰는 쪽을 스크립트 실행 전에 제거 -->
+  <section class="section section--gray" id="stock-events" data-for="inst" aria-labelledby="se-title">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="sec-eyebrow">EVENT-DRIVEN</span>
+        <h2 class="sec-title" id="se-title">종목 이벤트</h2>
+        <p class="sec-sub" id="se-sub">공시 · 실적에서 나온 이벤트를 유형별로 모아 봤어요.</p>
+      </div>
+      <div id="se-host"></div>
+    </div>
+  </section>
+
+  <section class="section section--tint" id="theme-rotation" data-for="wm" aria-labelledby="tr-title">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="sec-eyebrow">THEME ROTATION</span>
+        <h2 class="sec-title" id="tr-title">지금 돈이 몰리는 테마</h2>
+        <p class="sec-sub">버블을 누르면 테마의 구성 종목 · 관련 리포트 · 뉴스를 볼 수 있어요.</p>
+      </div>
+      <div id="tr-host"></div>
+      <div id="tr-global" class="card mk-trnote" hidden>
+        <div class="card__body"><p>테마 로테이션은 <b>국내 테마</b> 기준이에요. 국내 · 해외 데이터를 한 화면에 섞지 않도록 해외 화면에서는 숨겨 둘게요.</p>
+          <button class="btn btn--secondary btn--sm" type="button" data-region-go="kr">국내로 전환해서 보기</button></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+// Research 페이지 (7-4) — 코드 기본값('예시')으로 먼저 그리고 Supabase 값이 오면 덮어쓴다 (9장 불러오기 패턴)
+document.addEventListener('DOMContentLoaded', function () {
+  'use strict';
+
+  /* ---------- 기본값(예시) ---------- */
+  var SAMPLE_KR = {
+    snapshot_date: '2026-06-23', kospi: '8,203.99', kospi_chg: '-9.99%', kosdaq: '891.50', kosdaq_chg: '-7.94%', usdkrw: '1,539.10', usdkrw_chg: '+0.50%',
+    strong_sectors: [{ name: '통신서비스', chg: '+1.20%' }, { name: '유틸리티', chg: '+0.64%' }, { name: '음식료', chg: '-0.85%' }, { name: '보험', chg: '-1.92%' }],
+    weak_sectors: [{ name: '반도체', chg: '-14.20%' }, { name: '2차전지', chg: '-12.35%' }, { name: '조선', chg: '-11.08%' }, { name: '증권', chg: '-9.40%' }],
+    flows: { kospi: { foreign: '-21,480억', inst: '-6,210억', retail: '+27,350억' }, kosdaq: { foreign: '-3,120억', inst: '-1,980억', retail: '+5,010억' } },
+    ai_summary: '코스피 8,203.99(-9.99%), 코스닥 891.50(-7.94%)로 마감했어요. 외국인과 기관이 함께 팔고 개인이 받아내는 흐름이었고, 반도체(-14.20%) 낙폭이 가장 컸어요.'
+  };
+  var SAMPLE_COMMENT = { title: '변동성 구간의 점검 포인트', analyst: '리서치센터 투자전략팀(예시)', published_at: '2026-06-23',
+    summary: '지수 급락 구간에서는 수급 주체의 이탈 강도와 환율 방향을 함께 확인할 필요가 있어요. 업종별 낙폭 차이가 커진 만큼 실적 가시성이 높은 업종과 낮은 업종을 나눠 보는 관점이 유효해요.' };
+  var SAMPLE_GL = {
+    asof: '2026.10.28 (현지)', title: '기술주 반등에 나스닥 강세',
+    note: '밤사이 미국 증시는 대형 기술주 실적 기대에 나스닥 중심으로 올랐어요. 10년물 금리가 소폭 내리며 성장주에 우호적인 환경이었고, 아시아는 혼조로 마감했어요.',
+    idx: {
+      IXIC: ['나스닥', 23410.52, 0.84], GSPC: ['S&P 500', 6912.30, 0.41], DJI: ['다우', 47120.88, 0.12], RUT: ['러셀 2000', 2486.17, -0.36],
+      N225: ['닛케이 225', 49810.40, 0.58], HSI: ['항셍', 26120.75, -0.72], SSEC: ['상해종합', 3984.62, 0.21],
+      VIX: ['VIX', 16.42, -3.10], TNX: ['미 10년물', 4.02, -0.04], DXY: ['달러 인덱스', 98.74, -0.18]
+    },
+    sectors: [
+      ['XLK', '정보기술', 1.42, 3.1, 7.8], ['XLC', '커뮤니케이션', 1.05, 2.4, 5.2], ['XLY', '경기소비재', 0.62, 1.2, 3.4], ['XLF', '금융', 0.18, -0.4, 2.1],
+      ['XLI', '산업재', 0.09, 0.8, 1.6], ['XLV', '헬스케어', -0.21, -1.1, -2.3], ['XLP', '필수소비재', -0.48, -1.6, -3.0], ['XLE', '에너지', -1.12, -2.8, -6.4],
+      ['XLU', '유틸리티', 0.33, 1.9, 4.1], ['XLB', '소재', -0.36, -0.9, -1.2], ['XLRE', '부동산', -0.64, -2.1, -4.7]
+    ]
+  };
+  var IDX_GROUPS = [['미국', ['IXIC', 'GSPC', 'DJI', 'RUT']], ['아시아', ['N225', 'HSI', 'SSEC']], ['매크로', ['VIX', 'TNX', 'DXY']]];
+
+  /* ---------- 상태 ---------- */
+  var REGION = new URLSearchParams(location.search).get('region') === 'global' ? 'global' : 'kr';
+  var KR = { days: [SAMPLE_KR], idx: 0, sample: true, comment: SAMPLE_COMMENT, commentSample: true, brief: null };
+  var GL = { asof: SAMPLE_GL.asof, title: SAMPLE_GL.title, note: SAMPLE_GL.note, idx: SAMPLE_GL.idx, idxSample: true, ovSample: true,
+    sectors: SAMPLE_GL.sectors, secSample: true };
+  var heatPeriod = '1d';
+
+  var $id = function (id) { return document.getElementById(id); };
+  var num = function (v) { var n = parseFloat(String(v == null ? '' : v).replace(/[^\d.+-]/g, '')); return isFinite(n) ? n : 0; };
+  var cls = function (v) { return dirCls(num(v)); };
+  var dot = function (d) { return String(d || '').replace(/-/g, '.'); };
+  var sampleBadge = function (on) { return on ? ' <span class="badge badge--sample">예시</span>' : ''; };
+  var fade = function (el) { el.classList.remove('fade-up'); void el.offsetWidth; el.classList.add('fade-up'); };
+  var day = function () { return KR.days[KR.idx] || SAMPLE_KR; };
+  var signed = function (s) { s = String(s == null ? '-' : s); return /^[+-]/.test(s) || s === '-' ? s : (num(s) > 0 ? '+' : '') + s; };
+
+  /* ---------- 전환 바 ---------- */
+  var rbar = $id('rbar');
+  var gnb = document.querySelector('.gnb');
+  function setTop() { rbar.style.top = (gnb ? gnb.offsetHeight : 0) + 'px'; }
+  setTop(); window.addEventListener('resize', setTop);
+  var tabs = wireTabsA11y(rbar.querySelector('[role=tablist]'), function (k) { setRegion(k); });
+
+  function setRegion(r, init) {
+    r = r === 'global' ? 'global' : 'kr';
+    if (r === REGION && !init) return;
+    REGION = r;
+    rbar.setAttribute('data-region', r);
+    var u = new URL(location.href);
+    if (r === 'global') u.searchParams.set('region', 'global'); else u.searchParams.delete('region');
+    history.replaceState(null, '', u.pathname + u.search + u.hash);
+    renderAll(!init);
+    if (window.StockEvents) StockEvents.setRegion(r);
+    if ($id('se-sub')) $id('se-sub').textContent = r === 'global' ? '미국 주요 종목의 실적 결과와 발표 일정을 모아 봤어요.' : '공시 · 실적에서 나온 이벤트를 유형별로 모아 봤어요.';
+    var trh = $id('tr-host'), trg = $id('tr-global');
+    if (trh) { trh.hidden = r === 'global'; trg.hidden = r !== 'global'; }
+  }
+
+  /* ---------- 1. 시황 제목 (AI 앵커 없음) ---------- */
+  function renderAnchorArea() {
+    if (REGION === 'kr') {
+      var dd = new Date(day().snapshot_date + 'T00:00:00');
+      $id('briefing-eyebrow').textContent = 'DAILY MARKET · 국내 마감';
+      $id('briefing-title').textContent = (dd.getMonth() + 1) + '월 ' + dd.getDate() + '일 국내 증시 마감';
+    } else {
+      $id('briefing-eyebrow').textContent = 'OVERNIGHT · 해외';
+      $id('briefing-title').textContent = '밤사이 해외 증시';
+    }
+  }
+
+  function flowCell(v) { return '<td class="num ' + cls(v) + '">' + esc(signed(v)) + '</td>'; }
+  function renderBelow() {
+    var el = $id('below');
+    if (REGION === 'kr') {
+      var d = day(), fl = d.flows || {}, k = fl.kospi || {}, q = fl.kosdaq || {}, c = KR.comment, cs = String(c.summary || '');
+      el.innerHTML =
+        '<div class="mk-3col">' +
+          '<article class="card"><div class="card__body"><h3 class="mk-cardh">AI 데일리 요약' + sampleBadge(KR.sample) + '</h3>' +
+            '<div class="ai-summary">' + esc(d.ai_summary || '요약이 아직 없어요.') + '</div></div></article>' +
+          '<article class="card"><div class="card__body"><h3 class="mk-cardh">애널리스트 코멘트' + sampleBadge(KR.commentSample) + '</h3>' +
+            '<p class="mk-cm__t">' + esc(c.title) + '</p><p class="mk-cm__s">' + esc(cs.slice(0, 150)) + (cs.length > 150 ? '…' : '') + '</p>' +
+            '<p class="mk-cm__by">' + esc(c.analyst || '') + ' · ' + esc(dot(c.published_at)) + '</p>' +
+            (c.id ? '<a class="btn btn--text" href="reports.html?id=' + encodeURIComponent(c.id) + '">리포트 보기 →</a>' : '') + '</div></article>' +
+          '<article class="card"><div class="card__body"><h3 class="mk-cardh">투자자별 순매수' + sampleBadge(KR.sample) + '</h3>' +
+            '<table class="tbl mk-flows"><thead><tr><th>투자자</th><th class="num">KOSPI</th><th class="num">KOSDAQ</th></tr></thead><tbody>' +
+              '<tr><td>외국인</td>' + flowCell(k.foreign || d.foreign_net) + flowCell(q.foreign) + '</tr>' +
+              '<tr><td>기관</td>' + flowCell(k.inst || d.inst_net) + flowCell(q.inst) + '</tr>' +
+              '<tr><td>개인</td>' + flowCell(k.retail || d.retail_net) + flowCell(q.retail) + '</tr>' +
+            '</tbody></table><p class="form-note">단위 억 원 · ' + esc(dot(d.snapshot_date)) + '</p></div></article>' +
+        '</div>' +
+        (KR.days.length > 1 ? '<details class="mk-arch card"' + (KR.idx ? ' open' : '') + '><summary><b>데일리 아카이브</b><span class="muted">최근 ' + KR.days.length + '일 · 누르면 그날 시황으로 바뀌어요</span></summary>' +
+          '<div class="mk-arch__list">' + KR.days.map(function (x, i) {
+            return '<button type="button" class="mk-arch__d' + (i === KR.idx ? ' is-on' : '') + '" data-day="' + i + '" aria-pressed="' + (i === KR.idx) + '">' +
+              '<span>' + esc(dot(x.snapshot_date).slice(5)) + '</span><b class="num ' + cls(x.kospi_chg) + '">' + esc(signed(x.kospi_chg)) + '</b><small>KOSPI ' + esc(x.kospi) + '</small></button>';
+          }).join('') + '</div></details>' : '');
+      el.querySelectorAll('[data-day]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          KR.idx = +b.dataset.day; renderAll(true);
+          toast(dot(day().snapshot_date) + ' 시황으로 바꿨어요.');
+        });
+      });
+    } else {
+      el.innerHTML =
+        '<div class="mk-2col">' +
+          '<article class="card"><div class="card__body"><h3 class="mk-cardh">밤사이 요약' + sampleBadge(GL.ovSample) + '</h3>' +
+            '<p class="mk-cm__t">' + esc(GL.title) + '</p><p class="mk-cm__s">' + esc(GL.note) + '</p>' +
+            '<div class="mk-ichips">' + ['IXIC', 'GSPC', 'DJI', 'N225', 'HSI'].map(function (k) {
+              var x = GL.idx[k]; return '<span class="mk-ichip"><span>' + esc(x[0]) + '</span><b class="num ' + dirCls(x[2]) + '">' + sign(x[2]) + '</b></span>';
+            }).join('') + '</div></div></article>' +
+          '<article class="card"><div class="card__body"><h3 class="mk-cardh">미국 지수' + sampleBadge(GL.idxSample) + '</h3>' +
+            '<ul class="mk-uslist">' + ['IXIC', 'GSPC', 'DJI', 'RUT'].map(function (k) {
+              var x = GL.idx[k];
+              return '<li><span><b>' + esc(x[0]) + '</b><small>' + k + '</small></span><span class="num">' + fmt(x[1]) + '</span><span class="num ' + dirCls(x[2]) + '">' + sign(x[2]) + '</span></li>';
+            }).join('') + '</ul><p class="form-note">' + esc(GL.asof) + ' 기준</p></div></article>' +
+        '</div>';
+    }
+  }
+
+  /* ---------- 2. 주요 지수 스트립 ---------- */
+  function renderIndices() {
+    var el = $id('indices');
+    var cell = function (label, val, chg, unit) {
+      var c = num(chg);
+      return '<div class="mk-idx"><span class="mk-idx__l">' + esc(label) + '</span><b class="mk-idx__v num">' + esc(val) + '</b>' +
+        '<span class="mk-idx__c num ' + (c > 0 ? 'is-up' : c < 0 ? 'is-down' : '') + '">' + (c > 0 ? '▲ ' : c < 0 ? '▼ ' : '') +
+        esc(unit === 'p' ? sign(c, 2, '%p') : typeof chg === 'number' ? sign(c) : signed(chg)) + '</span></div>';
+    };
+    if (REGION === 'kr') {
+      var d = day();
+      $id('idx-badge').innerHTML = '<span class="mk-strip__asof">' + esc(dot(d.snapshot_date)) + ' 종가</span>' + sampleBadge(KR.sample);
+      el.innerHTML = '<div class="mk-idxrow mk-idxrow--kr">' + cell('KOSPI', d.kospi, d.kospi_chg) + cell('KOSDAQ', d.kosdaq, d.kosdaq_chg) + cell('USD/KRW', d.usdkrw, d.usdkrw_chg) + '</div>';
+    } else {
+      $id('idx-badge').innerHTML = '<span class="mk-strip__asof">' + esc(GL.asof) + '</span>' + sampleBadge(GL.idxSample);
+      el.innerHTML = '<div class="mk-idxgroups">' + IDX_GROUPS.map(function (g) {
+        return '<div class="mk-idxgroup"><h3>' + g[0] + '</h3><div class="mk-idxrow">' + g[1].map(function (k) {
+          var x = GL.idx[k];
+          return cell(x[0], k === 'TNX' ? fmt(x[1]) + '%' : fmt(x[1]), x[2], k === 'TNX' ? 'p' : '%');
+        }).join('') + '</div></div>';
+      }).join('') + '</div>';
+    }
+  }
+
+  /* ---------- 3. 업종 히트맵 ---------- */
+  function tile(name, sub, chg, max) {
+    var c = num(chg), a = Math.min(1, Math.abs(c) / max);
+    var bg = c > 0 ? 'rgba(224,52,75,' : c < 0 ? 'rgba(20,63,150,' : 'rgba(141,146,153,';
+    return '<div class="mk-tile' + (a > 0.5 ? ' is-dark' : '') + '" style="background:' + bg + (0.1 + a * 0.9).toFixed(3) + ')">' +
+      '<span class="mk-tile__n">' + esc(name) + '</span>' + (sub ? '<small>' + esc(sub) + '</small>' : '') +
+      '<b class="num">' + (c > 0 ? '+' : '') + c.toFixed(2) + '%</b></div>';
+  }
+  function renderHeat() {
+    var el = $id('heatmap'), tabsEl = $id('heat-tabs');
+    if (REGION === 'kr') {
+      var d = day();
+      var all = (d.strong_sectors || []).concat(d.weak_sectors || []).sort(function (a, b) { return Math.abs(num(b.chg)) - Math.abs(num(a.chg)); });
+      $id('heat-sub').innerHTML = '강세 · 약세 업종을 등락 폭이 큰 순서로 보여 드려요. ±15%에서 가장 진해요.' + sampleBadge(KR.sample);
+      tabsEl.innerHTML = '';
+      el.innerHTML = '<div class="mk-heat">' + all.map(function (s) { return tile(s.name, '', s.chg, 15); }).join('') + '</div>';
+    } else {
+      var MAX = { '1d': 2.5, '1w': 5, '1m': 10 }, col = { '1d': 2, '1w': 3, '1m': 4 }[heatPeriod];
+      $id('heat-sub').innerHTML = '미국 S&amp;P 500 섹터 ETF 기준 · ±' + MAX[heatPeriod] + '%에서 가장 진해요.' + sampleBadge(GL.secSample);
+      tabsEl.innerHTML = '<div class="tabs" role="tablist" aria-label="기간">' + [['1d', '1일'], ['1w', '1주'], ['1m', '1개월']].map(function (x) {
+        return '<button role="tab" type="button" data-tab="' + x[0] + '" aria-selected="' + (heatPeriod === x[0]) + '">' + x[1] + '</button>';
+      }).join('') + '</div>';
+      wireTabsA11y(tabsEl.firstChild, function (k) {
+        if (k === heatPeriod) return; heatPeriod = k; renderHeat(); fade(el);
+        var t = tabsEl.querySelector('[aria-selected=true]'); if (t) t.focus();
+      });
+      var rows = GL.sectors.slice().sort(function (a, b) { return b[col] - a[col]; });
+      el.innerHTML = '<div class="mk-heat">' + rows.map(function (s) { return tile(s[1], s[0], s[col], MAX[heatPeriod]); }).join('') + '</div>';
+    }
+  }
+
+  function renderAsof() {
+    $id('asof').textContent = REGION === 'kr' ? '국내 · ' + dot(day().snapshot_date) + ' 종가 기준' + (KR.sample ? ' (예시)' : '')
+      : '해외 · ' + GL.asof + ' 기준' + (GL.idxSample ? ' (예시)' : '');
+  }
+
+  function renderAll(animate) {
+    renderAsof(); renderAnchorArea(); renderBelow(); renderIndices(); renderHeat();
+    if (animate) ['below', 'indices', 'heatmap'].forEach(function (id) { fade($id(id)); });
+  }
+
+  /* ---------- 고객 유형별 모듈 ---------- */
+  if ($id('se-host') && window.StockEvents) StockEvents.mount($id('se-host'), { region: REGION });
+  if ($id('tr-host')) {
+    if (window.ThemeRotation) ThemeRotation.mount($id('tr-host'), { wide: true });
+    else $id('tr-host').innerHTML = '<div class="card"><div class="card__body muted">테마 로테이션 준비 중이에요.</div></div>';
+  }
+  document.querySelectorAll('[data-region-go]').forEach(function (b) {
+    b.addEventListener('click', function () { tabs.select(b.dataset.regionGo); rbar.scrollIntoView({ block: 'start' }); });
+  });
+
+  // 처음 그리기 (주소의 ?region= 유지)
+  if (REGION === 'global') tabs.select('global');
+  setRegion(REGION, true);
+
+  /* ---------- Supabase 불러오기 — 실패해도 화면 유지 ---------- */
+  if (!window.sb) return;
+  var q = function (p) { return p.then(function (r) { return r; }, function () { return { data: null }; }); };
+  Promise.all([
+    q(sb.from('market_snapshot').select('*').order('snapshot_date', { ascending: false }).limit(8)),
+    q(sb.from('reports').select('id,title,summary,analyst,published_at,category').eq('kind', 'macro').order('published_at', { ascending: false }).limit(12)),
+    q(sb.from('ai_briefings').select('kind,brief_date,title,caption,video_url,thumbnail_url,chapters').eq('kind', 'market').order('brief_date', { ascending: false }).limit(8)),
+    q(sb.from('global_indices').select('symbol,name,price,change_pct,as_of')),
+    q(sb.from('global_research').select('title,body,created_at').eq('kind', 'overnight').order('created_at', { ascending: false }).limit(1)),
+    q(sb.from('global_sectors').select('symbol,name,chg_1d,chg_1w,chg_1m,asof').eq('kind', 'sector'))
+  ]).then(function (r) {
+    var snaps = r[0].data || [];
+    if (snaps.length) { KR.days = snaps; KR.idx = 0; KR.sample = false; }
+    // 애널리스트 코멘트 — 본문이 문장으로 된 최신 매크로 리포트
+    var cm = (r[1].data || []).filter(function (x) { return (String(x.summary || '').match(/[가-힣]/g) || []).length > 60; })[0];
+    if (cm) { KR.comment = cm; KR.commentSample = false; }
+    KR.brief = (r[2].data || []).filter(function (b) { return snaps[0] && b.brief_date === snaps[0].snapshot_date; })[0] || null;
+    var gi = r[3].data || [];
+    if (gi.length) {
+      var idx = Object.assign({}, GL.idx), got = 0;
+      gi.forEach(function (x) { var k = String(x.symbol).replace(/^\^/, ''); if (idx[k]) { idx[k] = [idx[k][0], +x.price, +x.change_pct]; got++; } });
+      if (got) { GL.idx = idx; GL.idxSample = false; if (gi[0].as_of) GL.asof = gi[0].as_of; }
+    }
+    var ov = (r[4].data || [])[0];
+    // 요약이 4일 넘게 오래됐으면 예시로 취급
+    if (ov && ov.created_at && Date.now() - new Date(ov.created_at) < 4 * 864e5) {
+      GL.title = ov.title || GL.title; GL.note = ov.body && ov.body.note || GL.note; GL.ovSample = false;
+    }
+    var gs = r[5].data || [];
+    if (gs.length) { GL.sectors = gs.map(function (s) { return [s.symbol, s.name, +s.chg_1d || 0, +s.chg_1w || 0, +s.chg_1m || 0]; }); GL.secSample = false; }
+    renderAll(false);
+  }).catch(function (err) { console.warn('[IL] Research 데이터를 불러오지 못했어요', err); });
+});
+</script>
+</body>
+</html>

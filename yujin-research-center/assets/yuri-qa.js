@@ -185,6 +185,10 @@
     $('.yq-box', box).insertBefore(askF, optsEl);   // 검색바 → 칩 순서
     box.insertBefore($('.yq-box', box), logEl);     // 검색 영역 → 답
     logEl.hidden = true;
+    // 결과는 검색바 아래 넓은 두 칸(답변 카드 + 원문 패널)으로 — assets/yuri-answer.js
+    var resultHost = document.createElement('div');
+    resultHost.className = 'yqa'; resultHost.hidden = true; resultHost.setAttribute('aria-live', 'polite');
+    host.appendChild(resultHost);
   }
   // 예시 질문은 관심 분야 순서로 3개만 보여 준다
   optsEl.innerHTML = PRESETS.slice(0, 3).map(function (q, i) {
@@ -224,9 +228,21 @@
   }
 
   var busy = false;
-  function ask(text, byVoice) {
+  function ask(text, byVoice, preset) {
     text = String(text || '').trim(); if (!text || busy) return;
     busy = true;
+    if (inline && window.YuriAnswer) {
+      remember(text);
+      setMood('thinking');
+      var tk0 = tokens(text), docs0 = search(text);
+      YuriAnswer.loading(resultHost, text, byVoice);
+      aiAnswer(text, docs0).then(function (j) {
+        var said = YuriAnswer.show(resultHost, { q: text, voice: byVoice, preset: preset, docs: docs0, tokens: tk0, ai: j, sample: sample });
+        busy = false;
+        if (byVoice) speak(said); else setMood('idle');
+      });
+      return;
+    }
     msg('me', (byVoice ? '<span class="yq-voice">🎙 음성</span>' : '') + esc(text));
     remember(text);
     setMood('thinking');
@@ -301,7 +317,8 @@
   });
   optsEl.addEventListener('click', function (e) {
     var b = e.target.closest('[data-q]'); if (!b) return;
-    ask(PRESETS.filter(function (q) { return q.id === b.dataset.q; })[0].q);
+    var pr = PRESETS.filter(function (q) { return q.id === b.dataset.q; })[0];
+    ask(pr.q, false, pr);   // 검수 완료 질문
   });
   $('.yq-ask', box).addEventListener('submit', function (e) { e.preventDefault(); ask(input.value); input.value = ''; input.placeholder = inline ? '리서치센터 리포트에 무엇이든 물어보세요' : '질문을 입력하거나 마이크를 눌러 말해 주세요'; });
   window.YuriQA = { open: inline ? focusInline : open, close: close, ask: ask };

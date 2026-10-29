@@ -20,7 +20,7 @@
     { id: 'ndr', label: 'NDR · 기업 탐방', pillar: '행사', href: 'conferences.html?cat=ndr', desc: '기업 IR팀과 1:1 · 소그룹 미팅', kw: /NDR|탐방|미팅|경영진|방문/i },
     { id: 'conf', label: '컨퍼런스', pillar: '행사', href: 'conferences.html?cat=ai', desc: '산업 전망 대형 행사', kw: /컨퍼런스|포럼/ },
     { id: 'indepth', label: '인뎁스 리포트', pillar: '리서치', href: 'reports.html', desc: '관심 섹터 심층 리포트 모아 보기', kw: /리포트|보고서|인뎁스|심층|자료/ },
-    { id: 'cardnews', label: '카드뉴스', pillar: '리서치', href: 'home.html#cardnews', desc: '리포트 핵심을 카드 한 장으로', kw: /카드|요약|짧게|한\s?장/ },
+    { id: 'cardnews', label: '카드뉴스', pillar: '리서치', href: 'market.html#cardnews', desc: '리포트 핵심을 카드 한 장으로', kw: /카드|요약|짧게|한\s?장/ },
     { id: 'qa', label: '근거형 Q&A', pillar: '리서치', href: 'reports.html', desc: '리포트를 근거로 질문에 답변', kw: /Q\s?&?\s?A|질문|물어|문의/i }
   ];
   // 고객 구분 — Q1에서 한 번만 나뉘고, 구분마다 ②③ 보기와 라운지 구성이 다르다

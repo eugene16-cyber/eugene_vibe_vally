@@ -175,7 +175,7 @@
   ];
   var isPage = function (id) { return new RegExp('(^|/)' + id + '(\\.html)?$').test(location.pathname); };
   var items = MENU.filter(function (m) { return !(m.inst && seg === 'wm'); });
-  var current = items.filter(function (m) { return isPage(m.id); })[0];
+  var current = items.filter(function (m) { return isPage(m.id) || (m.id === 'market' && isPage('today')); })[0];  // 오늘의 시황(today)도 Research
   var onDesk = isPage('desk');
   var name = s && s.name || '고객';
   var cur = function (on) { return on ? ' aria-current="page"' : ''; };

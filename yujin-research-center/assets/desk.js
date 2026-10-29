@@ -44,6 +44,8 @@
      ========================================================= */
   // Home에 합쳐지며 인사 헤더 · 요약 숫자 칸은 없을 수 있다 — 있을 때만 채운다
   var put = function (sel, prop, v) { var el = $(sel); if (el) el[prop] = v; };
+  // 워크스페이스 칸(#ws-…)이 없는 페이지(Research)에서는 빈 요소로 받아 넘긴다
+  var $ws = function (sel) { return $(sel) || document.createElement('div'); };
   put('#desk-avatar', 'textContent', name.charAt(0));
   put('#desk-title', 'textContent', name + '님의 Private Desk');
   put('#ws-title', 'textContent', name + '님의 리서치 워크스페이스');
@@ -67,7 +69,7 @@
   var brief = SAMPLE_BRIEF;
   function renderBrief() {
     var b = brief;
-    $('#ws-brief').innerHTML =
+    $ws('#ws-brief').innerHTML =
       '<div class="card__body">' +
         '<div class="ws-h"><h3>오늘의 맞춤 브리핑</h3>' + (b.sample ? sampleBadge : '<span class="ws-h__note num">' + esc(b.meta) + '</span>') + '</div>' +
         '<div class="ws-brief__tags">' + prefs.watch.slice(0, 4).map(function (w) { return '<span class="badge badge--brand">#' + esc(w) + '</span>'; }).join('') + '</div>' +
@@ -76,7 +78,7 @@
         (b.changes && b.changes.length ? '<div class="ws-brief__chg"><span>변경점</span><ul>' + b.changes.map(function (c) { return '<li>' + esc(c) + '</li>'; }).join('') + '</ul></div>' : '') +
         '<button type="button" class="btn btn--primary btn--sm" id="ws-brief-go">리포트 보기 →</button>' +
       '</div>';
-    $('#ws-brief-go').addEventListener('click', function () {
+    $ws('#ws-brief-go').addEventListener('click', function () {
       if (b.href) { if (/^https?:/.test(b.href)) window.open(b.href, '_blank', 'noopener'); else location.href = b.href; }
       else toast('예시 브리핑이라 연결된 리포트가 없어요. 리포트가 들어오면 바로 연결돼요.');
     });
@@ -100,9 +102,9 @@
     { key: 'anchor', icon: '🎙️', title: 'AI 앵커 영상', desc: '3분 영상 브리핑', ext: 'MP4' }
   ];
   function renderFiles() {
-    $('#ws-fmt').innerHTML = '기본 형식 <b>' + esc(P.fmt) + '</b>';
+    $ws('#ws-fmt').innerHTML = '기본 형식 <b>' + esc(P.fmt) + '</b>';
     var mine = { '회의용 브리핑': 'brief', '고객 설명자료': 'client', '카드뉴스': 'card' }[P.fmt];
-    $('#ws-files').innerHTML = FILES.map(function (f) {
+    $ws('#ws-files').innerHTML = FILES.map(function (f) {
       return '<button type="button" class="ws-file' + (f.key === mine ? ' is-mine' : '') + '" data-file="' + f.key + '">' +
         '<span class="ws-file__ico" aria-hidden="true">' + f.icon + '</span>' +
         '<span class="ws-file__txt"><b>' + esc(f.title) + '</b><span>' + esc(f.desc) + '</span></span>' +
@@ -110,7 +112,7 @@
       '</button>';
     }).join('');
   }
-  $('#ws-files').addEventListener('click', function (e) {
+  $ws('#ws-files').addEventListener('click', function (e) {
     var b = e.target.closest('[data-file]'); if (!b) return;
     var k = b.getAttribute('data-file');
     if (k === 'card' && cards.length) { openCard(cards[0]); return; }
@@ -121,19 +123,19 @@
   /* 상담 · 담당자 */
   var CONSULT_KEY = 'il.consults-v1';
   var CONSULT_KINDS = ['리포트 내용 문의', '애널리스트 미팅 요청', '행사 · 세미나 문의', '기타 상담'];
-  $('#ws-mgr-role').textContent = P.mgr;
-  $('#ws-mgr-title').textContent = P.mgr + ' 연결 · 상담 요청';
+  $ws('#ws-mgr-role').textContent = P.mgr;
+  $ws('#ws-mgr-title').textContent = P.mgr + ' 연결 · 상담 요청';
   function renderConsult() {
     var list = store.get(CONSULT_KEY, []);
     var c = list[0];
-    $('#ws-consult').innerHTML = c
+    $ws('#ws-consult').innerHTML = c
       ? '<div class="ws-consult"><div class="ws-consult__top"><span class="badge badge--brand">' + esc(c.status || '접수됨') + '</span><span class="muted num">' + dot(c.at) + '</span></div>' +
         '<b>' + esc(c.kind) + '</b><p>' + esc(c.memo || '메모 없음') + '</p>' +
         (list.length > 1 ? '<span class="muted ws-consult__more">진행 중 상담 ' + list.length + '건</span>' : '') + '</div>'
       : '<div class="ws-consult"><div class="ws-consult__top"><span class="badge badge--brand">답변 준비 중</span>' + sampleBadge + '</div>' +
         '<b>반도체 업종 리포트 문의</b><p>' + esc(P.mgr) + '가 애널리스트 의견을 정리하고 있어요.</p></div>';
   }
-  $('#ws-consult-btn').addEventListener('click', function () {
+  $ws('#ws-consult-btn').addEventListener('click', function () {
     var ctx = [name, s.org || s.branch, prefs.watch.join(' · ')].filter(Boolean).join(' / ');
     var m = openModal(
       '<h2 class="modal__title">' + esc(P.mgr) + ' 상담 요청</h2>' +
@@ -156,19 +158,19 @@
 
   /* 관심 종목 · 테마 + 알림 */
   function renderTags() {
-    $('#ws-tags').innerHTML = prefs.watch.length ? prefs.watch.map(function (w, i) {
+    $ws('#ws-tags').innerHTML = prefs.watch.length ? prefs.watch.map(function (w, i) {
       return '<li class="ws-tag">' + esc(w) + '<button type="button" data-del="' + i + '" aria-label="' + esc(w) + ' 삭제">×</button></li>';
     }).join('') : '<li class="muted ws-tags__empty">관심 종목 · 테마를 추가해 보세요.</li>';
   }
-  $('#ws-tags').addEventListener('click', function (e) {
+  $ws('#ws-tags').addEventListener('click', function (e) {
     var b = e.target.closest('[data-del]'); if (!b) return;
     var w = prefs.watch.splice(+b.getAttribute('data-del'), 1)[0];
     savePrefs(); renderTags(); renderBrief(); renderCards();
     toast(w + '을(를) 관심 목록에서 뺐어요.');
   });
-  $('#ws-add').addEventListener('submit', function (e) {
+  $ws('#ws-add').addEventListener('submit', function (e) {
     e.preventDefault();
-    var inp = $('#ws-add-input'), v = inp.value.trim();
+    var inp = $ws('#ws-add-input'), v = inp.value.trim();
     if (!v) return;
     if (prefs.watch.indexOf(v) >= 0) { toast('이미 관심 목록에 있어요.'); return; }
     if (prefs.watch.length >= 10) { toast('관심 목록은 10개까지 담을 수 있어요.'); return; }
