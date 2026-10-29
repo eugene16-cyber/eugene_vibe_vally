@@ -27,20 +27,85 @@
 - 문구 해요체, 투자 권유 표현 금지.
 - 공용 기능은 `assets/` 모듈 하나로(5장). 페이지 판별은 `/market(\.html)?$/`처럼 `.html` 유무 무관.
 - Supabase: URL `https://cowwkddihelfgkftfqxr.supabase.co` + anon key만 `config.js`에. service_role은 클라이언트 금지.
-- 마일스톤 완료 조건: `check.mjs`로 1440·390px 콘솔 오류 0건 · 가로 스크롤 0 → Artifact로 게시(여러 `.html` + `assets/`를 `files`로 함께) → 보고 → 멈춤.
+- 페이지 전용 스타일은 `assets/<페이지>.css`에 둔다(공용 `app.css`는 웨이브 2에서만 수정).
+- 트랙 완료 조건: `check.mjs`로 1440·390px 콘솔 오류 0건 · 가로 스크롤 0 → Artifact로 게시(여러 `.html` + `assets/`를 `files`로 함께) → 보고 → 멈춤.
 - Artifact 안에서는 Supabase 로그인(Google·이메일 리다이렉트)이 동작하지 않을 수 있음 → "시연으로 둘러보기" + 코드 기본값('예시')으로 보이게 만든다.
 
-## C. 마일스톤
+## C. 진행 순서 — 세션 여러 개로 동시에
 
-| M | 내용 (원본 11장 단계) | 핵심 산출물 | 확인 포인트 |
-|---|---|---|---|
-| M0 | 준비 | `git init`, `.gitignore`(비밀 파일·`_secrets/`·`.env`·`node_modules`·mp4>50MB), `tools/check.mjs` | 로컬 서버 뜨고 check 스크립트 동작 |
-| M1 | 기반 + 진입 (1·2) | `app.css` `config.js` `gate.js` `partials.js` `index.html` `entry.js/.css` `login.js`, 빈 페이지 5개 | 기관/WM 메뉴 차이, 시연 진입 → home, 미승인 시 index로 |
-| M2 | Research (3) | `market.html` `anchor.js` `stock-events.js/.css` `theme-rotation.js` | 국내/해외 전환 일괄 적용, 기관=종목 이벤트 / WM=테마 |
-| M3 | Events + Desk (4·5) | `events-data.js` `orbit-books.js/.css` `conferences.html` `desk.html` `saved-research.js` `cardnews/*` | 책 공전·필터·신청 4단계 → Desk 신청 내역·취소, 카드뉴스 뷰어·저장 |
-| M4 | Quant + Home (6·7) | `quant.html` `home.html` `home.js` `home-feed.js` `home.css` | 테마 → 전략 연결, 백테스트 곡선, Home 스크롤 이펙트·유형별 섹션 |
-| M5 | 보조·마감 (8) | `reports` `global` `cardnews` `admin`(서버 없음 안내), 리다이렉트 4개, 접근성, `lounge-snapshot.json` | 전 페이지 390px · 콘솔 0건 |
-| M6 | 배포 (12, "배포해줘" 시에만) | `dist` 만들기 → `wrangler pages deploy` | 라이브에서 기관·WM 재확인 |
+```
+웨이브 0 (메인 세션, 완료)   M0 준비 · M1 기반+진입 ── main에 커밋·push
+                                   │
+웨이브 1 (동시 4세션)   ┌─ A Research ─┬─ B Events ─┬─ C Desk ─┬─ D Quant·보조 ─┐
+                                   │  각자 브랜치 → 끝나면 push
+웨이브 2 (메인 세션)    A→B→C→D 순서로 main에 병합 → Home(H) · 통합 마감
+웨이브 3                배포 ("배포해줘" 시에만)
+```
+
+### C-1. 트랙과 파일 소유권 (웨이브 1)
+
+**각 세션은 자기 트랙 파일만 만들고 고친다.** 다른 트랙 파일은 읽기만 한다.
+
+| 트랙 | 원본 | 소유 파일 (`yujin-research-center/` 기준) | 포트 | 완료 확인 |
+|---|---|---|---|---|
+| **A Research** | 7-4 · 7-5 | `market.html` `assets/market.css` `assets/anchor.js` `assets/stock-events.js/.css` `assets/theme-rotation.js/.css` | 4211 | 국내/해외 전환이 모든 영역에 한 번에 적용, 기관=종목 이벤트 / WM=테마 |
+| **B Events** | 7-6 · 9장 행사 | `conferences.html` `assets/conferences.css` `assets/events-data.js` `assets/orbit-books.js/.css` `assets/conf-records.js` | 4212 | 책 공전·펼침·필터·신청 4단계·내 신청·문의 |
+| **C Desk** | 7-8 · 카드뉴스 deck | `desk.html` `assets/desk.css` `assets/saved-research.js` `assets/cardnews/cardnews.js/.css` `cardnews.html` | 4213 | 카드뉴스 뷰어·저장·신청 상세·취소, `?cn=` |
+| **D Quant·보조** | 7-7 · 7-9 | `quant.html` `assets/quant.js/.css` `reports.html` `global.html` `assets/reports.js` `assets/global.js` | 4214 | 전략 만들기·백테스트·보관함, 리포트 목록·상세 |
+
+**모든 트랙이 읽기만 하는 공용 파일**: `app.css` `partials.js` `gate.js` `config.js` `index.html` `entry.*` `login.js` `CLAUDE.md` `PLAN.md` `tools/*`.
+공용 파일을 꼭 바꿔야 하면 고치지 말고 `notes/<트랙>.md`(트랙마다 따로)에 "무엇을 왜"를 적는다 → 웨이브 2에서 메인 세션이 반영.
+
+### C-2. 트랙 사이 약속 (먼저 정해 두는 인터페이스)
+
+서로의 결과를 기다리지 않도록, 남의 모듈이 아직 없으면 **있을 때만 쓰고 없으면 자리표시**한다(`if (window.ThemeRotation) …`).
+
+| 모듈 (만드는 트랙) | 전역 · 사용법 | 쓰는 곳 |
+|---|---|---|
+| `theme-rotation.js` (A) | `ThemeRotation.mount(host, {wide, onStrategy(name), strategyLabel})` | Research WM · Quant(D) · Home(H) |
+| `anchor.js` (A) | `renderAnchor(el, {kind, title, caption, videoUrl, poster, chapters:[{title, sub, time}]})` | Research · Home(H) |
+| `orbit-books.js` (B) | `OrbitBooks.mount(host, {books: CATS, center:'Insight.', onPick(catId)})` | Events · Home(H) |
+| `events-data.js` (B) | `IL_EVENTS = {CATS, EVENTS, TODAY}` | Events · Desk(C) |
+| `conf-records.js` (B) | `ILConf.list() / add(rec) / remove(id) / onChange(cb)` — `localStorage['il-conf-records-v1']` | Events · Desk(C) |
+| `saved-research.js` (C) | `ILSaved.toggle/has/list/remove/onChange` — `localStorage['il.saved-research-v1']` | Desk · Reports(D) · Home(H) |
+| `cardnews/cardnews.js` (C) | `CardNews.render(el, deck, {slide})` · `CardNews.open(cardRow)`(모달 뷰어) | Desk · Home(H) |
+
+- Desk(C)는 B가 끝나기 전엔 `ILConf`가 없을 수 있다 → `localStorage['il-conf-records-v1']`를 직접 읽는 대체 코드로 그린다.
+- Quant(D)의 테마 로테이션 섹션은 `ThemeRotation`이 없으면 "테마 로테이션 준비 중" 카드 → 웨이브 2에서 연결 확인.
+
+### C-3. 세션 시작 방법
+
+메인 세션(이 폴더)에서 M1을 커밋·push한 뒤, 트랙마다 **git worktree**(같은 저장소의 별도 작업 폴더)를 만든다. 같은 폴더를 여러 세션이 동시에 고치면 서로 덮어쓰므로 폴더를 나눈다.
+
+```bash
+# 메인 폴더에서 한 번
+git worktree add ../il-A -b track-A-research
+git worktree add ../il-B -b track-B-events
+git worktree add ../il-C -b track-C-desk
+git worktree add ../il-D -b track-D-quant
+# 각 폴더에서 한 번 (git에 없는 파일 준비)
+node tools/make-config.mjs && (cd tools && npm i)
+```
+
+그다음 VS Code 창을 폴더별로 열고 Claude Code 세션에 이렇게 시작한다:
+> `PLAN.md C장 트랙 A 진행해줘` (B · C · D도 같은 형식)
+
+각 세션 규칙:
+- 로컬 서버는 자기 포트로: `python -m http.server 421X` (`yujin-research-center/`에서), 확인은 `node tools/check.mjs <페이지> --persona=am --base=http://localhost:421X` + `--persona=hnw`.
+- Artifact 미리보기는 트랙별 따로 게시(제목 예: "Insight Lab · Research"). 통합본은 웨이브 2에서 메인 세션이 기존 M1 Artifact를 갱신.
+- 끝나면 자기 브랜치에 커밋하고 `git push -u origin track-X-…` → 보고 → 멈춤. **main에 직접 병합하지 않는다.**
+- Supabase는 읽기만. 테이블 · RLS를 바꾸지 않는다.
+
+### C-4. 웨이브 2 · 3 (메인 세션)
+
+| 단계 | 내용 | 확인 |
+|---|---|---|
+| 병합 | `git merge track-A-research` → B → C → D. 충돌은 소유권 표 기준으로 해결, `notes/*.md` 요청을 공용 파일에 반영 | 전 페이지 `check.mjs` 기관·WM |
+| H Home | `home.html` `home.js` `home-feed.js` `home.css` (7-3) — A·B·C 모듈 재사용 | Orbit Books · 앵커 · 카드뉴스 스크롤 · 유형별 섹션 |
+| 마감 | 리다이렉트 4개(12장) · `lounge-snapshot.json` · Quant↔테마 연결 · 390px · 접근성 · 공용 `?v=` 일괄 갱신 | 전 페이지 콘솔 0건, 통합 Artifact 갱신 |
+| 배포 | 12장 절차 ("배포해줘" 시에만) | 라이브에서 기관·WM 재확인 |
+
+> 세션을 하나만 쓸 때도 같은 순서(A→B→C→D→H)로 진행하면 된다.
 
 ## D. 사용자가 직접 해야 하는 것 (이 환경에서 불가)
 

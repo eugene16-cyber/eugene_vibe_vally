@@ -4,9 +4,128 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>유진 Insight Lab</title>
-<link rel="icon" href="data:,">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link rel="stylesheet" href="assets/app.css?v=20261029a">
+<link rel="stylesheet" href="assets/entry.css?v=20261029b">
+<script src="assets/config.js?v=20261029a"></script>
+<script src="assets/config.local.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" defer></script>
+<script src="assets/partials.js?v=20261029a" defer></script>
+<script src="assets/entry.js?v=20261029b" defer></script>
+<script src="assets/login.js?v=20261029a" defer></script>
 </head>
-<body>
-<p>유진 Insight Lab — 준비 중이에요. (시연용 가상 화면)</p>
+<body data-chrome="none">
+<main class="entry is-instant" id="main" data-phase="reel">
+
+  <!-- 브랜드 쇼릴 — 처음엔 화면 전체, 고객 유형 선택부터는 오른쪽(모바일은 위) 프레임으로 줄어든다 -->
+  <div class="reel-media">
+    <video id="reel-video" src="assets/media/showreel.mp4" poster="assets/media/showreel-poster.jpg"
+      muted playsinline autoplay preload="auto" aria-label="유진 Insight Lab 브랜드 필름"></video>
+  </div>
+
+  <!-- 1. 쇼릴 위 조작부 -->
+  <section class="step reel" id="s-reel" aria-label="유진 Insight Lab 소개">
+    <button class="reel__skip" type="button" data-go="s-type">건너뛰기 →</button>
+    <div class="reel__bar">
+      <div>
+        <h1 class="reel__title">시장의 내일을 먼저 읽는 곳, <em>유진 Insight Lab</em></h1>
+      </div>
+      <button class="btn btn--primary reel__cta" type="button" data-go="s-type">시작하기</button>
+    </div>
+    <div class="reel__progress" aria-hidden="true"><span id="reel-progress"></span></div>
+  </section>
+
+  <!-- 2. 고객 유형 -->
+  <section class="step" id="s-type">
+    <div class="panel">
+      <div class="panel__brand"><span class="logo__mark" aria-hidden="true">E</span>유진투자증권 <span class="logo__sub">Insight Lab</span></div>
+      <p class="panel__step">1 / 3</p>
+      <h2 class="panel__title">어떤 고객이신가요?</h2>
+      <p class="panel__desc">고객 유형에 맞춰 메뉴와 자료 형식을 준비해 드려요.</p>
+      <div class="panel__body pick">
+        <button class="pick__card" type="button" data-seg="법인">
+          <span class="pick__icon" aria-hidden="true">🏢</span><b>법인 고객</b><span>자산운용사 · 투자자문 · DMA 전문투자자 · 연기금 · 보험 · 은행</span>
+        </button>
+        <button class="pick__card" type="button" data-seg="WM">
+          <span class="pick__icon" aria-hidden="true">💎</span><b>WM 고객</b><span>지점 PB와 함께하는 자산관리 고객</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3a. 법인 소속 -->
+  <section class="step" id="s-inst">
+    <div class="panel">
+      <button class="panel__back" type="button" data-go="s-type">‹ 이전</button>
+      <p class="panel__step">2 / 3</p>
+      <h2 class="panel__title">소속을 알려 주세요</h2>
+      <p class="panel__desc">시연에서는 비워 두면 예시 고객 정보로 들어가요.</p>
+      <form class="panel__body" id="f-inst" novalidate>
+        <fieldset class="radios" style="border:0;padding:0;margin:0 0 22px">
+          <legend class="sr-only">고객 유형</legend>
+          <label class="radio"><input type="radio" name="persona" value="am" checked><span><b>자산운용사</b><small>펀드·일임 운용역, 리서치 담당</small></span></label>
+          <label class="radio"><input type="radio" name="persona" value="ia"><span><b>투자자문·일임사</b><small>고객 설명자료가 필요한 자문 인력</small></span></label>
+          <label class="radio"><input type="radio" name="persona" value="dma"><span><b>DMA 이용 전문투자자</b><small>DMA 주문·수수료 상담 연결</small></span></label>
+          <label class="radio"><input type="radio" name="persona" value="etc"><span><b>기타 기관</b><small>연기금·보험·은행·공제회</small></span></label>
+        </fieldset>
+        <label class="field"><span class="field__label">소속</span><input class="input" name="org" autocomplete="organization" placeholder="예) 한빛자산운용(가상)"></label>
+        <label class="field"><span class="field__label">이름</span><input class="input" name="name" autocomplete="name" placeholder="예) 김민준"></label>
+        <button class="btn btn--primary btn--block" type="submit" style="margin-top:8px">다음</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- 3b. WM 지점 -->
+  <section class="step" id="s-wm">
+    <div class="panel">
+      <button class="panel__back" type="button" data-go="s-type">‹ 이전</button>
+      <p class="panel__step">2 / 3</p>
+      <h2 class="panel__title">거래 지점을 알려 주세요</h2>
+      <p class="panel__desc">담당 PB에게 받은 초대 코드가 있으면 함께 넣어 주세요. 시연에서는 비워 둬도 돼요.</p>
+      <form class="panel__body" id="f-wm" novalidate>
+        <label class="field"><span class="field__label">지점</span><input class="input" name="branch" placeholder="예) 강남금융센터"></label>
+        <label class="field"><span class="field__label">초대 코드</span><input class="input" name="invite_code" autocomplete="off" placeholder="예) WM-2026-DEMO"></label>
+        <label class="field"><span class="field__label">이름</span><input class="input" name="name" autocomplete="name" placeholder="예) 최은정"></label>
+        <button class="btn btn--primary btn--block" type="submit" style="margin-top:8px">다음</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- 4. 로그인 -->
+  <section class="step" id="s-login">
+    <div class="panel">
+      <button class="panel__back" type="button" id="login-back">‹ 이전</button>
+      <p class="panel__step">3 / 3</p>
+      <h2 class="panel__title">로그인 방법을 골라 주세요</h2>
+      <div class="panel__body">
+        <div class="login-who" id="login-who" aria-live="polite"></div>
+        <button class="btn btn--block demo-btn" type="button" id="btn-demo">시연으로 둘러보기</button>
+        <p class="form-note" style="margin-top:8px;text-align:center">로그인 없이 바로 승인된 시연 계정으로 들어가요.</p>
+        <div class="divider">또는 이메일로 로그인</div>
+        <form id="f-email">
+          <label class="field"><span class="sr-only">이메일</span><input class="input" type="email" name="email" required autocomplete="email" placeholder="name@company.com"></label>
+          <button class="btn btn--secondary btn--block" type="submit">로그인 링크 받기</button>
+          <p class="form-note" style="margin-top:8px">메일로 받은 링크를 누르면 소속 확인(승인) 단계로 넘어가요. 테스트용 이메일을 써 주세요.</p>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. 승인 대기 -->
+  <section class="step" id="s-wait">
+    <div class="panel wait">
+      <div class="wait__icon" id="wait-icon" aria-hidden="true"><span class="wait__spin"></span></div>
+      <h2 class="panel__title" id="wait-title">소속 확인 중이에요</h2>
+      <p class="panel__desc" id="wait-desc" aria-live="polite">담당자가 소속을 확인하면 이메일로 알려드려요. 보통 영업일 기준 하루 안에 끝나요.</p>
+      <div class="panel__body">
+        <button class="btn btn--primary btn--block" type="button" id="btn-approve">시연: 바로 승인하기</button>
+        <button class="btn btn--secondary btn--block" type="button" data-go="s-type" id="btn-restart">처음으로</button>
+      </div>
+    </div>
+  </section>
+
+  <p class="entry-foot" id="entry-foot">리서치센터 직원이신가요? <a href="admin.html">관리자 로그인 →</a></p>
+</main>
 </body>
 </html>

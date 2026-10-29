@@ -25,3 +25,4 @@ __pycache__/
 *.pyc
 dist/
 tools/shots/
+yujin-research-center/assets/config.local.js

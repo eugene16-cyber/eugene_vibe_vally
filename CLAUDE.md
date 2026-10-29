@@ -39,5 +39,5 @@
 ## 주의
 
 - 이 폴더에 `gmail_credentials.json`, `gmail_token.json`, `kis_token.json`, `env.download` 같은 비밀 파일이 있다. 절대 커밋하지 않는다(`.gitignore`에 포함).
-- **실행 계획은 `PLAN.md`가 기준**이다(원본 11단계 → M0~M6 마일스톤, Python은 전체 경로로 실행, 결과 보여주기는 Artifact). 원본과 다르면 `PLAN.md` 우선.
+- **실행 계획은 `PLAN.md`가 기준**이다(원본 11단계 → 병렬 트랙 A·B·C·D + 메인 세션 병합. 트랙 세션은 자기 소유 파일만 고친다, Python은 전체 경로로 실행, 결과 보여주기는 Artifact). 원본과 다르면 `PLAN.md` 우선.
 - 0·5·11·12장 등 나머지 기획 내용은 사용자가 제공한 기획서(`프롬프트 작성용.docx`)를 참고한다.

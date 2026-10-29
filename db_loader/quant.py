@@ -95,21 +95,22 @@ def stock_stats(px, mkt_r):
     return out
 
 
-def _dividends(cli, start, end):
-    """{종목코드: [(기준일 YYYYMMDD, 주당배당금)]}"""
-    out = {}
-    y = start.year
-    while y <= end.year:                                     # 1년씩 끊어 조회 (연속조회 키로 페이지 넘김)
+def _dividends(cli, codes, start, end):
+    """{종목코드: [(기준일 YYYYMMDD, 주당배당금)]} — 종목별 조회 (전 종목 조회는 100건 제한)"""
+    out, fail = {}, 0
+    for i, code in enumerate(codes):
         try:
-            rows = cli.dividends(dt.date(y, 1, 1), min(dt.date(y, 12, 31), end))
+            rows = cli.dividends(code, start, end)
         except kis.KISError as e:
-            print("  (배당일정 조회 실패 → 배당 팩터 · div 생략:", e, ")")
-            return {}
-        for r in rows:
-            amt = float(r.get("per_sto_divi_amt") or 0)
-            if amt > 0 and r.get("sht_cd"):
-                out.setdefault(r["sht_cd"].strip()[-6:], []).append((r.get("record_date", "").replace("/", ""), amt))
-        y += 1
+            fail += 1
+            if fail >= 20 and not out:
+                print("  (배당일정 조회 실패 → 배당 팩터 · div 생략:", e, ")")
+                return {}
+            continue
+        out[code] = [(r.get("record_date", "").replace("/", ""), float(r.get("per_sto_divi_amt") or 0))
+                     for r in rows if float(r.get("per_sto_divi_amt") or 0) > 0]
+        if (i + 1) % 500 == 0:
+            print(f"  배당 {i + 1}/{len(codes)}")
     return out
 
 
@@ -142,7 +143,7 @@ def crawl():
             print(f"  ({m['name']} 생략: {e})")
         if (i + 1) % 300 == 0:
             print(f"  월봉 {i + 1}/{len(master)}")
-    divs = _dividends(cli, start, end)
+    divs = _dividends(cli, list(px), start, end)
     info = {m["code"]: m for m in master}
     now = dt.datetime.now(dt.timezone.utc).isoformat()
 

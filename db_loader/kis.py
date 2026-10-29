@@ -103,17 +103,12 @@ class KIS:
         out = d.get("output") or d.get("output1") or []
         return out if isinstance(out, list) else [out]
 
-    def dividends(self, start, end):
-        """예탁원 배당일정 (전 종목, 기간) → [{sht_cd, record_date, per_sto_divi_amt, ...}]"""
-        rows, cts = [], ""
-        for _ in range(200):
-            d = self.get("/uapi/domestic-stock/v1/ksdinfo/dividend", "HHKDB669102C0", {
-                "CTS": cts, "GB1": "0", "F_DT": _ymd(start), "T_DT": _ymd(end), "SHT_CD": "", "HIGH_GB": ""})
-            rows += d.get("output1") or []
-            cts = (d.get("ctx_area_fk100") or d.get("CTS") or "").strip()
-            if not cts or not d.get("output1"):
-                break
-        return rows
+    def dividends(self, code, start, end):
+        """예탁원 배당일정 (한 종목, 기간) → [{record_date, per_sto_divi_amt, ...}]
+        전 종목 조회는 100건에서 끊기고 연속조회가 안 돼서 종목별로 부른다."""
+        d = self.get("/uapi/domestic-stock/v1/ksdinfo/dividend", "HHKDB669102C0", {
+            "CTS": "", "GB1": "0", "F_DT": _ymd(start), "T_DT": _ymd(end), "SHT_CD": code, "HIGH_GB": ""})
+        return d.get("output1") or []
 
     # ───────── 해외 ─────────
     def overseas_chart(self, excd, symb, upto=None):
