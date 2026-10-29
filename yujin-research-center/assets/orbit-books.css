@@ -1,0 +1,59 @@
+/* Orbit Books — 행사 카테고리 책 공전 (Events · Home) */
+.ob{position:relative;display:flex;flex-direction:column;gap:10px;min-width:0}
+.ob__stage{position:relative;width:100%;aspect-ratio:1.22;min-height:260px;--bw:80px;overflow:hidden;border-radius:var(--radius-lg)}
+.ob__ring{position:absolute;border-radius:50%;border:1px dashed rgba(27,116,228,.28);pointer-events:none}
+.ob__ring--inner{border-style:solid;border-color:rgba(27,116,228,.14)}
+.ob__core{position:absolute;left:50%;top:50%;z-index:10;width:calc(var(--bw)*1.5);height:calc(var(--bw)*1.5);transform:translate(-50%,-50%);
+  border-radius:50%;display:grid;place-items:center;pointer-events:none;
+  background:radial-gradient(circle at 34% 30%,#ffffff 0,#dbeafe 34%,#7fb3f5 72%,#3182f6 100%);
+  box-shadow:0 18px 40px -14px rgba(27,116,228,.55),inset 0 -8px 18px rgba(11,46,107,.18);
+  transition:opacity var(--dur-page) var(--ease-out),transform var(--dur-page) var(--ease-out)}
+.ob__core span{font-size:calc(var(--bw)*.23);font-weight:800;letter-spacing:-.03em;color:var(--blue-navy)}
+.ob.is-picked .ob__core{opacity:0;transform:translate(-50%,-50%) scale(.8)}
+
+/* 책 */
+.ob-book{position:absolute;left:0;top:0;width:var(--bw);height:calc(var(--bw)*1.38);padding:0;perspective:900px;
+  font-size:calc(var(--bw)*.1);will-change:transform;transform-origin:50% 50%;-webkit-tap-highlight-color:transparent}
+.ob-book.is-flying{transition:transform .55s var(--ease-out),opacity .3s,filter .3s}
+.ob-book:focus-visible{outline:0}
+.ob-book:focus-visible .ob-book__cover{box-shadow:0 0 0 3px var(--blue-cta)}
+.ob-book__body,.ob-book__cover{position:absolute;inset:0;border-radius:3px 7px 7px 3px}
+.ob-book__body{background:#fbfaf7;border:1px solid #e6e2d8;box-shadow:var(--shadow-pop);overflow:hidden}
+.ob-book__page{position:absolute;inset:0;padding:1.1em 1em;display:flex;flex-direction:column;gap:.55em;text-align:left;color:var(--ink-800);
+  opacity:0;transition:opacity .25s .2s}
+.ob-page__ko{font-size:1.45em;font-weight:800;letter-spacing:-.02em;color:var(--blue-navy);line-height:1.2}
+.ob-page__desc{font-size:.92em;line-height:1.5;color:var(--ink-500);display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden}
+.ob-page__detail{margin-top:auto;font-size:.95em;font-weight:700;color:var(--blue-main)}
+.ob-book__cover{transform-origin:0 50%;transform-style:preserve-3d;transition:transform .6s var(--ease-out),box-shadow .2s}
+.ob-book__front,.ob-book__back{position:absolute;inset:0;border-radius:inherit;backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  display:flex;flex-direction:column;padding:1em .95em .85em 1.25em;text-align:left;overflow:hidden}
+.ob-book__front{background:var(--c);color:var(--ink);
+  box-shadow:inset .45em 0 0 rgba(0,0,0,.14),inset -1px 0 0 rgba(255,255,255,.12),0 10px 22px -10px rgba(4,5,5,.45);border:1px solid rgba(11,46,107,.08)}
+.ob-book__front::after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,rgba(255,255,255,.18),transparent 40%);pointer-events:none}
+.ob-book__back{transform:rotateY(180deg);background:#f3f1ea;color:var(--blue-navy);justify-content:center;align-items:flex-start;border:1px solid #e6e2d8}
+.ob-cv__ed{font-size:.62em;font-weight:700;letter-spacing:.14em;opacity:.78}
+.ob-cv__mk{margin-top:auto;font-size:3.1em;font-weight:800;letter-spacing:-.04em;line-height:1}
+.ob-cv__label{margin-top:.25em;font-size:.95em;font-weight:700;letter-spacing:-.01em;line-height:1.25}
+.ob-cv__foot{display:flex;justify-content:space-between;gap:.4em;margin-top:.7em;padding-top:.5em;border-top:1px solid currentColor;
+  font-size:.56em;font-weight:700;letter-spacing:.12em;opacity:.72}
+.ob-book__back .ob-cv__mk{margin-top:0;opacity:.18;font-size:3.6em}
+
+/* 펼침 */
+.ob-book.is-open .ob-book__cover{transform:rotateY(-176deg)}
+.ob-book.is-open .ob-book__page{opacity:1}
+.ob-book:not(.is-open):hover .ob-book__cover{transform:rotateY(-14deg)}
+
+/* 아래 막대 */
+.ob__bar{display:flex;align-items:center;gap:12px;min-height:34px;flex-wrap:wrap}
+.ob__toggle,.ob__close{height:32px;padding:0 12px;border-radius:var(--radius-full);background:rgba(255,255,255,.8);border:1px solid var(--color-hairline);
+  font-size:13px;font-weight:600;color:var(--ink-800)}
+.ob__toggle:hover,.ob__close:hover{background:#fff;border-color:var(--gray-200)}
+.ob__hint{font-size:13px;font-weight:600;color:var(--blue-main)}
+.ob__close{margin-left:auto}
+
+@media (max-width:768px){
+  .ob__stage{min-height:240px}
+}
+@media (prefers-reduced-motion:reduce){
+  .ob-book.is-flying,.ob-book__cover{transition:none}
+}
