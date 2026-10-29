@@ -5,181 +5,163 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Events · 유진 Insight Lab</title>
+<meta name="description" content="콥데이·NDR·IPO·Conference·WM특화세미나 일정을 한 곳에서 찾고 신청해요.">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
 <link rel="stylesheet" href="assets/app.css?v=20261029a">
-<link rel="stylesheet" href="assets/orbit-books.css?v=20261029b">
-<link rel="stylesheet" href="assets/conferences.css?v=20261029b">
+<link rel="stylesheet" href="assets/orbit-books.css?v=20261029c">
+<link rel="stylesheet" href="assets/conferences.css?v=20261029c">
 <script src="assets/config.js?v=20261029a"></script>
 <script src="assets/config.local.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" defer></script>
 <script src="assets/partials.js?v=20261029a" defer></script>
-<script src="assets/events-data.js?v=20261029b" defer></script>
-<script src="assets/conf-records.js?v=20261029b" defer></script>
-<script src="assets/orbit-books.js?v=20261029b" defer></script>
-<script src="assets/conferences.js?v=20261029b" defer></script>
+<script src="assets/events-data.js?v=20261029c" defer></script>
+<script src="assets/conf-records.js?v=20261029c" defer></script>
+<script src="assets/orbit-books.js?v=20261029c" defer></script>
+<script src="assets/conferences.js?v=20261029c" defer></script>
 </head>
 <body data-page-eyebrow="CORPORATE ACCESS" data-page-title="세미나·컨퍼런스" data-page-desc="Corporate Day부터 WM 세미나까지 — 책을 골라 카테고리를 살펴보고, 아래 캘린더·목록에서 일정을 찾아 신청해주세요.">
-<main id="main" class="cf">
+<main id="main" class="cx">
   <div class="wrap">
-    <div class="cf-tabbar">
-      <div class="tabs" role="tablist" aria-label="행사 메뉴">
-        <button type="button" role="tab" id="tab-conf" data-tab="conf" aria-controls="panel-conf" aria-selected="true">기업행사/컨퍼런스</button>
+    <div class="cx-topbar">
+      <div class="tabs" role="tablist" aria-label="행사 메뉴" id="cx-tabs">
+        <button type="button" role="tab" id="tab-internal" data-tab="internal" aria-controls="panel-internal" aria-selected="true">기업행사/컨퍼런스</button>
         <button type="button" role="tab" id="tab-seminar" data-tab="seminar" aria-controls="panel-seminar" aria-selected="false">세미나/탐방 요청</button>
         <button type="button" role="tab" id="tab-external" data-tab="external" aria-controls="panel-external" aria-selected="false">외부 행사</button>
       </div>
-      <button type="button" class="cf-mine" id="cf-mine">내 신청·문의 <b class="cf-mine__n" id="cf-mine-n">0</b></button>
+      <button type="button" class="btn btn--secondary btn--sm cx-my" data-my>내 신청·문의 <span class="cx-my__n" id="cx-my-n" data-zero>0</span></button>
     </div>
 
-    <!-- ① 기업행사/컨퍼런스 -->
-    <section role="tabpanel" id="panel-conf" aria-labelledby="tab-conf" class="cf-panel">
-      <div class="cf-banner">
-        <div class="cf-banner__copy">
-          <p class="cf-banner__eyebrow">EUGENE INSIGHT LAB <span aria-hidden="true">/</span> LIVE ACCESS</p>
-          <h2 class="cf-banner__title">Conferences</h2>
-          <p class="cf-banner__desc">현재 신청 가능/진행 예정 중인 행사를 확인해주세요</p>
-          <p class="cf-banner__six">SIX WAYS TO CONNECT</p>
-          <ol class="cf-banner__cats" id="cf-cats"></ol>
+    <!-- ═══════ 기업행사/컨퍼런스 ═══════ -->
+    <section role="tabpanel" id="panel-internal" aria-labelledby="tab-internal" class="cx-panel">
+      <div class="cx-hero" aria-label="행사 카테고리">
+        <div class="cx-hero__copy">
+          <p class="cx-hero__cap">EUGENE INSIGHT LAB <span aria-hidden="true">/</span> LIVE ACCESS</p>
+          <h2 class="cx-hero__title">Conferences</h2>
+          <p class="cx-hero__desc">현재 신청 가능/진행 예정 중인 행사를 확인해주세요</p>
+          <p class="cx-hero__idx">SIX WAYS TO CONNECT</p>
         </div>
-        <div class="cf-banner__orbit" id="cf-orbit"></div>
+        <div class="cx-hero__orbit" id="cx-orbit"></div>
       </div>
+      <div class="cx-desc" id="cx-desc"></div>
+      <p class="sr-only" id="cx-live" aria-live="polite"></p>
 
-      <div class="cf-sum">
-        <div>
-          <p class="cf-sum__k">6개 카테고리 · 예정 <b id="cf-n-up">0</b>건</p>
-          <p class="cf-sum__t">책을 골라 행사 카테고리를 펼쳐보세요</p>
-        </div>
-        <p class="cf-sum__open">지금 신청 가능한 행사 <b id="cf-n-open">0</b>건 · 아래 캘린더·목록에서 전체 일정을 바로 확인할 수 있어요.</p>
-        <a class="cf-sum__all" href="#cf-schedule" id="cf-all">전체 일정 보기 →</a>
-      </div>
-
-      <section class="cf-sched" id="cf-schedule" aria-labelledby="cf-sched-title">
-        <div class="cf-sched__head">
-          <p class="sec-eyebrow">SCHEDULE</p>
-          <h2 class="sec-title" id="cf-sched-title">행사 일정 <span class="badge badge--sample">예시</span></h2>
-          <p class="sec-sub">시연용 가상 일정이에요. 실제 행사·기업·애널리스트와 관계없어요.</p>
-        </div>
-        <div class="cf-ctrl">
-          <div class="cf-seg" role="group" aria-label="예정 / 지난 행사" id="cf-time">
-            <button type="button" data-v="up" aria-pressed="true">예정</button>
-            <button type="button" data-v="past" aria-pressed="false">지난</button>
+      <section class="cx-explore" id="explore" aria-labelledby="explore-title">
+        <div class="cx-explore__head">
+          <div>
+            <h2 id="explore-title">행사 일정 <span class="badge badge--sample">예시</span></h2>
+            <p class="cx-sub">카테고리·참여 대상으로 좁히고, 목록과 캘린더를 오가며 확인해주세요.</p>
           </div>
-          <div class="chips cf-chips" role="group" aria-label="카테고리 필터" id="cf-chips"></div>
-          <div class="cf-ctrl__end">
-            <label class="cf-select"><span class="sr-only">참여 대상</span>
-              <select id="cf-elig">
-                <option value="">참여 대상 · 전체</option>
-                <option value="inst">기관 투자자</option>
-                <option value="corp">상장 기업</option>
-                <option value="wm">WM 고객</option>
-              </select>
-            </label>
-            <div class="cf-seg" role="group" aria-label="보기 방식" id="cf-view">
-              <button type="button" data-v="list" aria-pressed="true">목록</button>
-              <button type="button" data-v="cal" aria-pressed="false">캘린더</button>
-            </div>
+          <label class="cx-search">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/></svg>
+            <input id="cx-q" type="search" placeholder="행사명·기업·주제 검색" aria-label="행사명, 기업, 주제 검색">
+          </label>
+        </div>
+
+        <div class="cx-controls">
+          <div class="cx-seg" role="group" aria-label="진행 상태" id="cx-phase">
+            <button type="button" data-phase="upcoming" aria-pressed="true">예정 행사</button>
+            <button type="button" data-phase="past" aria-pressed="false">지난 행사</button>
+          </div>
+          <select class="cx-select" id="cx-elig" aria-label="참여 대상">
+            <option value="all">참여 대상 전체</option>
+            <option value="inst">기관투자자</option>
+            <option value="corp">법인 고객</option>
+            <option value="wm">WM 고객</option>
+          </select>
+          <select class="cx-select" id="cx-analyst" aria-label="담당 애널리스트"><option value="all">담당 전체</option></select>
+          <label class="cx-toggle"><input type="checkbox" id="cx-open"> 신청 가능만</label>
+          <span class="cx-grow"></span>
+          <div class="cx-seg" role="group" aria-label="일정 보기 방식" id="cx-view">
+            <button type="button" data-view="list" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg>목록</button>
+            <button type="button" data-view="calendar" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4m6-4v4"/></svg>캘린더</button>
           </div>
         </div>
-        <p class="sr-only" aria-live="polite" id="cf-live"></p>
-        <div id="cf-out"></div>
+
+        <div class="cx-cats" id="cx-cats" role="group" aria-label="행사 카테고리"></div>
+        <p class="cx-count" id="cx-count" aria-live="polite"></p>
+        <div id="cx-list"></div>
+        <div id="cx-calendar" hidden></div>
+
+        <div class="cx-inquiry">
+          <div>
+            <h3>원하는 행사가 없나요?</h3>
+            <p>관심 섹터·애널리스트를 골라 개별 세미나를 요청하거나, 외부 행사 주선을 문의할 수 있어요.</p>
+          </div>
+          <div class="cx-inquiry__acts">
+            <button type="button" class="btn btn--primary btn--sm" data-goto="seminar">세미나 요청</button>
+            <button type="button" class="btn btn--secondary btn--sm" data-goto="external">외부 행사 문의</button>
+          </div>
+        </div>
       </section>
     </section>
 
-    <!-- ② 세미나/탐방 요청 -->
-    <section role="tabpanel" id="panel-seminar" aria-labelledby="tab-seminar" class="cf-panel" hidden>
-      <div class="cf-req">
-        <div class="cf-req__copy">
-          <p class="sec-eyebrow">ANALYST SEMINAR</p>
-          <h2 class="sec-title">섹터별/애널리스트별 세미나 신청</h2>
-          <p class="sec-sub">유리가 요청 내용을 확인하고, 이메일로 일정 조율을 안내해 드려요. 애널리스트 일정에 따라 희망 날짜와 실제 진행 가능한 날짜가 다를 수 있어요.</p>
-          <ol class="cf-steps">
-            <li><b>01</b><span>세미나 요청 신청</span><small>섹터나 애널리스트, 주제와 희망 날짜를 적어요.</small></li>
-            <li><b>02</b><span>애널리스트에게 전달</span><small>유리가 요청을 정리해 담당 애널리스트에게 전해요.</small></li>
-            <li><b>03</b><span>일정 조율·확정</span><small>가능한 날짜를 이메일로 안내하고 확정해요.</small></li>
-          </ol>
-          <div class="cf-faq">
-            <h3 class="cf-faq__title">자주 묻는 질문</h3>
-            <details><summary>애널리스트를 몰라도 신청할 수 있나요?</summary><p>네. ‘섹터로 선택’을 고르면 그 섹터 담당 애널리스트를 유리가 찾아 연결해 드려요.</p></details>
-            <details><summary>신청하면 바로 확정되나요?</summary><p>아니에요. 애널리스트 일정을 확인한 뒤 가능한 날짜를 이메일로 안내하고, 회신을 받아 확정해요.</p></details>
-            <details><summary>행사 참가 신청과 무엇이 다른가요?</summary><p>행사 참가 신청은 이미 정해진 일정에 자리를 신청하는 것이고, 세미나 요청은 원하는 주제·날짜로 별도 세미나를 여는 요청이에요.</p></details>
-            <details><summary>실적발표 관련 문의도 할 수 있나요?</summary><p>실적 리뷰 콜 일정은 ‘기업행사/컨퍼런스’ 탭의 Earnings Call 책에서 볼 수 있어요. 개별 기업 실적 문의는 이 폼의 희망 주제에 적어 주세요.</p></details>
+    <!-- ═══════ 세미나/탐방 요청 ═══════ -->
+    <section role="tabpanel" id="panel-seminar" aria-labelledby="tab-seminar" class="cx-panel" hidden>
+      <div class="cx-split">
+        <div>
+          <p class="cx-eyebrow">ANALYST SEMINAR</p>
+          <h2 class="cx-split__title">섹터별/애널리스트별 세미나 신청</h2>
+          <p class="cx-lead">유리가 요청 내용을 확인하고, 이메일로 일정 조율을 안내해 드려요. 애널리스트 일정에 따라 희망 날짜와 실제 진행 가능한 날짜가 다를 수 있어요.</p>
+          <ol class="cx-steps"><li><b>01</b>세미나 요청 신청</li><li><b>02</b>애널리스트에게 전달</li><li><b>03</b>일정 조율·확정</li></ol>
+          <div class="cx-faq">
+            <h3>자주 묻는 질문</h3>
+            <details><summary>애널리스트를 몰라도 요청할 수 있나요?</summary><p>네. ‘섹터로 선택’에서 관심 산업을 고르고 궁금한 내용을 남기면 해당 섹터 담당 애널리스트와 연결해 드려요.</p></details>
+            <details><summary>요청하면 일정이 바로 확정되나요?</summary><p>유리가 담당 애널리스트와 진행 가능 여부를 확인한 뒤, 이메일로 일정 조율과 확정 여부를 안내해 드려요. 희망 날짜와 실제 진행 가능한 날짜가 다를 수 있어요.</p></details>
+            <details><summary>행사 참가 신청과 어떻게 다른가요?</summary><p>기업행사/컨퍼런스는 정해진 일정에 참여하는 방식이고, 개별 세미나는 기관에 필요한 내용과 참석 대상에 맞춰 별도로 협의해요.</p></details>
+            <details><summary>실적발표 관련 문의도 가능한가요?</summary><p>네. 관심 기업과 확인하고 싶은 분기·내용을 남겨주세요.</p><button type="button" class="btn btn--secondary btn--sm cx-faq__btn" data-request="earnings">실적발표 문의</button></details>
           </div>
         </div>
-        <form class="cf-form card" id="cf-seminar-form" novalidate>
-          <div class="card__body">
-            <h3 class="cf-form__title">세미나 요청</h3>
-            <div class="cf-seg cf-seg--block" role="group" aria-label="선택 방식" id="cf-by">
-              <button type="button" data-v="sector" aria-pressed="true">섹터로 선택</button>
-              <button type="button" data-v="analyst" aria-pressed="false">애널리스트로 선택</button>
+        <section class="cx-card" aria-labelledby="sm-title">
+          <form id="cx-seminar-form" data-kind="seminar" data-inline novalidate>
+            <h3 id="sm-title">애널리스트 세미나 요청</h3>
+            <div data-fields="seminar"></div>
+            <div class="cx-fields">
+              <div class="field"><label class="field__label" for="sm-aud">참석 대상<small>선택</small></label>
+                <select class="cx-in" id="sm-aud" name="audience"><option>담당자와 협의</option><option>기관 리서치 · 운용팀</option><option>법인 임직원 · 경영진</option><option>내부 교육 대상자</option><option>WM 고객 모임</option></select></div>
+              <div class="field"><label class="field__label" for="sm-cnt">예상 인원<small>선택</small></label>
+                <input class="cx-in" id="sm-cnt" name="attendees" type="number" min="1" max="10000" placeholder="예: 10"></div>
             </div>
-            <label class="field"><span class="field__label" id="cf-by-label">섹터</span>
-              <select class="input" name="target" id="cf-target" required></select></label>
-            <label class="field"><span class="field__label">희망 주제</span>
-              <input class="input" name="topic" required maxlength="80" placeholder="예: 2027 메모리 업황 점검"></label>
-            <label class="field"><span class="field__label">희망 날짜</span>
-              <input class="input" type="date" name="date" required></label>
-            <label class="field"><span class="field__label">연락처(이메일)</span>
-              <input class="input" type="email" name="email" required autocomplete="email" placeholder="test@example.com"></label>
-            <label class="cf-check"><input type="checkbox" name="demo" required> <span>실제 접수·전송이 없는 시연 화면임을 확인했어요.</span></label>
-            <p class="cf-form__err" role="alert"></p>
-            <button class="btn btn--primary btn--block" type="submit">세미나 요청하기</button>
-            <div class="cf-note">
-              <b>유리를 통한 일정 조율 안내</b>
-              <p>요청을 남기면 유리가 담당 애널리스트 일정을 확인해 가능한 날짜를 이메일로 안내해 드려요. 시연 화면에서는 실제 전달·이메일 발송이 일어나지 않고, ‘내 신청·문의’에만 기록돼요.</p>
-            </div>
-          </div>
-        </form>
+            <div class="cx-svc"><strong>유리를 통한 일정 조율 안내</strong><p>유리가 요청 내용을 담당 애널리스트에게 전달하고, 입력한 이메일로 일정 조율과 확정 여부를 안내해 드려요. 요청만으로 일정이 확정되지는 않아요.</p></div>
+            <label class="cx-check"><input type="checkbox" name="demo" required><span>실제 접수·전송이 없는 시연 화면임을 확인했어요. 테스트 값으로 입력해주세요.</span></label>
+            <p class="cx-err" role="alert"></p>
+            <div class="cx-formacts"><button class="btn btn--primary btn--sm" type="submit">요청 내용 확인 →</button></div>
+            <p class="cx-formnote">시연용 폼 · 실제 접수·일정 확정·연락 없음</p>
+          </form>
+        </section>
       </div>
     </section>
 
-    <!-- ③ 외부 행사 -->
-    <section role="tabpanel" id="panel-external" aria-labelledby="tab-external" class="cf-panel" hidden>
-      <div class="sec-head">
-        <p class="sec-eyebrow">EXTERNAL EVENTS</p>
-        <h2 class="sec-title">관심사에 맞는 외부 행사</h2>
-        <p class="sec-sub">리서치센터가 외부 행사·세미나를 연결해 드려요. 관심 있는 형태를 골라 주선 문의를 남겨 주세요.</p>
+    <!-- ═══════ 외부 행사 ═══════ -->
+    <section role="tabpanel" id="panel-external" aria-labelledby="tab-external" class="cx-panel" hidden>
+      <p class="cx-eyebrow">EXTERNAL EVENTS</p>
+      <h2 class="cx-split__title">관심사에 맞는 외부 행사</h2>
+      <p class="cx-lead">산업·테마 세미나부터 기업 인사이트 세션, 연사 초청까지.<br>기관에 필요한 외부 행사 연결과 주선을 지원해요.</p>
+      <div class="cx-ext-grid">
+        <article class="cx-ext"><span class="cx-ext__ix">01 / INDUSTRY</span><h3>산업·테마 세미나</h3><p>반도체 업황, AI 밸류체인 등 관심 산업을 다루는 외부 전문가 세미나예요.</p>
+          <div class="cx-ext__tags"><span class="badge">반도체</span><span class="badge">AI</span><span class="badge">산업전망</span></div>
+          <button type="button" class="btn btn--secondary btn--sm" data-ext="산업·테마 세미나">주선 문의 →</button></article>
+        <article class="cx-ext"><span class="cx-ext__ix">02 / COMPANY</span><h3>기업 인사이트 세션</h3><p>기업 관계자와 함께 AI 도입 사례나 산업 현장의 변화를 살펴보는 자리예요.</p>
+          <div class="cx-ext__tags"><span class="badge">기업 관점</span><span class="badge">사업 현황</span><span class="badge">현장 사례</span></div>
+          <button type="button" class="btn btn--secondary btn--sm" data-ext="기업 인사이트 세션">주선 문의 →</button></article>
+        <article class="cx-ext"><span class="cx-ext__ix">03 / COLLABORATION</span><h3>연사 초청·행사 협업</h3><p>기관 행사에 필요한 외부 연사 초청과 공동 프로그램 구성을 함께 논의해요.</p>
+          <div class="cx-ext__tags"><span class="badge">외부 연사</span><span class="badge">공동 행사</span><span class="badge">기관 교육</span></div>
+          <button type="button" class="btn btn--secondary btn--sm" data-ext="연사 초청·행사 협업">주선 문의 →</button></article>
       </div>
-      <div class="cf-ext" id="cf-ext">
-        <article class="card cf-ext__card"><div class="card__body">
-          <span class="cf-ext__ic" aria-hidden="true">◎</span>
-          <h3>산업·테마 세미나</h3>
-          <p>관심 산업·테마를 다루는 외부 전문가 세미나를 찾아 연결해 드려요.</p>
-          <button type="button" class="btn btn--text" data-ext="산업·테마 세미나">주선 문의 →</button>
-        </div></article>
-        <article class="card cf-ext__card"><div class="card__body">
-          <span class="cf-ext__ic" aria-hidden="true">◇</span>
-          <h3>기업 인사이트 세션</h3>
-          <p>관심 기업 IR팀과의 소규모 세션이나 탐방을 주선해 드려요.</p>
-          <button type="button" class="btn btn--text" data-ext="기업 인사이트 세션">주선 문의 →</button>
-        </div></article>
-        <article class="card cf-ext__card"><div class="card__body">
-          <span class="cf-ext__ic" aria-hidden="true">✦</span>
-          <h3>연사 초청·행사 협업</h3>
-          <p>사내 행사에 애널리스트 연사를 초청하거나 공동 세미나를 기획할 수 있어요.</p>
-          <button type="button" class="btn btn--text" data-ext="연사 초청·행사 협업">주선 문의 →</button>
-        </div></article>
+      <div class="cx-suggest">
+        <div><h3>찾는 행사가 없으신가요?</h3><p>“반도체 기업의 현장 이야기를 듣고 싶어요”처럼 원하는 행사를 제안할 수 있어요.</p></div>
+        <button type="button" class="btn btn--primary btn--sm" data-ext-mode="suggest">원하는 행사 제안 →</button>
       </div>
-
-      <form class="cf-propose card" id="cf-propose-form" novalidate>
-        <div class="card__body">
-          <h3 class="cf-form__title">새로운 행사 제안 및 문의 — 희망하는 세미나를 제안해주세요!</h3>
-          <div class="cf-propose__grid">
-            <label class="field"><span class="field__label">행사 형태</span>
-              <select class="input" name="kind">
-                <option>세미나</option><option>기업 탐방</option><option>컨퍼런스</option><option>온라인 웨비나</option><option>기타</option>
-              </select></label>
-            <label class="field"><span class="field__label">제목</span>
-              <input class="input" name="title" required maxlength="80" placeholder="예: 전력 인프라 밸류체인 세미나"></label>
-            <label class="field cf-propose__wide"><span class="field__label">내용</span>
-              <textarea class="input cf-textarea" name="body" rows="4" maxlength="600" placeholder="다뤄졌으면 하는 주제, 희망 시기, 참석 인원 등을 적어 주세요."></textarea></label>
-            <label class="field"><span class="field__label">연락처(이메일)</span>
-              <input class="input" type="email" name="email" required autocomplete="email" placeholder="test@example.com"></label>
-          </div>
-          <label class="cf-check"><input type="checkbox" name="demo" required> <span>실제 접수·전송이 없는 시연 화면임을 확인했어요.</span></label>
-          <p class="cf-form__err" role="alert"></p>
-          <button class="btn btn--primary" type="submit">제안 보내기</button>
+      <div class="cx-split">
+        <div>
+          <p class="cx-eyebrow">LET’S CONNECT</p>
+          <h2 class="cx-split__title">새로운 행사 제안 및 문의</h2>
+          <p class="cx-lead">희망하는 세미나를 제안해주세요!</p>
+          <ol class="cx-steps"><li><b>01</b>행사 선택 또는 희망 주제 제안</li><li><b>02</b>주선 가능 여부·내용 검토</li><li><b>03</b>전화·이메일로 개별 안내</li></ol>
+          <div class="cx-svc"><strong>진행 전 개별 협의</strong><p>행사 주선과 제안의 진행 여부는 관계자와 협의한 뒤 안내해 드려요. 문의만으로 참가나 일정이 확정되지는 않아요.</p></div>
         </div>
-      </form>
+        <section class="cx-card" id="cx-ext-area" aria-labelledby="ex-head"></section>
+      </div>
     </section>
   </div>
 </main>

@@ -1,439 +1,537 @@
-// Events 페이지 (7-6) — 탭 · Orbit Books 배너 · 일정 목록/캘린더 · 신청 4단계 · 내 신청·문의 · 세미나 요청 · 외부 행사
+// Events 페이지 (7-6) — 상단 Orbit Books(카테고리) / 하단 목록·캘린더 탐색 / 신청 · 문의 다이얼로그 / 세미나 요청 · 외부 행사 탭
 // 행사 데이터는 events-data.js(IL_EVENTS), 기록은 conf-records.js(ILConf). 실제 접수 · 전송은 없어요.
 (function () {
   'use strict';
   var D = window.IL_EVENTS, R = window.ILConf;
   if (!D || !R) { console.warn('[IL] 행사 모듈을 불러오지 못했어요'); return; }
-  var TODAY = D.TODAY;
+  var TODAY = D.TODAY, EVENTS = D.EVENTS;
   var sess = (window.IL && IL.session()) || {};
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+  var scrollBehavior = function () { return reduced.matches ? 'auto' : 'smooth'; };
+  var ARROW = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>';
 
-  // 필터 칩 — Earnings Call은 칩에서만 빠지고 '전체'와 책에서는 보여요
-  var CHIPS = [['', '전체'], ['corp', '콥데이'], ['ndr', 'NDR'], ['ipo', 'IPO'], ['ai', 'Conference'], ['wm', 'WM특화세미나']];
-  var SRC = { roster: '행사내역', notice: '공지', pattern: '예상 일정' };
-  var SECTORS = ['반도체 · IT하드웨어', '2차전지 · 소재', '자동차 · 부품', '인터넷 · 플랫폼', '바이오 · 헬스케어', '금융 · 지주', '조선 · 기계 · 방산', '매크로 · 투자전략', '해외주식'];
-  var ANALYSTS = ['윤태오 · 반도체/IT', '서지우 · IPO·M&A·스몰캡', '한도윤 · 2차전지·소재', '정하린 · 자산배분·WM', '강서진 · 투자전략', '오민재 · 인터넷·플랫폼', '이도현 · AI·디지털금융'];
+  // 하단 필터는 배너 책(CATS 6개)과 이름 · 순서가 달라요. Earnings Call은 필터에서만 빠지고 '전체'와 책에서는 보여요.
+  var FILTERS = [['corp', '콥데이'], ['ndr', 'NDR'], ['ipo', 'IPO'], ['ai', 'Conference'], ['wm', 'WM특화세미나']];
+  var SERIES_NAME = { mna: '매월 진행', corpday: '분기마다 진행' };
+  var SECTORS = ['반도체 · IT', '2차전지 · 소재', '모빌리티 · 산업재', '금융 · 디지털자산', '소비재 · 유통', '매크로 · 투자전략', '기타 / 담당자 상담'];
+  var ANALYSTS = ['윤태오 · 반도체/IT', '서지우 · IPO·M&A', '한도윤 · 2차전지·소재', '정하린 · 자산배분·WM', '강서진 · 투자전략', '오민재 · 인터넷·플랫폼', '이도현 · AI·디지털금융'];
+  var TONE = { brand: 'badge--brand', warn: 'cx-badge--warn', muted: 'badge--muted', neutral: 'cx-badge--neutral', point: 'badge--point' };
 
-  var st = { time: 'up', cat: '', elig: '', view: 'list', month: null };
-  var ob = null;
-
-  /* ---------- 공용 ---------- */
-  var catChip = function (c) { return '<span class="cf-cat" style="--c:' + c.color + ';--ink:' + c.ink + '">' + esc(c.label) + '</span>'; };
-  var srcBadge = function (ev) {
-    return D.isSample(ev) ? '<span class="badge badge--sample">예시</span>' : '<span class="badge badge--muted">' + esc(SRC[ev.source] || '') + '</span>';
+  /* ═════════ 유틸 ═════════ */
+  var catOf = D.catOf, md = D.md, dot = D.dot, wd = D.dow;
+  var filterLabel = function (id) { var f = FILTERS.filter(function (x) { return x[0] === id; })[0]; return f ? f[1] : (catOf(id) || {}).label || ''; };
+  var mineFor = function (id) { return R.find(id); };
+  // 내가 신청한 자리는 잔여석에서 빼서 보여 줘요
+  var seatsLeft = function (e) { var m = mineFor(e.id); return Math.max(0, (e.seats || 0) - (m && m.kind === 'apply' ? 1 : 0)); };
+  var srcTag = function (e) { return e.source === 'roster' || e.source === 'notice' ? '' : '<span class="cx-sample">' + (e.source === 'pattern' ? '예정' : '예시') + '</span>'; };
+  var srcLabel = function (e) { return e.source === 'roster' ? ' · 2026 행사내역(가상)' : e.source === 'notice' ? ' · 안내문 기준(가상)' : e.source === 'pattern' ? ' · 예정(일정 미확정)' : ' · 예시 일정'; };
+  // 담당 · 시간 · 장소처럼 있는 정보만 이어 붙여요
+  var metaOf = function (e) {
+    return [e.analysts && e.analysts.length ? '담당 ' + e.analysts.join(', ') : '', e.time, D.where(e)].filter(Boolean).join(' · ') || '세부 정보 추후 안내';
   };
-  var upcoming = function () { return D.EVENTS.filter(function (e) { return !D.isPast(e); }); };
-  // 신청 기록까지 반영한 상태
-  function stateOf(ev) {
-    var s = D.status(ev), rec = R.find(ev.id);
-    if (rec && s.key !== 'done') {
-      if (rec.kind === 'apply') return { key: 'mine', label: '신청 완료', rec: rec };
-      return { key: 'mine', label: ev.cat === 'ndr' ? '문의 완료' : '관심 등록됨', rec: rec };
-    }
-    if (s.key === 'open' && ev.seats != null) s = { key: 'open', label: '신청 가능 · 잔여 ' + ev.seats + '석' };
-    return s;
-  }
-  var stBadge = function (s) { return '<span class="cf-st cf-st--' + s.key + '">' + esc(s.label) + '</span>'; };
-  var fmtAt = function (iso) {
-    var d = new Date(iso); if (isNaN(d)) return '';
-    var p = function (n) { return ('0' + n).slice(-2); };
-    return d.getFullYear() + '.' + p(d.getMonth() + 1) + '.' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
-  };
-  var validEmail = function (v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); };
+  var upcomingOf = function (cat) { return EVENTS.filter(function (e) { return e.cat === cat && !D.isPast(e); }).sort(byStart); };
+  var byStart = function (a, b) { return a.start < b.start ? -1 : a.start > b.start ? 1 : 0; };
+  var badgeCls = function (r) { return TONE[r.tone] || 'badge--muted'; };
 
-  /* ---------- 탭 ---------- */
-  var panels = { conf: $('#panel-conf'), seminar: $('#panel-seminar'), external: $('#panel-external') };
-  var tabs = wireTabsA11y($('.cf-tabbar [role=tablist]'), function (key) {
-    Object.keys(panels).forEach(function (k) { panels[k].hidden = k !== key; });
-    panels[key].classList.remove('fade-up'); void panels[key].offsetWidth; panels[key].classList.add('fade-up');
-    if (history.replaceState) history.replaceState(null, '', key === 'conf' ? location.pathname + location.search : '#' + key);
-  });
+  var curUser = null;
+  if (typeof getUser === 'function') getUser().then(function (u) { curUser = u; });
+  if (typeof onAuth === 'function') onAuth(function (u) { curUser = u; });
 
-  /* ---------- 배너 · Orbit Books ---------- */
-  $('#cf-cats').innerHTML = D.CATS.map(function (c, i) {
-    return '<li><button type="button" data-cat="' + c.id + '"><span class="cf-dot" style="--c:' + c.color + '"></span>' +
-      '<span class="cf-cats__no">' + ('0' + (i + 1)).slice(-2) + '</span>' + esc(c.label) + '</button></li>';
-  }).join('');
-  var nUp = function (cat) { return upcoming().filter(function (e) { return e.cat === cat; }).length; };
-  if (window.OrbitBooks) {
-    ob = OrbitBooks.mount($('#cf-orbit'), {
-      books: D.CATS, center: 'Insight.',
-      detail: function (c) { return '예정 ' + nUp(c.id) + '건 · 목록 보기 ↓'; },
-      onPick: function (id) { setFilter({ cat: id, time: 'up' }); announce(D.catOf(id).label + ' 일정으로 정리했어요.'); }
-    });
-  }
-  $('#cf-cats').addEventListener('click', function (e) {
-    var b = e.target.closest('button[data-cat]'); if (!b) return;
-    if (ob) ob.pick(b.dataset.cat);
-    setFilter({ cat: b.dataset.cat, time: 'up' });
-    $('#cf-schedule').scrollIntoView({ behavior: 'smooth', block: 'start' });
-  });
+  /* ═════════ 상태 ═════════ */
+  var state = { tab: 'internal', cat: 'all', phase: 'upcoming', elig: 'all', analyst: 'all', openOnly: false, q: '', view: 'list', calY: 0, calM: 0 };
 
-  function counts() {
-    $('#cf-n-up').textContent = upcoming().length;
-    $('#cf-n-open').textContent = upcoming().filter(function (e) { return stateOf(e).key === 'open'; }).length;
-    $('#cf-mine-n').textContent = R.list().length;
-  }
-  $('#cf-all').addEventListener('click', function (e) {
-    e.preventDefault();
-    if (ob) ob.close();
-    setFilter({ cat: '', elig: '', time: 'up' });
-    $('#cf-schedule').scrollIntoView({ behavior: 'smooth', block: 'start' });
-  });
-
-  /* ---------- 일정 필터 ---------- */
-  function renderChips() {
-    var list = CHIPS.slice();
-    // 칩에 없는 카테고리(Earnings Call)를 책으로 골랐으면 임시 칩으로 보여 줘요
-    if (st.cat && !CHIPS.some(function (c) { return c[0] === st.cat; })) list.push([st.cat, D.catOf(st.cat).label + ' ×']);
-    $('#cf-chips').innerHTML = list.map(function (c) {
-      return '<button type="button" class="chip' + (st.cat === c[0] ? ' is-active' : '') + '" data-cat="' + c[0] + '" aria-pressed="' + (st.cat === c[0]) + '">' + esc(c[1]) + '</button>';
-    }).join('');
-  }
-  $('#cf-chips').addEventListener('click', function (e) {
-    var b = e.target.closest('[data-cat]'); if (!b) return;
-    var cat = b.dataset.cat;
-    if (cat && cat === st.cat && b.textContent.indexOf('×') > -1) cat = '';
-    if (ob) { if (cat) ob.pick(cat); else ob.close(); }
-    setFilter({ cat: cat });
-  });
-  function segWire(id, key) {
-    $('#' + id).addEventListener('click', function (e) {
-      var b = e.target.closest('[data-v]'); if (!b) return;
-      var o = {}; o[key] = b.dataset.v; setFilter(o);
-    });
-  }
-  segWire('cf-time', 'time'); segWire('cf-view', 'view');
-  $('#cf-elig').addEventListener('change', function (e) { setFilter({ elig: e.target.value }); });
-
-  function setFilter(o) {
-    // 조건이 바뀌면 캘린더는 첫 일정이 있는 달로 다시 맞춰요
-    if ('time' in o || 'cat' in o || 'elig' in o) st.month = null;
-    Object.assign(st, o);
-    $$('#cf-time [data-v]').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.v === st.time); });
-    $$('#cf-view [data-v]').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.v === st.view); });
-    $('#cf-elig').value = st.elig;
-    renderChips();
-    renderOut();
-  }
-  function filtered() {
-    return D.EVENTS.filter(function (e) {
-      if ((st.time === 'past') !== D.isPast(e)) return false;
-      if (st.cat && e.cat !== st.cat) return false;
-      if (st.elig && (e.elig || []).indexOf(st.elig) < 0) return false;
-      return true;
-    }).sort(function (a, b) { return st.time === 'past' ? (b.start < a.start ? -1 : 1) : (a.start < b.start ? -1 : 1); });
-  }
-  var live = $('#cf-live');
-  function announce(msg) { live.textContent = ''; setTimeout(function () { live.textContent = msg; }, 30); }
-
-  function renderOut() {
-    var list = filtered();
-    var out = $('#cf-out');
-    out.innerHTML = st.view === 'cal' ? calHTML(list) : listHTML(list);
-    out.classList.remove('fade-up'); void out.offsetWidth; out.classList.add('fade-up');
-    counts();
-  }
-
-  /* 목록 */
-  function listHTML(list) {
-    if (!list.length) return '<p class="cf-empty">조건에 맞는 일정이 없어요.</p>';
-    var html = '', month = '';
-    list.forEach(function (ev) {
-      var m = ev.start.slice(0, 7);
-      if (m !== month) {
-        if (month) html += '</ul>';
-        month = m;
-        html += '<h3 class="cf-month">' + m.slice(0, 4) + '년 ' + (+m.slice(5)) + '월</h3><ul class="cf-list">';
+  function filtered(anyPhase) {
+    var q = state.q.toLowerCase();
+    return EVENTS.filter(function (e) {
+      if (!anyPhase && D.isPast(e) !== (state.phase === 'past')) return false;
+      if (state.cat !== 'all' && e.cat !== state.cat) return false;
+      if (state.elig !== 'all' && (e.elig || []).indexOf(state.elig) < 0) return false;
+      if (state.analyst !== 'all' && (e.analysts || []).indexOf(state.analyst) < 0) return false;
+      if (state.openOnly && !D.status(e).can) return false;
+      if (q) {
+        var c = catOf(e.cat);
+        var days = (e.days || []).map(function (d) { return d.sessions.map(function (s) { return s[1] + ' ' + s[2]; }).join(' '); }).join(' ');
+        var hay = [e.title, c.label, c.ko, e.place, e.format, e.cond, days].concat(e.tags || [], e.analysts || []).join(' ').toLowerCase();
+        if (hay.indexOf(q) < 0) return false;
       }
-      var c = D.catOf(ev.cat), s = stateOf(ev);
-      var meta = [ev.time, ev.place, ev.format && ev.format !== ev.place ? ev.format : ''].filter(Boolean).join(' · ');
-      html += '<li><button type="button" class="cf-ev" data-open="' + ev.id + '">' +
-        '<span class="cf-ev__date' + (ev.tba ? ' is-tba' : '') + '">' +
-          (ev.tba ? '<b>' + (+ev.start.slice(5, 7)) + '월</b><span>미정</span>'
-                  : '<b>' + ev.start.slice(5).replace('-', '.') + '</b><span>' + D.dow(ev.start) + (ev.end ? ' ~ ' + ev.end.slice(5).replace('-', '.') : '') + '</span>') +
-        '</span>' +
-        '<span class="cf-ev__body">' +
-          '<span class="cf-ev__tags">' + catChip(c) + srcBadge(ev) + '</span>' +
-          '<span class="cf-ev__title">' + esc(ev.title) + '</span>' +
-          '<span class="cf-ev__meta">' + esc(meta || '시간·장소 미정') + ' · ' + esc(ev.analysts.join(', ')) + '</span>' +
-        '</span>' +
-        '<span class="cf-ev__side">' + stBadge(s) + '<span class="cf-ev__go" aria-hidden="true">›</span></span>' +
-      '</button></li>';
-    });
-    return html + '</ul>';
+      return true;
+    }).sort(function (a, b) { return state.phase === 'past' ? byStart(b, a) : byStart(a, b); });
   }
 
-  /* 월 캘린더 */
-  function calHTML(list) {
-    if (!st.month) {
-      var first = list.filter(function (e) { return !e.tba; })[0] || list[0];
-      st.month = first ? first.start.slice(0, 7) : TODAY.slice(0, 7);
-    }
-    var y = +st.month.slice(0, 4), mo = +st.month.slice(5, 7);
-    var firstDow = new Date(y, mo - 1, 1).getDay(), days = new Date(y, mo, 0).getDate();
-    var pad = function (n) { return ('0' + n).slice(-2); };
-    var inMonth = list.filter(function (e) {
-      var a = e.start.slice(0, 7), b = (e.end || e.start).slice(0, 7);
-      return a <= st.month && b >= st.month;
-    });
-    var cells = '';
-    for (var i = 0; i < firstDow; i++) cells += '<div class="cf-cal__cell is-blank" aria-hidden="true"></div>';
-    for (var d = 1; d <= days; d++) {
-      var ds = st.month + '-' + pad(d);
-      var evs = inMonth.filter(function (e) { return !e.tba && e.start <= ds && (e.end || e.start) >= ds; });
-      var dw = (firstDow + d - 1) % 7;
-      cells += '<div class="cf-cal__cell' + (ds === TODAY ? ' is-today' : '') + (dw === 0 ? ' is-sun' : dw === 6 ? ' is-sat' : '') + '">' +
-        '<span class="cf-cal__d">' + d + '</span>' +
-        evs.map(function (e) {
-          var c = D.catOf(e.cat);
-          return '<button type="button" class="cf-cal__ev" data-open="' + e.id + '" style="--c:' + c.color + ';--ink:' + c.ink + '" title="' + esc(e.title) + '">' +
-            '<span>' + esc(e.title) + '</span></button>';
-        }).join('') +
-      '</div>';
-    }
-    var tba = inMonth.filter(function (e) { return e.tba; });
-    var body = inMonth.length ? '' : '<p class="cf-empty">선택한 조건에 맞는 일정이 없는 달이에요. ‹ › 로 다른 달을 확인해주세요.</p>';
-    return '<div class="cf-cal">' +
-      '<div class="cf-cal__nav"><button type="button" data-mon="-1" aria-label="이전 달">‹</button>' +
-      '<b aria-live="polite">' + y + '년 ' + mo + '월</b><button type="button" data-mon="1" aria-label="다음 달">›</button></div>' +
-      '<div class="cf-cal__grid" role="grid" aria-label="' + y + '년 ' + mo + '월 행사 캘린더">' +
-        D.DOW.map(function (w, i) { return '<div class="cf-cal__dow' + (i === 0 ? ' is-sun' : i === 6 ? ' is-sat' : '') + '">' + w + '</div>'; }).join('') +
-        cells +
-      '</div>' +
-      (tba.length ? '<div class="cf-cal__tba"><b>일정 미확정</b>' + tba.map(function (e) {
-        return '<button type="button" data-open="' + e.id + '">' + esc(e.title) + ' ›</button>';
-      }).join('') + '</div>' : '') +
-      body + '</div>';
-  }
-  $('#cf-out').addEventListener('click', function (e) {
-    var mb = e.target.closest('[data-mon]');
-    if (mb) {
-      var y = +st.month.slice(0, 4), m = +st.month.slice(5, 7) - 1 + (+mb.dataset.mon);
-      var dt = new Date(y, m, 1);
-      st.month = dt.getFullYear() + '-' + ('0' + (dt.getMonth() + 1)).slice(-2);
-      $('#cf-out').innerHTML = calHTML(filtered());
-      var nb = $('#cf-out [data-mon="' + mb.dataset.mon + '"]'); if (nb) nb.focus();
+  /* ═════════ 상단: 카테고리 책 · 설명 ═════════ */
+  var orbit = window.OrbitBooks ? OrbitBooks.mount($('#cx-orbit'), {
+    books: D.CATS, center: 'Insight.',
+    detail: function (c) {
+      var up = upcomingOf(c.id);
+      return '예정 ' + up.length + '건 · 신청 가능 ' + up.filter(function (e) { return D.status(e).can; }).length + '건';
+    },
+    onPick: function (id) { setCat(id); }
+  }) : null;
+
+  function renderBookDesc() {
+    var box = $('#cx-desc');
+    if (state.cat === 'all') {
+      var up = EVENTS.filter(function (e) { return !D.isPast(e); });
+      var open = up.filter(function (e) { return D.status(e).can; }).length;
+      box.innerHTML = '<div class="cx-desc__copy"><p class="cx-eyebrow">6개 카테고리 · 예정 ' + up.length + '건</p>' +
+        '<h3>책을 골라 행사 카테고리를 펼쳐보세요</h3>' +
+        '<p>지금 신청 가능한 행사 ' + open + '건 · 아래 캘린더·목록에서 전체 일정을 바로 확인할 수 있어요.</p></div>' +
+        '<div class="cx-desc__acts"><button type="button" class="btn btn--primary btn--sm" data-jump>전체 일정 보기 ' + ARROW + '</button></div>';
       return;
     }
-    var ob2 = e.target.closest('[data-open]');
-    if (ob2) openDetail(ob2.dataset.open);
-  });
+    var c = catOf(state.cat), ups = upcomingOf(c.id), next = ups[0];
+    var opens = ups.filter(function (e) { return D.status(e).can; }).length;
+    var extra = {
+      corp: '<button type="button" class="btn btn--secondary btn--sm" data-detail="corp-260907">Q3 참여기업 보기</button>',
+      earnings: '<button type="button" class="btn btn--secondary btn--sm" data-request="earnings">실적발표 문의</button>',
+      ndr: '<button type="button" class="btn btn--secondary btn--sm" data-request="ndr">NDR 참여 문의</button>',
+      wm: '<button type="button" class="btn btn--secondary btn--sm" data-goto="seminar">맞춤 세미나 요청</button>'
+    }[c.id] || '';
+    box.innerHTML = '<div class="cx-desc__copy"><p class="cx-eyebrow">' + esc(c.label) + ' · 예정 ' + ups.length + '건 · 신청 가능 ' + opens + '건</p>' +
+      '<h3>' + (next ? esc(next.title) : esc(c.ko) + ' — 예정된 일정 없음') + '</h3>' +
+      '<p>' + (next ? esc(D.dateLabel(next)) + (D.where(next) ? ' · ' + esc(D.where(next)) : '') + ' — ' : '') + esc(c.desc) + '</p></div>' +
+      '<div class="cx-desc__acts">' +
+        '<button type="button" class="btn btn--primary btn--sm" data-jump>' + esc(c.ko) + ' 일정 ' + ups.length + '건 보기 ' + ARROW + '</button>' + extra +
+        '<button type="button" class="btn btn--text cx-desc__all" data-filter="all">전체 보기</button>' +
+      '</div>';
+  }
 
-  /* ---------- 행사 상세 ---------- */
-  function row(k, v) { return v ? '<div><dt>' + k + '</dt><dd>' + v + '</dd></div>' : ''; }
-  function openDetail(id) {
-    var ev = D.byId(id); if (!ev) { toast('행사 정보를 찾지 못했어요.'); return; }
-    var c = D.catOf(ev.cat), s = stateOf(ev);
-    var elig = (ev.elig || []).map(function (k) { return D.ELIG[k]; }).join(' · ');
-    var seats = ev.cap ? ev.cap + '명 · ' + (ev.seats ? '잔여 ' + ev.seats + '석' : '마감') : '';
-    var html = '<div class="cf-dt">' +
-      '<div class="cf-ev__tags">' + catChip(c) + srcBadge(ev) + stBadge(s) + '</div>' +
-      '<h2 class="modal__title cf-dt__title">' + esc(ev.title) + '</h2>' +
-      '<p class="cf-dt__intro">' + esc(ev.intro || c.desc) + '</p>' +
-      '<dl class="cf-dl">' +
-        row('일시', esc(D.dateLabel(ev, true)) + (ev.time ? ' · ' + esc(ev.time) : '')) +
-        row('장소', esc(ev.place || '')) + row('형식', esc(ev.format && ev.format !== ev.place ? ev.format : '')) +
-        row('담당', esc(ev.analysts.join(', '))) + row('대상', esc(ev.cond || elig)) +
-        row('정원', esc(seats)) + row('신청 마감', ev.deadline ? esc(D.dateLabel({ start: ev.deadline }, true)) : '') +
-      '</dl>' +
-      (ev.program ? '<h3 class="cf-dt__h">프로그램</h3><table class="tbl cf-prog"><tbody>' + ev.program.map(function (p) {
-        return '<tr><td class="num">' + esc(p[0]) + '</td><td>' + esc(p[1]) + '</td><td class="muted">' + esc(p[2]) + '</td></tr>';
-      }).join('') + '</tbody></table>' : '') +
-      (ev.days ? '<h3 class="cf-dt__h">날짜별 세션 <small>A / B 동시 진행</small></h3><div class="cf-days">' + ev.days.map(function (d) {
-        return '<div class="cf-day"><b>' + esc(D.dateLabel({ start: d.date })) + '</b><ul>' + d.sessions.map(function (x) {
-          return '<li><span class="num">' + esc(x[0]) + '</span><span>A · ' + esc(x[1]) + '</span><span>B · ' + esc(x[2]) + '</span></li>';
-        }).join('') + '</ul></div>';
-      }).join('') + '</div>' : '') +
-      (ev.cat === 'ndr' ? '<p class="cf-dt__note">NDR은 기업 IR팀의 초청으로 진행돼요. 참여를 원하시면 문의를 남겨 주세요. 담당자가 초청 가능 여부를 확인해 안내해요.</p>' : '') +
-      '<div class="cf-dt__act">' + actionHTML(ev, s) + '</div>' +
+  /* ═════════ 하단: 카테고리 칩 · 목록 · 캘린더 ═════════ */
+  function renderCats() {
+    var base = EVENTS.filter(function (e) { return D.isPast(e) === (state.phase === 'past'); });
+    var chip = function (id, label, n, dotc) {
+      return '<button type="button" class="chip' + (state.cat === id ? ' is-active' : '') + '" data-filter="' + id + '" aria-pressed="' + (state.cat === id) + '"' +
+        (dotc ? ' style="--dot:' + dotc + '"' : '') + '>' + (dotc ? '<i aria-hidden="true"></i>' : '') + esc(label) + ' <span class="c">' + n + '</span></button>';
+    };
+    $('#cx-cats').innerHTML = chip('all', '전체', base.length) + FILTERS.map(function (f) {
+      return chip(f[0], f[1], base.filter(function (e) { return e.cat === f[0]; }).length, catOf(f[0]).dot);
+    }).join('');
+  }
+
+  function badgesOf(e) {
+    var r = D.status(e), mine = mineFor(e.id), out = [];
+    if (mine) out.push('<span class="badge cx-badge--mine">✓ ' + (mine.kind === 'apply' ? '신청 완료' : '문의 접수') + '</span>');
+    out.push('<span class="badge ' + badgeCls(r) + '">' + esc(r.label) + '</span>');
+    if (e.cap && !D.isPast(e) && r.key !== 'full' && r.key !== 'soon') out.push('<span class="badge badge--muted">잔여 ' + seatsLeft(e) + '/' + e.cap + '석</span>');
+    (e.elig || []).forEach(function (k) { out.push('<span class="badge cx-badge--neutral">' + esc(D.ELIG[k]) + '</span>'); });
+    return out.join('');
+  }
+  function ctaOf(e, cls) {
+    cls = cls == null ? 'btn--sm' : cls;
+    var r = D.status(e), mine = mineFor(e.id);
+    if (mine) return '<button type="button" class="btn btn--secondary ' + cls + '" data-my>신청 내역</button>';
+    if (r.can) return '<button type="button" class="btn btn--primary ' + cls + '" data-apply="' + e.id + '">신청하기 ' + ARROW + '</button>';
+    if (r.ask) return '<button type="button" class="btn btn--secondary ' + cls + '" data-request="ndr" data-event="' + e.id + '">참여 문의</button>';
+    if (r.key === 'tba') return '<button type="button" class="btn btn--secondary ' + cls + '" data-request="interest" data-event="' + e.id + '">관심 등록</button>';
+    if (e.days) return '<button type="button" class="btn btn--secondary ' + cls + '" data-detail="' + e.id + '">참여기업 보기</button>';
+    var off = { full: '정원 마감', closed: '종료된 행사', ended: '신청 마감' }[r.key] || '신청 준비 중';
+    return '<button type="button" class="btn btn--secondary ' + cls + '" disabled>' + off + '</button>';
+  }
+
+  function renderList() {
+    var rows = filtered(), prev = '';
+    $('#cx-count').innerHTML = '<b>' + rows.length + '</b>개의 ' + (state.phase === 'past' ? '지난' : '예정') + ' 일정' + (state.cat !== 'all' ? ' · ' + esc(catOf(state.cat).label) : '');
+    if (!rows.length) {
+      $('#cx-list').innerHTML = '<div class="cx-empty">조건에 맞는 일정이 없어요.<br><button type="button" class="btn btn--secondary btn--sm" data-reset>필터 초기화</button></div>';
+      return;
+    }
+    $('#cx-list').innerHTML = rows.map(function (e, i) {
+      var p = e.start.split('-'), c = catOf(e.cat), past = D.isPast(e);
+      var mon = p[0] + '년 ' + (+p[1]) + '월';
+      var head = mon !== prev ? '<h3 class="cx-month">' + mon + '<span>' + (state.phase === 'past' ? '지난 행사' : '예정 행사') + '</span></h3>' : '';
+      prev = mon;
+      var sc = D.seriesCount(e);
+      return head + '<article class="cx-row' + (past ? ' is-past' : '') + (reduced.matches ? '' : ' in') + '" style="--dot:' + c.dot + ';--d:' + Math.min(i, 6) * 45 + 'ms">' +
+        '<div class="cx-date" aria-label="' + esc(D.dateLabel(e)) + '"><div class="m">' + p[1] + '월</div><div class="d">' + (e.tba ? '–' : +p[2]) + '</div>' +
+          '<div class="w">' + (e.tba ? '일정 미정' : wd(e.start) + '요일') + '</div>' + (e.end && e.end !== e.start ? '<div class="r">~' + md(e.end) + '</div>' : '') + '</div>' +
+        '<div class="cx-row__body">' +
+          '<span class="cx-cat"><i aria-hidden="true"></i>' + esc(c.label) + srcTag(e) + '</span>' +
+          '<button type="button" class="cx-title" data-detail="' + e.id + '">' + esc(e.title) + '</button>' +
+          '<div class="cx-meta">' + esc(metaOf(e)) + '</div>' +
+          (e.cond ? '<div class="cx-meta">자격 · ' + esc(e.cond) + (e.deadline && !past ? ' · 마감 ' + md(e.deadline) : '') + '</div>' : '') +
+          (sc > 1 ? '<div class="cx-meta">' + (SERIES_NAME[e.series] || '정기 행사') + ' · 2026년 ' + sc + '회</div>' : '') +
+          '<div class="cx-badges">' + badgesOf(e) + '</div>' +
+        '</div>' +
+        '<div class="cx-acts">' + ctaOf(e) + '<button type="button" class="cx-more" data-detail="' + e.id + '">상세 보기</button></div>' +
+      '</article>';
+    }).join('');
+  }
+
+  function focusMonth() {
+    var first = filtered()[0] || EVENTS.filter(function (e) { return D.isPast(e) === (state.phase === 'past'); })[0];
+    var iso = first ? first.start : TODAY;
+    state.calY = +iso.slice(0, 4); state.calM = +iso.slice(5, 7) - 1;
+  }
+  // 캘린더는 지난 · 예정 일정을 함께 보여 줘요(지난 일정은 흐리게)
+  function renderCalendar() {
+    var y = state.calY, m = state.calM, ym = y + '-' + ('0' + (m + 1)).slice(-2);
+    var first = new Date(y, m, 1).getDay(), last = new Date(y, m + 1, 0).getDate();
+    var rows = filtered(true).filter(function (e) { return !e.tba && e.start <= ym + '-31' && D.endOf(e) >= ym + '-01'; }).sort(byStart);
+    var blank = '<div class="cx-cell is-blank" aria-hidden="true"></div>';
+    var cells = D.DOW.map(function (d, i) { return '<div class="cx-dow' + (i === 0 ? ' is-sun' : i === 6 ? ' is-sat' : '') + '">' + d + '</div>'; }).join('') + new Array(first + 1).join(blank);
+    for (var d = 1; d <= last; d++) {
+      var iso = ym + '-' + ('0' + d).slice(-2);
+      var inDay = rows.filter(function (e) { return e.start <= iso && D.endOf(e) >= iso; });
+      cells += '<div class="cx-cell' + (iso === TODAY ? ' is-today' : '') + '"><span class="n">' + d + '</span>' + inDay.map(function (e) {
+        return '<button type="button" class="cx-ev' + (D.isPast(e) ? ' is-past' : '') + '" style="--dot:' + catOf(e.cat).dot + '" data-detail="' + e.id + '" aria-label="' + dot(iso) + ' ' + esc(e.title) + ' 상세">' +
+          '<b>' + esc(catOf(e.cat).label) + '</b><span>' + esc(e.title) + '</span></button>';
+      }).join('') + '</div>';
+    }
+    cells += new Array((7 - (first + last) % 7) % 7 + 1).join(blank);
+    $('#cx-count').innerHTML = '<b>' + rows.length + '</b>개의 일정 · ' + y + '년 ' + (m + 1) + '월';
+    $('#cx-calendar').innerHTML = '<div class="cx-cal">' +
+      '<div class="cx-cal__bar"><h3 aria-live="polite">' + y + '년 ' + (m + 1) + '월</h3><div class="cx-cal__nav">' +
+        '<button type="button" data-month="-1" aria-label="이전 달">‹</button><button type="button" data-month="0">이번 일정</button><button type="button" data-month="1" aria-label="다음 달">›</button></div></div>' +
+      '<div class="cx-grid">' + cells + '</div>' +
+      '<div class="cx-agenda"><h4>이 달의 일정</h4>' + (rows.length ? rows.map(function (e) {
+        var r = D.status(e);
+        return '<button type="button" class="cx-ag" data-detail="' + e.id + '"><time>' + md(e.start) + (e.end && e.end !== e.start ? '~' : '') + '</time>' +
+          '<span class="t">' + esc(e.title) + '</span><span class="badge ' + badgeCls(r) + '">' + esc(r.label) + '</span></button>';
+      }).join('') : '<p class="cx-meta cx-agenda__empty">선택한 조건에 맞는 일정이 없는 달이에요. ‹ › 로 다른 달을 확인해주세요.</p>') + '</div>' +
     '</div>';
-    var m = openModal(html, { label: ev.title + ' 상세', width: 600 });
-    var act = $('[data-act]', m.el);
-    if (act) act.addEventListener('click', function () { m.close(); setTimeout(function () { openApply(ev); }, 220); });
-    var mine = $('[data-mine]', m.el);
-    if (mine) mine.addEventListener('click', function () { m.close(); setTimeout(openMine, 220); });
-  }
-  function flowOf(ev) {
-    if (ev.cat === 'ndr') return { kind: 'request', type: 'NDR 참여 문의', btn: 'NDR 참여 문의', submit: '문의 보내기', q: '문의 내용' };
-    if (ev.tba || ev.mode === 'tba') return { kind: 'request', type: '관심 등록', btn: '관심 등록', submit: '관심 등록하기', q: '알림 받을 때 함께 받고 싶은 내용' };
-    return { kind: 'apply', type: '참가 신청', btn: '참가 신청', submit: '신청하기', q: '사전 질문' };
-  }
-  function actionHTML(ev, s) {
-    if (s.key === 'done') return '<p class="muted">종료된 행사예요.</p>';
-    if (s.key === 'mine') return '<p class="cf-dt__done">' + esc(s.label) + ' · ' + esc(fmtAt(s.rec.at)) + '</p><button type="button" class="btn btn--secondary" data-mine>내 신청·문의 보기</button>';
-    if (s.key === 'closed') return '<button type="button" class="btn btn--primary" disabled>신청 마감</button>';
-    if (s.key === 'planned') return '<p class="muted">신청 일정이 열리면 안내해 드려요.</p>';
-    return '<button type="button" class="btn btn--primary" data-act>' + esc(flowOf(ev).btn) + '</button>';
   }
 
-  /* ---------- 신청 4단계 ---------- */
-  var STEPS = ['시연 확인', '입력', '내용 확인', '완료'];
-  function openApply(ev) {
-    var f = flowOf(ev);
-    var elig = (ev.elig || []).map(function (k) { return D.ELIG[k]; }).join(' · ');
-    var data = { name: sess.name || '', org: sess.org || sess.branch || '', email: '', q: '', demo: false, elig: false };
-    var step = 0;
-    var m = openModal('<div class="cf-ap"></div>', { label: ev.title + ' ' + f.btn, width: 520 });
-    var root = $('.cf-ap', m.el);
+  function renderExplore() {
+    renderCats();
+    $('#cx-list').hidden = state.view !== 'list'; $('#cx-calendar').hidden = state.view !== 'calendar';
+    if (state.view === 'list') renderList(); else renderCalendar();
+  }
+  function syncMyCount() { var n = $('#cx-my-n'), k = R.list().length; n.textContent = k; n.toggleAttribute('data-zero', !k); }
+  function renderAll() { renderBookDesc(); renderExplore(); syncMyCount(); syncUrl(); if (orbit) orbit.refresh(); }
 
-    function stepper() {
-      return '<ol class="cf-stepper">' + STEPS.map(function (t, i) {
-        return '<li class="' + (i < step ? 'is-done' : i === step ? 'is-now' : '') + '"' + (i === step ? ' aria-current="step"' : '') + '><b>' + (i + 1) + '</b><span>' + t + '</span></li>';
-      }).join('') + '</ol>';
-    }
-    function draw() {
-      var h = '<p class="cf-ap__k">' + esc(f.btn) + '</p><h2 class="modal__title">' + esc(ev.title) + '</h2>' +
-        '<p class="cf-ap__date">' + esc(D.dateLabel(ev, true)) + (ev.time ? ' · ' + esc(ev.time) : '') + '</p>' + stepper();
-      if (step === 0) {
-        h += '<div class="cf-ap__box">시연용 가상 화면이에요. 이 화면에서 입력한 내용은 이 브라우저에만 저장되고, 리서치센터로 전송되지 않아요.</div>' +
-          '<label class="cf-check"><input type="checkbox" name="demo"' + (data.demo ? ' checked' : '') + '> <span>실제 접수·전송이 없는 시연 화면임을 확인했어요. 테스트 값으로 입력해주세요.</span></label>' +
-          '<div class="cf-ap__act"><button type="button" class="btn btn--primary" data-next' + (data.demo ? '' : ' disabled') + '>다음</button></div>';
-      } else if (step === 1) {
-        h += '<form novalidate>' +
-          '<label class="field"><span class="field__label">이름</span><input class="input" name="name" required maxlength="30" value="' + esc(data.name) + '"></label>' +
-          '<label class="field"><span class="field__label">소속</span><input class="input" name="org" required maxlength="40" value="' + esc(data.org) + '"></label>' +
-          '<label class="field"><span class="field__label">이메일</span><input class="input" type="email" name="email" required placeholder="test@example.com" value="' + esc(data.email) + '"></label>' +
-          '<label class="field"><span class="field__label">' + esc(f.q) + ' <small class="muted">(선택)</small></span><textarea class="input cf-textarea" name="q" rows="3" maxlength="300">' + esc(data.q) + '</textarea></label>' +
-          '<label class="cf-check"><input type="checkbox" name="elig"' + (data.elig ? ' checked' : '') + '> <span>참여 대상(' + esc(ev.cond || elig) + ')에 해당하는 것을 확인했어요.</span></label>' +
-          '<p class="cf-form__err" role="alert"></p>' +
-          '<div class="cf-ap__act"><button type="button" class="btn btn--secondary" data-prev>이전</button><button type="submit" class="btn btn--primary">다음</button></div></form>';
-      } else if (step === 2) {
-        h += '<dl class="cf-dl cf-dl--confirm">' + row('구분', esc(f.type)) + row('이름', esc(data.name)) + row('소속', esc(data.org)) +
-          row('이메일', esc(data.email)) + row(esc(f.q), esc(data.q) || '<span class="muted">없음</span>') + '</dl>' +
-          '<div class="cf-ap__act"><button type="button" class="btn btn--secondary" data-prev>이전</button><button type="button" class="btn btn--primary" data-submit>' + esc(f.submit) + '</button></div>';
-      } else {
-        h += '<div class="cf-ap__ok"><span class="cf-ap__check" aria-hidden="true">✓</span>' +
-          '<p><b>' + esc(f.type) + ' 완료</b></p>' +
-          '<p class="muted">‘내 신청·문의’와 일정 목록의 신청 상태에 바로 반영했어요. 실제 접수·이메일 발송은 일어나지 않았어요.</p></div>' +
-          '<div class="cf-ap__act"><button type="button" class="btn btn--secondary" data-mine>내 신청·문의 보기</button><button type="button" class="btn btn--primary" data-close>닫기</button></div>';
-      }
-      root.innerHTML = h;
-      var first = $(step === 0 ? 'input[name=demo]' : 'input:not([type=checkbox]),[data-submit],[data-close]', root);
-      if (first) first.focus();
-      wire();
-    }
-    function wire() {
-      var demo = $('input[name=demo]', root);
-      if (demo) demo.addEventListener('change', function () { data.demo = demo.checked; $('[data-next]', root).disabled = !demo.checked; });
-      var next = $('[data-next]', root); if (next) next.addEventListener('click', function () { step = 1; draw(); });
-      $$('[data-prev]', root).forEach(function (b) { b.addEventListener('click', function () { keep(); step -= 1; draw(); }); });
-      var form = $('form', root);
-      if (form) form.addEventListener('submit', function (e) {
-        e.preventDefault(); keep();
-        var err = !data.name.trim() ? '이름을 입력해주세요.' : !data.org.trim() ? '소속을 입력해주세요.' :
-          !validEmail(data.email) ? '이메일 형식을 확인해주세요.' : !data.elig ? '참여 대상 확인에 체크해주세요.' : '';
-        if (err) { $('.cf-form__err', root).textContent = err; return; }
-        step = 2; draw();
-      });
-      var sub = $('[data-submit]', root);
-      if (sub) sub.addEventListener('click', function () {
-        R.add({ kind: f.kind, type: f.type, title: ev.title, eventId: ev.id, email: data.email, cat: ev.cat, date: ev.start,
-          name: data.name, org: data.org, question: data.q });
-        step = 3; draw();
-      });
-      var mine = $('[data-mine]', root); if (mine) mine.addEventListener('click', function () { m.close(); setTimeout(openMine, 220); });
-      var cl = $('[data-close]', root); if (cl) cl.addEventListener('click', m.close);
-    }
-    function keep() {
-      var form = $('form', root); if (!form) return;
-      data.name = form.name.value; data.org = form.org.value; data.email = form.email.value.trim(); data.q = form.q.value; data.elig = form.elig.checked;
-    }
-    draw();
+  // 필터 상태를 주소에 반영 — 공유 · 뒤로가기 · Home 링크가 같은 상태로 열려요
+  function syncUrl() {
+    if (!history.replaceState || state.tab !== 'internal') return;
+    var q = new URLSearchParams(location.search);
+    if (state.cat === 'all') q.delete('category'); else q.set('category', state.cat);
+    if (state.view === 'list') q.delete('view'); else q.set('view', state.view);
+    if (state.phase === 'upcoming') q.delete('phase'); else q.set('phase', state.phase);
+    q.delete('event'); q.delete('cat');
+    var qs = q.toString();
+    history.replaceState(null, '', location.pathname + (qs ? '?' + qs : ''));
   }
 
-  /* ---------- 내 신청·문의 ---------- */
-  function openMine() {
-    var m = openModal('<h2 class="modal__title">내 신청·문의</h2><p class="form-note">이 브라우저에만 저장된 시연 기록이에요. 실제 접수·전송은 없어요.</p><div class="cf-mine-list"></div>',
-      { label: '내 신청·문의', width: 560 });
-    var box = $('.cf-mine-list', m.el);
-    function draw() {
-      var list = R.list().slice().reverse();
-      box.innerHTML = list.length ? '<ul>' + list.map(function (r) {
-        var ev = r.eventId && D.byId(r.eventId);
-        return '<li class="cf-rec"><div class="cf-rec__main">' +
-          '<span class="cf-rec__type cf-rec__type--' + (r.kind === 'apply' ? 'apply' : 'req') + '">' + esc(r.type || (r.kind === 'apply' ? '참가 신청' : '문의')) + '</span>' +
-          '<b>' + esc(r.title) + '</b>' +
-          '<small>' + (ev ? esc(D.dateLabel(ev)) + ' · ' : '') + '기록 ' + esc(fmtAt(r.at)) + (r.email ? ' · ' + esc(r.email) : '') + '</small></div>' +
-          '<div class="cf-rec__act">' + (ev ? '<button type="button" class="btn btn--text btn--sm" data-view="' + ev.id + '">행사 보기</button>' : '') +
-          '<button type="button" class="btn btn--sm cf-rec__del" data-del="' + esc(r.id) + '" aria-label="' + esc(r.title) + ' 기록 삭제">삭제</button></div></li>';
-      }).join('') + '</ul>' : '<p class="cf-empty">아직 신청·문의 기록이 없어요.</p>';
-    }
-    box.addEventListener('click', function (e) {
-      var del = e.target.closest('[data-del]');
-      if (del) { R.remove(del.dataset.del); draw(); toast('기록을 삭제했어요.'); var f = $('[data-del]', box) || $('.modal__close', m.el); f.focus(); return; }
-      var v = e.target.closest('[data-view]');
-      if (v) { m.close(); setTimeout(function () { openDetail(v.dataset.view); }, 220); }
-    });
-    draw();
+  // 카테고리 선택 — 책 · 칩이 같은 상태를 써요
+  function setCat(id) {
+    state.cat = id;
+    if (state.view === 'calendar') focusMonth();
+    renderAll();
+    if (orbit) orbit.dock(id === 'all' ? null : id);
+    $('#cx-live').textContent = id === 'all' ? '전체 일정을 표시해요.' : filterLabel(id) + ' 일정 ' + filtered().length + '건으로 목록을 정리했어요.';
+    var chip = $('#cx-cats [data-filter="' + id + '"]'), row = $('#cx-cats');
+    if (chip && row.scrollWidth > row.clientWidth) row.scrollTo({ left: chip.offsetLeft - (row.clientWidth - chip.clientWidth) / 2 });
   }
-  $('#cf-mine').addEventListener('click', openMine);
-  R.onChange(function () { counts(); if (!panels.conf.hidden) renderOut(); });
+  function setPressed(sel, on) { $$(sel).forEach(function (b) { b.setAttribute('aria-pressed', String(on(b))); }); }
+  function jumpToExplore() { $('#explore').scrollIntoView({ behavior: scrollBehavior(), block: 'start' }); }
 
-  /* ---------- 세미나/탐방 요청 ---------- */
-  var by = 'sector';
-  var semForm = $('#cf-seminar-form');
-  function fillTarget() {
-    var opts = by === 'sector' ? SECTORS : ANALYSTS;
-    $('#cf-by-label').textContent = by === 'sector' ? '섹터' : '애널리스트(가상)';
-    $('#cf-target').innerHTML = opts.map(function (o) { return '<option>' + esc(o) + '</option>'; }).join('');
-    $$('#cf-by [data-v]').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.v === by); });
+  /* ═════════ 다이얼로그 — partials.js openModal 하나를 열어 두고 내용만 바꿔요 ═════════ */
+  var dlg = null, detailEv = null, draft = null;
+  function showDialog(html, label) {
+    label = label || 'SEMINARS & CONFERENCES';
+    if (!dlg) {
+      dlg = openModal('<div class="cx-dbody"></div>', { label: label, width: 580, onClose: function () { dlg = null; } });
+      dlg.el.classList.add('cx-dialog'); dlg.el.parentNode.classList.add('cx-modal');
+    }
+    dlg.el.setAttribute('aria-label', label);
+    $('.cx-dbody', dlg.el).innerHTML = '<p class="cx-dlbl">' + esc(label) + '</p>' + html;
+    dlg.el.scrollTop = 0;
+    var f = $('.cx-dbody input:not([type=hidden]):not([type=checkbox]),.cx-dbody select,.cx-dbody textarea', dlg.el) || $('.modal__close', dlg.el);
+    if (f) f.focus();
   }
-  $('#cf-by').addEventListener('click', function (e) { var b = e.target.closest('[data-v]'); if (b) { by = b.dataset.v; fillTarget(); } });
-  fillTarget();
-  var tmr = new Date(D.parse(TODAY).getTime() + 86400000);
-  semForm.date.min = tmr.getFullYear() + '-' + ('0' + (tmr.getMonth() + 1)).slice(-2) + '-' + ('0' + tmr.getDate()).slice(-2);
-  semForm.addEventListener('submit', function (e) {
-    e.preventDefault();
-    var f = semForm, err = !f.topic.value.trim() ? '희망 주제를 입력해주세요.' : !f.date.value ? '희망 날짜를 골라주세요.' :
-      f.date.value < f.date.min ? '희망 날짜는 내일 이후로 골라주세요.' : !validEmail(f.email.value.trim()) ? '이메일 형식을 확인해주세요.' :
-      !f.demo.checked ? '시연 화면 확인에 체크해주세요.' : '';
-    $('.cf-form__err', f).textContent = err;
-    if (err) return;
-    var target = f.target.value.split(' · ')[0];
-    R.add({ kind: 'request', type: '세미나 요청', title: target + ' 세미나 요청 · ' + f.topic.value.trim(), eventId: null,
-      email: f.email.value.trim(), date: f.date.value, by: by, target: f.target.value });
-    f.reset(); fillTarget();
-    toast('세미나 요청을 ‘내 신청·문의’에 기록했어요. 실제 전송은 없어요.');
+  function closeDialog() { if (dlg) dlg.close(); }
+
+  function detail(id) {
+    var e = D.byId(id); if (!e) { toast('행사 정보를 찾지 못했어요.'); return; }
+    detailEv = e;
+    var c = catOf(e.cat), mine = mineFor(e.id), sc = D.seriesCount(e), r = D.status(e);
+    var prog = e.days
+      ? '<h3>참여기업·일정 <small>· 안내문 기준 A/B 동시 진행</small></h3>' +
+        '<div class="cx-daytabs" role="tablist" aria-label="행사 날짜">' + e.days.map(function (d, i) {
+          return '<button type="button" role="tab" data-day="' + i + '" aria-selected="' + (i === 0) + '">' + md(d.date) + ' ' + wd(d.date) + '</button>';
+        }).join('') + '</div><div id="cx-daytable"></div>'
+      : '<h3>프로그램</h3><div class="cx-prog">' + (e.program ? e.program.map(function (p) {
+          return '<div><time>' + esc(p[0]) + '</time><span>' + esc(p[1]) + (p[2] ? '<small>' + esc(p[2]) + '</small>' : '') + '</span></div>';
+        }).join('') : '<p class="cx-meta">프로그램 확정 후 안내 예정</p>') + '</div>';
+    var how = e.mode === 'invite' ? '초청 기반 · 담당 애널리스트 문의' : e.mode === 'tba' || e.tba ? '일정 확정 후 안내 · 관심 등록 가능' :
+      e.openAt && e.openAt > TODAY ? dot(e.openAt) + ' 신청 오픈 예정' : e.deadline ? '온라인 신청 · 마감 ' + dot(e.deadline) + ' 18:00' : '추후 안내';
+    var row = function (k, v) { return '<dt>' + k + '</dt><dd>' + v + '</dd>'; };
+    showDialog(
+      '<span class="badge cx-badge--neutral cx-dcat" style="--dot:' + c.dot + '"><i aria-hidden="true"></i>' + esc(c.label + srcLabel(e)) + '</span>' +
+      '<h2 class="cx-dtitle">' + esc(e.title) + '</h2>' +
+      '<p class="cx-lead">' + esc(e.intro || '') + '</p>' +
+      '<div class="cx-badges">' + badgesOf(e) + '</div>' +
+      '<dl class="cx-dl">' +
+        row('일시', esc(D.dateLabel(e)) + (e.time ? '<br>' + esc(e.time) : '')) +
+        (e.analysts && e.analysts.length ? row('담당', esc(e.analysts.join(', '))) : '') +
+        (sc > 1 ? row('정기 행사', (SERIES_NAME[e.series] || '정기 행사') + ' · 2026년 ' + sc + '회 진행') : '') +
+        row('장소·방식', esc(D.where(e)) || '추후 안내') +
+        row('참여 대상', (e.elig || []).map(function (k) { return D.ELIG[k]; }).join(' · ') || '추후 안내') +
+        (e.cond ? row('자격 조건', esc(e.cond)) : '') +
+        row('신청 방식', how) +
+        (e.cap ? row('정원', e.cap + '명 · ' + (D.isPast(e) ? '행사 종료' : '잔여 ' + seatsLeft(e) + '석')) : '') +
+        row('내 신청 상태', mine ? (mine.kind === 'apply' ? '신청 완료' : '문의 접수') + ' · ' + dot(mine.at.slice(0, 10)) + ' (시연 기록)' : '미신청') +
+      '</dl>' + prog +
+      (e.notes ? '<h3>참여 안내</h3><div class="cx-prog">' + e.notes.map(function (n, i) { return '<div><time>0' + (i + 1) + '</time><span>' + esc(n) + '</span></div>'; }).join('') + '</div>' : '') +
+      (r.ask ? '<div class="cx-mini">NDR은 기업 IR팀의 초청으로 진행돼요. 문의를 남기면 담당자가 초청 가능 여부를 확인해 안내해요.</div>' : '') +
+      '<div class="cx-dfoot"><span class="cx-dfoot__meta">문의 · 유진투자증권 법인영업팀 · 리서치센터</span>' + ctaOf(e, '') + '</div>',
+      c.label.toUpperCase());
+    if (e.days) selectDay(e, 0);
+  }
+  function selectDay(e, i) {
+    $$('[data-day]').forEach(function (b) { b.setAttribute('aria-selected', String(+b.dataset.day === i)); });
+    var d = e.days[i];
+    $('#cx-daytable').innerHTML = '<table class="cx-ab"><caption class="sr-only">' + dot(d.date) + ' 참여기업</caption>' +
+      '<thead><tr><th scope="col">시작</th><th scope="col">A</th><th scope="col">B</th></tr></thead><tbody>' +
+      d.sessions.map(function (s) { return '<tr><th scope="row">' + esc(s[0]) + '</th><td>' + esc(s[1]) + '</td><td>' + esc(s[2]) + '</td></tr>'; }).join('') + '</tbody></table>';
+  }
+
+  /* ═════════ 신청 — 로그인 안내 → 입력 → 내용 확인 → 완료 ═════════ */
+  function personFields(p, v) {
+    v = v || {};
+    return '<div class="field"><label class="field__label" for="' + p + 'name">이름<span class="req">*</span></label><input class="cx-in" id="' + p + 'name" name="name" required maxlength="50" value="' + esc(v.name != null ? v.name : sess.name || '') + '" placeholder="테스트 이름" autocomplete="off"></div>' +
+      '<div class="field"><label class="field__label" for="' + p + 'org">소속 기관<span class="req">*</span></label><input class="cx-in" id="' + p + 'org" name="org" required maxlength="80" value="' + esc(v.org != null ? v.org : sess.org || sess.branch || '') + '" placeholder="테스트 기관명" autocomplete="off"></div>' +
+      '<div class="field"><label class="field__label" for="' + p + 'email">업무용 이메일<span class="req">*</span></label><input class="cx-in" id="' + p + 'email" name="email" type="email" required maxlength="100" value="' + esc(v.email || (curUser && curUser.email) || '') + '" placeholder="test@example.com" autocomplete="off"></div>' +
+      '<div class="field"><label class="field__label" for="' + p + 'phone">연락처<small>선택</small></label><input class="cx-in" id="' + p + 'phone" name="phone" type="tel" maxlength="30" value="' + esc(v.phone || '') + '" placeholder="회신받을 전화번호" autocomplete="off"></div>';
+  }
+  var CONSENT = '<label class="cx-check"><input type="checkbox" name="demo" required><span>실제 접수·전송이 없는 시연 화면임을 확인했어요. 테스트 값으로 입력해주세요.</span></label>';
+
+  function apply(id, skipLogin, values) {
+    var e = D.byId(id); if (!e || !D.status(e).can) return;
+    if (!curUser && !skipLogin) {
+      showDialog('<h2 class="cx-dtitle">로그인하고 신청할까요?</h2>' +
+        '<p class="cx-lead">로그인하면 이메일이 자동으로 채워지고 신청 내역을 계정 기준으로 확인할 수 있어요. 시연에서는 비회원으로 계속해도 돼요.</p>' +
+        '<div class="cx-mini">' + esc(e.title) + ' · ' + esc(D.dateLabel(e)) + '</div>' +
+        '<div class="cx-formacts"><button type="button" class="btn btn--secondary btn--sm" data-apply="' + id + '" data-guest>비회원으로 계속</button>' +
+        '<button type="button" class="btn btn--primary btn--sm" data-login>로그인</button></div>', 'REGISTRATION');
+      return;
+    }
+    values = values || {};
+    var c = catOf(e.cat);
+    showDialog('<span class="badge badge--brand">참가 신청</span>' +
+      '<h2 class="cx-dtitle">' + esc(e.title) + '</h2>' +
+      '<p class="cx-lead">' + esc([D.dateLabel(e), e.time, D.where(e)].filter(Boolean).join(' · ')) + '</p>' +
+      '<div class="cx-mini">자격 조건 · ' + esc(e.cond || '추후 안내') + (e.cap ? ' · 잔여 ' + seatsLeft(e) + '석' : '') + '</div>' +
+      '<form data-kind="apply" data-event="' + e.id + '"><div class="cx-fields">' + personFields('ap-', values) +
+        (e.format === '하이브리드' ? '<div class="field full"><label class="field__label" for="ap-attend">참석 방식<span class="req">*</span></label><select class="cx-in" id="ap-attend" name="attend"><option>현장 참석</option><option>온라인 시청</option></select></div>' : '') +
+        '<div class="field full"><label class="field__label" for="ap-q">사전 질문<small>선택</small></label><textarea class="cx-in" id="ap-q" name="question" maxlength="1000" placeholder="행사에서 확인하고 싶은 내용을 적어주세요.">' + esc(values.question || '') + '</textarea></div>' +
+      '</div>' +
+      '<label class="cx-check"><input type="checkbox" name="eligible" required><span>' + esc((e.elig || []).map(function (k) { return D.ELIG[k]; }).join('·')) + ' 대상이며 위 자격 조건에 해당해요.</span></label>' + CONSENT +
+      '<div class="cx-formacts"><button type="button" class="btn btn--secondary btn--sm" data-detail="' + e.id + '">이전</button><button class="btn btn--primary btn--sm" type="submit">신청 내용 확인 ' + ARROW + '</button></div>' +
+      '</form>', c.label.toUpperCase() + ' · REGISTRATION');
+  }
+
+  function requestFields(kind, p, v) {
+    v = v || {};
+    if (kind === 'interest') {
+      return '<div class="cx-fields">' + personFields(p, v) +
+        '<div class="field full"><label class="field__label" for="' + p + 'question">알림 받을 때 함께 받고 싶은 내용<small>선택</small></label><textarea class="cx-in" id="' + p + 'question" name="question" maxlength="600" placeholder="예: 참여 기업 명단이 확정되면 알려주세요.">' + esc(v.question || '') + '</textarea></div></div>';
+    }
+    var by = v.selectBy || 'sector';
+    var opt = function (list, cur) { return list.map(function (s) { return '<option' + (cur === s ? ' selected' : '') + '>' + esc(s) + '</option>'; }).join(''); };
+    return '<div class="cx-fields">' +
+      '<div class="field full"><label class="field__label" for="' + p + 'by">' + (kind === 'earnings' ? '실적발표 문의 기준' : kind === 'ndr' ? 'NDR 문의 기준' : '세미나 요청 기준') + '<span class="req">*</span></label>' +
+        '<select class="cx-in" id="' + p + 'by" name="selectBy"><option value="sector"' + (by === 'sector' ? ' selected' : '') + '>섹터로 선택</option><option value="analyst"' + (by === 'analyst' ? ' selected' : '') + '>애널리스트로 선택</option></select></div>' +
+      '<div class="field full" data-by="sector"' + (by === 'analyst' ? ' hidden' : '') + '><label class="field__label" for="' + p + 'sector">섹터<span class="req">*</span></label><select class="cx-in" id="' + p + 'sector" name="sector"' + (by === 'analyst' ? ' disabled' : ' required') + '><option value="">섹터 선택</option>' + opt(SECTORS, v.sector) + '</select></div>' +
+      '<div class="field full" data-by="analyst"' + (by === 'sector' ? ' hidden' : '') + '><label class="field__label" for="' + p + 'analyst">애널리스트(가상)<span class="req">*</span></label><select class="cx-in" id="' + p + 'analyst" name="analyst"' + (by === 'sector' ? ' disabled' : ' required') + '><option value="">애널리스트 선택</option>' + opt(ANALYSTS, v.analyst) + '</select></div>' +
+      (kind === 'earnings' ? '<div class="field full"><label class="field__label" for="' + p + 'company">관심 기업<span class="req">*</span></label><input class="cx-in" id="' + p + 'company" name="company" required maxlength="100" value="' + esc(v.company || '') + '" placeholder="문의할 기업명"></div>' : '') +
+      (kind === 'ndr' ? '<div class="field full"><label class="field__label" for="' + p + 'event">관심 NDR<small>선택</small></label><select class="cx-in" id="' + p + 'event" name="eventTitle"><option value="">일정 선택</option>' +
+        opt(EVENTS.filter(function (e) { return e.cat === 'ndr' && !D.isPast(e); }).map(function (e) { return e.title; }), v.eventTitle) + '</select></div>' : '') +
+      '<div class="field"><label class="field__label" for="' + p + 'date">희망 일정<small>선택</small></label><input class="cx-in" id="' + p + 'date" name="preferred" type="date" min="' + TODAY + '" value="' + esc(v.preferred || '') + '"></div>' +
+      '<div class="field"><label class="field__label" for="' + p + 'fmt">희망 방식</label><select class="cx-in" id="' + p + 'fmt" name="format">' + opt(['담당자와 협의', '대면', '온라인'], v.format) + '</select></div>' +
+      personFields(p, v) +
+      '<div class="field full"><label class="field__label" for="' + p + 'question">' + (kind === 'earnings' ? '문의 내용' : '궁금한 내용 · 희망 주제') + '<span class="req">*</span></label><textarea class="cx-in" id="' + p + 'question" name="question" required maxlength="1200" placeholder="' +
+        (kind === 'earnings' ? '확인하고 싶은 기업·분기 및 문의 내용' : '예: 반도체 업황과 주요 기업 전망, AI 투자 흐름 등') + '">' + esc(v.question || '') + '</textarea></div>' +
+    '</div>';
+  }
+  var SCHEDULE_NOTE = '<div class="cx-svc"><strong>유리를 통한 일정 조율 안내</strong><p>유리가 요청 내용을 담당 애널리스트에게 전달하고, 입력한 이메일로 일정 조율과 확정 여부를 안내해 드려요. 요청만으로 일정이 확정되지는 않아요.</p></div>';
+  var REQ_TITLE = { ndr: 'NDR 참여 문의', earnings: '실적발표 문의', seminar: '애널리스트 세미나 요청', interest: '관심 등록' };
+
+  function request(kind, values, forId) {
+    values = values || {};
+    var ev = forId && D.byId(forId);
+    if (ev && !values.eventTitle) values.eventTitle = ev.title;
+    var lead = kind === 'ndr' ? 'NDR은 초청을 통해 참여하는 방식이에요. 관심 섹터를 남기면 담당 애널리스트가 미팅 가능 시간을 안내해요.'
+      : kind === 'interest' ? '일정이 확정되면 입력한 이메일로 먼저 안내해 드려요.' : '희망 주제와 담당자를 선택해 문의해주세요.';
+    var seg = kind === 'seminar' || kind === 'earnings'
+      ? '<div class="cx-seg cx-seg--form" role="group" aria-label="문의 유형"><button type="button" data-kind="seminar" aria-pressed="' + (kind === 'seminar') + '">애널리스트 세미나</button><button type="button" data-kind="earnings" aria-pressed="' + (kind === 'earnings') + '">실적발표</button></div>' : '';
+    showDialog('<h2 class="cx-dtitle">' + REQ_TITLE[kind] + '</h2>' + (ev ? '<div class="cx-mini">' + esc(ev.title) + ' · ' + esc(D.dateLabel(ev)) + '</div>' : '') +
+      '<p class="cx-lead">' + lead + '</p>' + seg +
+      '<form data-kind="' + kind + '"' + (ev ? ' data-event="' + ev.id + '"' : '') + '>' + requestFields(kind, 'rq-', values) + (kind === 'seminar' ? SCHEDULE_NOTE : '') + CONSENT +
+        '<div class="cx-formacts"><button type="button" class="btn btn--secondary btn--sm" data-close>닫기</button><button class="btn btn--primary btn--sm" type="submit">' + (kind === 'interest' ? '관심 등록 확인' : '문의 내용 확인') + ' ' + ARROW + '</button></div>' +
+        '<p class="cx-formnote">공개 일정에 게시하지 않는 개별 문의 · 시연에서는 서버로 전송하지 않아요.</p>' +
+      '</form>', kind === 'interest' ? 'NOTIFY ME' : 'INDIVIDUAL INQUIRY');
+  }
+
+  /* 외부 행사 폼 */
+  function renderExternalForm() {
+    if ($('#cx-ext-form')) return;
+    $('#cx-ext-area').innerHTML = '<form id="cx-ext-form" data-kind="external" data-inline novalidate>' +
+      '<h3 id="ex-head">행사 주선 문의</h3>' +
+      '<div class="cx-seg cx-seg--form" role="group" aria-label="요청 방식"><button type="button" data-ext-mode="inquiry" aria-pressed="true">행사 주선 문의</button><button type="button" data-ext-mode="suggest" aria-pressed="false">희망 행사 제안</button></div>' +
+      '<input type="hidden" name="requestMode" value="행사 주선 문의">' +
+      '<div class="cx-fields">' +
+        '<div class="field full"><label class="field__label" for="ex-type">관심 행사 유형<span class="req">*</span></label><select class="cx-in" id="ex-type" name="inquiryType" required><option value="">행사 유형 선택</option><option>산업·테마 세미나</option><option>기업 인사이트 세션</option><option>연사 초청·행사 협업</option><option>외부 행사 참가</option><option>기타 / 담당자와 협의</option></select></div>' +
+        '<div class="field full"><label class="field__label" for="ex-title" id="ex-title-lbl">관심 행사 또는 주제<span class="req">*</span></label><input class="cx-in" id="ex-title" name="eventTitle" required maxlength="100" placeholder="예: 반도체 산업전망 세미나"></div>' +
+        '<div class="field"><label class="field__label" for="ex-date">희망 일정<small>선택</small></label><input class="cx-in" id="ex-date" name="preferred" type="date" min="' + TODAY + '"></div>' +
+        '<div class="field"><label class="field__label" for="ex-loc">장소 또는 방식<small>선택</small></label><input class="cx-in" id="ex-loc" name="location" maxlength="100" placeholder="대면 / 온라인 / 협의"></div>' +
+        personFields('ex-') +
+        '<div class="field full"><label class="field__label" for="ex-q" id="ex-q-lbl">필요한 내용<span class="req">*</span></label><textarea class="cx-in" id="ex-q" name="question" required maxlength="1200" placeholder="행사 목적, 참석 대상, 궁금한 내용 등을 남겨주세요."></textarea></div>' +
+      '</div>' +
+      '<div class="cx-svc"><strong>전화·이메일로 개별 안내</strong><p>요청 내용을 확인한 뒤 행사 관계자와 주선 가능 여부를 검토해요.</p></div>' +
+      CONSENT +
+      '<div class="cx-formacts"><button class="btn btn--primary btn--sm" type="submit"><span id="ex-submit">문의 내용 확인</span> ' + ARROW + '</button></div>' +
+    '</form>';
+  }
+  function setExtMode(mode, focus) {
+    renderExternalForm();
+    var f = $('#cx-ext-form'), s = mode === 'suggest';
+    f.elements.requestMode.value = s ? '희망 행사 제안' : '행사 주선 문의';
+    $$('[data-ext-mode]', f).forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.extMode === mode)); });
+    $('#ex-head').textContent = s ? '원하는 행사 제안' : '행사 주선 문의';
+    $('#ex-title-lbl').innerHTML = (s ? '원하는 행사 · 주제' : '관심 행사 또는 주제') + '<span class="req">*</span>';
+    $('#ex-q-lbl').innerHTML = (s ? '듣고 싶은 내용 · 만나고 싶은 기업' : '필요한 내용') + '<span class="req">*</span>';
+    $('#ex-submit').textContent = s ? '제안 내용 확인' : '문의 내용 확인';
+    if (focus) { $('#cx-ext-area').scrollIntoView({ behavior: scrollBehavior(), block: 'start' }); $('#ex-title').focus({ preventScroll: true }); }
+  }
+  function toggleBy(form, val) {
+    $$('[data-by]', form).forEach(function (f) { var on = f.dataset.by === val, s = $('select', f); f.hidden = !on; s.disabled = !on; s.required = on; });
+  }
+
+  /* 내용 확인 → 완료 */
+  var NAMES = { name: '이름', org: '소속 기관', email: '이메일', phone: '연락처', attend: '참석 방식', question: '질문·문의', sector: '섹터', analyst: '애널리스트',
+    company: '관심 기업', eventTitle: '행사·주제', preferred: '희망 일정', format: '희망 방식', audience: '참석 대상', attendees: '예상 인원',
+    requestMode: '요청 방식', inquiryType: '행사 유형', location: '장소·방식' };
+  var formData = function (form) { var o = {}; new FormData(form).forEach(function (v, k) { o[k] = v; }); return o; };
+  function confirmDraft(form) {
+    var raw = formData(form), data = Object.assign({}, raw);
+    delete data.demo; delete data.eligible;
+    if (data.selectBy === 'analyst') delete data.sector; else delete data.analyst;
+    delete data.selectBy;
+    var kind = form.dataset.kind, ev = form.dataset.event && D.byId(form.dataset.event);
+    var type = kind === 'apply' ? '참가 신청' : kind === 'seminar' ? '세미나 요청' : kind === 'earnings' ? '실적발표 문의' : kind === 'ndr' ? 'NDR 참여 문의' :
+      kind === 'interest' ? '관심 등록' : data.requestMode === '희망 행사 제안' ? '희망 행사 제안' : '외부 행사 주선 문의';
+    var title = ev ? ev.title : data.eventTitle || (data.company ? data.company + ' 실적발표' : '') || (data.sector || data.analyst || '').split(' · ')[0] + ' ' + type;
+    draft = { kind: kind, type: type, title: title, eventId: ev ? ev.id : '', data: data, raw: raw, inline: form.hasAttribute('data-inline') };
+    showDialog('<span class="badge badge--brand">내용 확인</span><h2 class="cx-dtitle">' + esc(type) + ' 내용 확인</h2><p class="cx-lead">' + esc(title) + '</p>' +
+      '<dl class="cx-sum">' + Object.keys(data).filter(function (k) { return NAMES[k] && data[k]; }).map(function (k) { return '<dt>' + NAMES[k] + '</dt><dd>' + esc(data[k]) + '</dd>'; }).join('') + '</dl>' +
+      '<div class="cx-mini">입력 내용은 이 브라우저의 시연 기록으로만 남고 실제로 전송되지 않아요.</div>' +
+      '<div class="cx-formacts"><button type="button" class="btn btn--secondary btn--sm" data-edit>수정</button><button type="button" class="btn btn--primary btn--sm" data-complete>' +
+        (kind === 'apply' ? '신청하기' : kind === 'seminar' ? '세미나 요청하기' : kind === 'interest' ? '관심 등록하기' : '문의하기') + ' ' + ARROW + '</button></div>', 'REVIEW');
+  }
+  function editDraft() {
+    if (!draft) return;
+    var d = draft;
+    if (d.inline) { closeDialog(); return; }
+    if (d.kind === 'apply') apply(d.eventId, true, d.raw); else request(d.kind, d.raw, d.eventId);
+  }
+  function complete() {
+    if (!draft) return;
+    var d = draft; draft = null;
+    var ev = d.eventId && D.byId(d.eventId);
+    R.add(Object.assign({}, d.data, { kind: d.kind === 'apply' ? 'apply' : 'request', type: d.type, title: d.title, eventId: d.eventId || null,
+      email: d.data.email || '', cat: ev ? ev.cat : '', date: ev ? ev.start : d.data.preferred || '' }));
+    if (d.inline) {
+      var f = d.kind === 'external' ? $('#cx-ext-form') : $('#cx-seminar-form');
+      if (f) { f.reset(); if (d.kind === 'external') setExtMode('inquiry'); else toggleBy(f, 'sector'); }
+    }
+    showDialog('<div class="cx-center"><div class="cx-ok" aria-hidden="true">✓</div><h2 class="cx-dtitle">' + esc(d.type) + ' 완료 (시연)</h2><p class="cx-lead">' + esc(d.title) + '</p></div>' +
+      (d.kind === 'seminar' ? SCHEDULE_NOTE : '') +
+      '<div class="cx-mini">‘내 신청·문의’와 일정 목록의 신청 상태에 바로 반영했어요. 실제 접수·이메일 발송은 일어나지 않았어요.</div>' +
+      '<div class="cx-formacts"><button type="button" class="btn btn--secondary btn--sm" data-my>내 신청·문의</button><button type="button" class="btn btn--primary btn--sm" data-close>확인</button></div>', 'COMPLETE');
+    toast(d.type + '이(가) 기록됐어요.');
+  }
+  function myRecords() {
+    var list = R.list().slice().reverse();
+    showDialog('<h2 class="cx-dtitle">내 신청·문의</h2><p class="cx-lead">' + (curUser ? esc(curUser.email) + ' 계정으로 로그인 중 · ' : '') + '이 브라우저에서 진행한 시연 기록이에요.</p>' +
+      (list.length ? list.map(function (r) {
+        return '<div class="cx-myitem"><div class="cx-myitem__b"><span class="badge ' + (r.kind === 'apply' ? 'badge--brand' : 'cx-badge--neutral') + '">' + esc(r.type) + '</span>' +
+          '<h4>' + esc(r.title) + '</h4><p>' + dot((r.at || '').slice(0, 10)) + ' · ' + (r.kind === 'apply' ? '신청 완료' : '접수 · 담당자 검토 대기') + ' · 시연 기록</p></div>' +
+          (r.eventId && D.byId(r.eventId) ? '<button type="button" data-detail="' + esc(r.eventId) + '">상세</button>' : '') +
+          '<button type="button" data-remove="' + esc(r.id) + '" aria-label="' + esc(r.title) + ' 기록 삭제">삭제</button></div>';
+      }).join('') : '<div class="cx-empty">아직 신청·문의 기록이 없어요.</div>'), 'MY REQUESTS');
+  }
+
+  /* ═════════ 탭 · 이벤트 연결 ═════════ */
+  var panels = { internal: $('#panel-internal'), seminar: $('#panel-seminar'), external: $('#panel-external') };
+  function showTab(tab) {
+    state.tab = tab;
+    Object.keys(panels).forEach(function (k) { panels[k].hidden = k !== tab; });
+    panels[tab].classList.remove('fade-up'); void panels[tab].offsetWidth; panels[tab].classList.add('fade-up');
+    if (tab === 'external') renderExternalForm();
+    if (history.replaceState) { if (tab === 'internal') syncUrl(); else history.replaceState(null, '', location.pathname + '#' + tab); }
+  }
+  var tabs = wireTabsA11y($('#cx-tabs'), showTab);
+  function gotoTab(tab) { tabs.select(tab); $('#cx-tabs').scrollIntoView({ behavior: scrollBehavior(), block: 'nearest' }); }
+
+  // 세미나 탭 폼 필드
+  $('[data-fields="seminar"]').outerHTML = requestFields('seminar', 'sm-');
+
+  document.addEventListener('click', function (ev) {
+    var b = ev.target.closest('button'); if (!b || b.closest('.ob')) return;
+    var ds = b.dataset;
+    if (ds.filter) { setCat(ds.filter); return; }
+    if ('jump' in ds) { jumpToExplore(); return; }
+    if (ds.goto) { closeDialog(); gotoTab(ds.goto); return; }
+    if (ds.phase) { state.phase = ds.phase; setPressed('#cx-phase [data-phase]', function (x) { return x === b; }); focusMonth(); renderExplore(); syncUrl(); return; }
+    if (ds.view) { state.view = ds.view; setPressed('#cx-view [data-view]', function (x) { return x === b; }); if (state.view === 'calendar') focusMonth(); renderExplore(); syncUrl(); return; }
+    if ('month' in ds) {
+      var d = +ds.month;
+      if (d === 0) focusMonth(); else { state.calM += d; if (state.calM < 0) { state.calM = 11; state.calY--; } if (state.calM > 11) { state.calM = 0; state.calY++; } }
+      renderCalendar();
+      var nb = $('#cx-calendar [data-month="' + ds.month + '"]'); if (nb) nb.focus();
+      return;
+    }
+    if ('reset' in ds) {
+      state.analyst = 'all'; state.elig = 'all'; state.openOnly = false; state.q = '';
+      $('#cx-analyst').value = 'all'; $('#cx-elig').value = 'all'; $('#cx-open').checked = false; $('#cx-q').value = '';
+      setCat('all'); return;
+    }
+    if (ds.day) { if (detailEv && detailEv.days) selectDay(detailEv, +ds.day); return; }
+    if (ds.detail) { detail(ds.detail); return; }
+    if (ds.apply) { apply(ds.apply, 'guest' in ds); return; }
+    if ('login' in ds) { closeDialog(); if (typeof openAuth === 'function') openAuth('로그인하면 신청 폼의 이메일이 자동으로 채워져요.'); return; }
+    if (ds.request) { request(ds.request, {}, ds.event || ''); return; }
+    if (ds.kind && b.closest('.cx-seg')) { request(ds.kind); return; }
+    if (ds.ext) {
+      setExtMode('inquiry'); $('#ex-type').value = ds.ext; $('#ex-title').value = ds.ext;
+      $('#cx-ext-area').scrollIntoView({ behavior: scrollBehavior(), block: 'start' }); $('#ex-q').focus({ preventScroll: true }); return;
+    }
+    if (ds.extMode) { setExtMode(ds.extMode, !b.closest('#cx-ext-form')); return; }
+    if ('my' in ds) { myRecords(); return; }
+    if ('edit' in ds) { editDraft(); return; }
+    if ('complete' in ds) { complete(); return; }
+    if (ds.remove) { R.remove(ds.remove); toast('기록을 삭제했어요.'); myRecords(); return; }
+    if ('close' in ds) { closeDialog(); return; }
   });
-
-  /* ---------- 외부 행사 ---------- */
-  $('#cf-ext').addEventListener('click', function (e) {
-    var b = e.target.closest('[data-ext]'); if (!b) return;
-    var what = b.dataset.ext;
-    var m = openModal('<h2 class="modal__title">' + esc(what) + ' 주선 문의</h2>' +
-      '<p class="form-note" style="margin-bottom:16px">관심 주제를 남기면 맞는 외부 행사를 찾아 안내해 드려요.</p>' +
-      '<form novalidate><label class="field"><span class="field__label">관심 주제</span><input class="input" name="topic" required maxlength="80" placeholder="예: 전력 인프라, 로봇"></label>' +
-      '<label class="field"><span class="field__label">연락처(이메일)</span><input class="input" type="email" name="email" required placeholder="test@example.com"></label>' +
-      '<label class="cf-check"><input type="checkbox" name="demo"> <span>실제 접수·전송이 없는 시연 화면임을 확인했어요.</span></label>' +
-      '<p class="cf-form__err" role="alert"></p><button class="btn btn--primary btn--block" type="submit">문의 남기기</button></form>',
-      { label: what + ' 주선 문의' });
-    var f = $('form', m.el);
-    f.addEventListener('submit', function (ev) {
-      ev.preventDefault();
-      var err = !f.topic.value.trim() ? '관심 주제를 입력해주세요.' : !validEmail(f.email.value.trim()) ? '이메일 형식을 확인해주세요.' : !f.demo.checked ? '시연 화면 확인에 체크해주세요.' : '';
-      $('.cf-form__err', f).textContent = err;
-      if (err) return;
-      R.add({ kind: 'request', type: '주선 문의', title: what + ' · ' + f.topic.value.trim(), eventId: null, email: f.email.value.trim() });
-      m.close(); toast('주선 문의를 ‘내 신청·문의’에 기록했어요. 실제 전송은 없어요.');
-    });
+  document.addEventListener('submit', function (ev) {
+    var f = ev.target; if (!f.dataset.kind) return;
+    ev.preventDefault();
+    if (f.reportValidity()) confirmDraft(f);
   });
-  var pf = $('#cf-propose-form');
-  pf.addEventListener('submit', function (e) {
-    e.preventDefault();
-    var err = !pf.title.value.trim() ? '제목을 입력해주세요.' : !validEmail(pf.email.value.trim()) ? '이메일 형식을 확인해주세요.' : !pf.demo.checked ? '시연 화면 확인에 체크해주세요.' : '';
-    $('.cf-form__err', pf).textContent = err;
-    if (err) return;
-    R.add({ kind: 'request', type: '행사 제안', title: pf.kind.value + ' 제안 · ' + pf.title.value.trim(), eventId: null, email: pf.email.value.trim(), body: pf.body.value });
-    pf.reset();
-    toast('행사 제안을 ‘내 신청·문의’에 기록했어요. 실제 전송은 없어요.');
+  document.addEventListener('change', function (ev) {
+    var t = ev.target;
+    if (t.name === 'selectBy') toggleBy(t.form, t.value);
+    if (t.id === 'cx-elig') { state.elig = t.value; renderExplore(); }
+    if (t.id === 'cx-analyst') { state.analyst = t.value; renderExplore(); }
+    if (t.id === 'cx-open') { state.openOnly = t.checked; renderExplore(); }
   });
+  $('#cx-q').addEventListener('input', function (e) { state.q = e.target.value.trim(); if (state.view === 'calendar') focusMonth(); renderExplore(); });
+  R.onChange(function () { renderAll(); });
 
-  /* ---------- 시작 — ?cat= · ?event= · #seminar · #external ---------- */
-  var q = new URLSearchParams(location.search);
-  var hash = location.hash.slice(1);
-  if (panels[hash]) tabs.select(hash);
-  var qc = q.get('cat');
-  if (qc && D.catOf(qc)) { setFilter({ cat: qc }); if (ob) ob.pick(qc); } else setFilter({});
-  if (q.get('event')) openDetail(q.get('event'));
-  if (hash === 'schedule' || hash === 'cf-schedule') $('#cf-schedule').scrollIntoView();
+  /* ═════════ 시작 — ?category= · ?view= · ?phase= · ?event= · #seminar · #external · #my ═════════ */
+  $('#cx-analyst').insertAdjacentHTML('beforeend', EVENTS.reduce(function (a, e) {
+    (e.analysts || []).forEach(function (n) { if (a.indexOf(n) < 0) a.push(n); }); return a;
+  }, []).sort(function (a, b) { return a.localeCompare(b, 'ko'); }).map(function (n) { return '<option>' + esc(n) + '</option>'; }).join(''));
+  var initTab = location.hash.slice(1), init = new URLSearchParams(location.search);
+  var initCat = init.get('category') || init.get('cat');
+  if (catOf(initCat)) state.cat = initCat;
+  if (init.get('view') === 'calendar') { state.view = 'calendar'; setPressed('#cx-view [data-view]', function (x) { return x.dataset.view === 'calendar'; }); }
+  if (init.get('phase') === 'past') { state.phase = 'past'; setPressed('#cx-phase [data-phase]', function (x) { return x.dataset.phase === 'past'; }); }
+  if (panels[initTab] && initTab !== 'internal') tabs.select(initTab);
+  focusMonth(); renderAll();
+  if (state.cat !== 'all' && orbit) orbit.dock(state.cat);
+  var initEvent = init.get('event');
+  if (initEvent && D.byId(initEvent)) detail(initEvent);
+  else if ((init.has('view') || init.has('category') || init.has('cat')) && state.tab === 'internal') jumpToExplore();
+  if (initTab === 'my') myRecords();
 })();

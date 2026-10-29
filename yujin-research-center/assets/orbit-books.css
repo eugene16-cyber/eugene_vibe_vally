@@ -12,21 +12,22 @@
 .ob.is-picked .ob__core{opacity:0;transform:translate(-50%,-50%) scale(.8)}
 
 /* 책 */
-.ob-book{position:absolute;left:0;top:0;width:var(--bw);height:calc(var(--bw)*1.38);padding:0;perspective:900px;
-  font-size:calc(var(--bw)*.1);will-change:transform;transform-origin:50% 50%;-webkit-tap-highlight-color:transparent}
+.ob-book{position:absolute;left:0;top:0;padding:0;font-size:calc(var(--bw)*.1);will-change:transform;transform-origin:50% 50%;-webkit-tap-highlight-color:transparent;text-align:left}
 .ob-book.is-flying{transition:transform .55s var(--ease-out),opacity .3s,filter .3s}
 .ob-book:focus-visible{outline:0}
 .ob-book:focus-visible .ob-book__cover{box-shadow:0 0 0 3px var(--blue-cta)}
+.ob-book__vol{position:relative;display:block;width:var(--bw);height:calc(var(--bw)*1.38);perspective:900px}
+.ob-book__cap{display:none}
 .ob-book__body,.ob-book__cover{position:absolute;inset:0;border-radius:3px 7px 7px 3px}
 .ob-book__body{background:#fbfaf7;border:1px solid #e6e2d8;box-shadow:var(--shadow-pop);overflow:hidden}
-.ob-book__page{position:absolute;inset:0;padding:1.1em 1em;display:flex;flex-direction:column;gap:.55em;text-align:left;color:var(--ink-800);
+.ob-book__page{position:absolute;inset:0;padding:1.1em 1em;display:flex;flex-direction:column;gap:.55em;color:var(--ink-800);
   opacity:0;transition:opacity .25s .2s}
 .ob-page__ko{font-size:1.45em;font-weight:800;letter-spacing:-.02em;color:var(--blue-navy);line-height:1.2}
 .ob-page__desc{font-size:.92em;line-height:1.5;color:var(--ink-500);display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden}
 .ob-page__detail{margin-top:auto;font-size:.95em;font-weight:700;color:var(--blue-main)}
 .ob-book__cover{transform-origin:0 50%;transform-style:preserve-3d;transition:transform .6s var(--ease-out),box-shadow .2s}
 .ob-book__front,.ob-book__back{position:absolute;inset:0;border-radius:inherit;backface-visibility:hidden;-webkit-backface-visibility:hidden;
-  display:flex;flex-direction:column;padding:1em .95em .85em 1.25em;text-align:left;overflow:hidden}
+  display:flex;flex-direction:column;padding:1em .95em .85em 1.25em;overflow:hidden}
 .ob-book__front{background:var(--c);color:var(--ink);
   box-shadow:inset .45em 0 0 rgba(0,0,0,.14),inset -1px 0 0 rgba(255,255,255,.12),0 10px 22px -10px rgba(4,5,5,.45);border:1px solid rgba(11,46,107,.08)}
 .ob-book__front::after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,rgba(255,255,255,.18),transparent 40%);pointer-events:none}
@@ -38,7 +39,8 @@
   font-size:.56em;font-weight:700;letter-spacing:.12em;opacity:.72}
 .ob-book__back .ob-cv__mk{margin-top:0;opacity:.18;font-size:3.6em}
 
-/* 펼침 */
+/* 앞으로 온 책 · 펼침 */
+.ob-book.is-docked .ob-book__front{box-shadow:inset .45em 0 0 rgba(0,0,0,.14),0 0 0 2px #fff,0 0 0 4px var(--blue-cta),0 16px 30px -12px rgba(27,116,228,.6)}
 .ob-book.is-open .ob-book__cover{transform:rotateY(-176deg)}
 .ob-book.is-open .ob-book__page{opacity:1}
 .ob-book:not(.is-open):hover .ob-book__cover{transform:rotateY(-14deg)}
@@ -51,9 +53,17 @@
 .ob__hint{font-size:13px;font-weight:600;color:var(--blue-main)}
 .ob__close{margin-left:auto}
 
-@media (max-width:768px){
-  .ob__stage{min-height:240px}
-}
+/* 모바일 — 공전 대신 가로로 넘기는 책 카드 */
+.ob--track .ob__stage{aspect-ratio:auto;min-height:0;display:flex;gap:12px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;
+  padding:6px 2px 10px;--bw:92px;scrollbar-width:none;border-radius:0}
+.ob--track .ob__stage::-webkit-scrollbar{display:none}
+.ob--track .ob__ring,.ob--track .ob__core,.ob--track .ob__toggle,.ob--track .ob__close{display:none}
+.ob--track .ob__bar{min-height:0}
+.ob--track .ob-book{position:relative;flex:none;display:flex;flex-direction:column;gap:6px;scroll-snap-align:start;will-change:auto}
+.ob--track .ob-book:not(.is-open):hover .ob-book__cover{transform:none}
+.ob--track .ob-book__cap{display:block;width:var(--bw);font-size:11px;font-weight:600;line-height:1.35;color:var(--ink-500)}
+.ob--track .ob-book.is-docked .ob-book__cap{color:var(--blue-main)}
+
 @media (prefers-reduced-motion:reduce){
   .ob-book.is-flying,.ob-book__cover{transition:none}
 }
