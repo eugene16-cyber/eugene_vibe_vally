@@ -1,0 +1,7 @@
+{
+  "name": "insightlab-copy-edit",
+  "private": true,
+  "type": "module",
+  "description": "문구 편집실 Artifact(https://claude.ai/artifact/NKPU57Q7xRAL9b4wsHJ6w7) — 문구 추출 · 편집기 빌드 · 수정 반영",
+  "dependencies": { "acorn": "8.12.1" }
+}

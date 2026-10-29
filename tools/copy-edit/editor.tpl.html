@@ -1,0 +1,417 @@
+<title>Insight Lab 문구 편집실</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* 교정지 레이아웃: 왼쪽 파일 목록 · 오른쪽 원문/수정 2단 교정 행 */
+:root {
+  --bg: #f4f6f9; --paper: #ffffff; --ink: #0f1a2c; --muted: #5d6b7e; --line: #dbe2ea; --tint: #eaf1fb;
+  --navy: #0b2e6b; --accent: #1b6fe6; --accent-ink: #ffffff;
+  --mark: #fff3c4; --mark-ink: #6b4e00; --ok: #11795a; --ok-bg: #e2f5ee; --warn: #a3361f; --warn-bg: #fdebe6; --lock: #6b7684;
+  --f-sans: "IBM Plex Sans KR", "Pretendard Variable", "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+  --r: 8px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0c121c; --paper: #121a27; --ink: #e6ecf4; --muted: #93a1b5; --line: #253246; --tint: #16233a;
+  --navy: #9cc0ff; --accent: #5b9bff; --accent-ink: #06101f;
+  --mark: #3a3216; --mark-ink: #f3d77a; --ok: #5fd3a7; --ok-bg: #12302a; --warn: #ff9b85; --warn-bg: #3a1c16; --lock: #93a1b5; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0c121c; --paper: #121a27; --ink: #e6ecf4; --muted: #93a1b5; --line: #253246; --tint: #16233a;
+  --navy: #9cc0ff; --accent: #5b9bff; --accent-ink: #06101f;
+  --mark: #3a3216; --mark-ink: #f3d77a; --ok: #5fd3a7; --ok-bg: #12302a; --warn: #ff9b85; --warn-bg: #3a1c16; --lock: #93a1b5; color-scheme: dark }
+
+* { box-sizing: border-box }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-sans); font-size: 14px; line-height: 1.55 }
+button, input, textarea, select { font: inherit; color: inherit }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
+
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--paper) }
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--paper); border-bottom: 1px solid var(--line);
+  padding-block: 12px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)) }
+.top__row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; max-width: 1360px; margin: 0 auto }
+.brand { display: flex; align-items: baseline; gap: 10px; min-width: 0 }
+.brand h1 { margin: 0; font-size: 17px; font-weight: 700; color: var(--navy); letter-spacing: -.01em; white-space: nowrap }
+.brand small { color: var(--muted); font-size: 12px }
+.tally { display: flex; gap: 6px; flex-wrap: wrap; margin-left: auto }
+.pill { display: inline-flex; align-items: center; gap: 4px; border-radius: 999px; padding: 2px 10px; font-size: 12px; font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; border: 1px solid transparent }
+.pill--draft { background: var(--mark); color: var(--mark-ink) }
+.pill--done { background: var(--ok-bg); color: var(--ok) }
+.pill--plain { background: var(--tint); color: var(--navy) }
+.pill--lock { background: transparent; border-color: var(--line); color: var(--lock) }
+.pill--warn { background: var(--warn-bg); color: var(--warn) }
+.tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; width: 100% }
+.search { flex: 1 1 260px; min-width: 0; height: 36px; border: 1px solid var(--line); border-radius: var(--r); background: var(--bg); padding: 0 12px }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: var(--r); overflow: hidden }
+.seg button { border: 0; background: transparent; padding: 7px 12px; cursor: pointer; font-size: 13px; color: var(--muted); white-space: nowrap }
+.seg button[aria-pressed="true"] { background: var(--navy); color: var(--paper); font-weight: 600 }
+.navbtn { display: none; height: 36px; border: 1px solid var(--line); border-radius: var(--r); background: var(--paper); padding: 0 12px; cursor: pointer }
+
+.banner { max-width: 1360px; margin: 12px auto 0; padding: 10px 14px; border-radius: var(--r); font-size: 13px }
+.banner--warn { background: var(--warn-bg); color: var(--warn) }
+.banner--info { background: var(--tint); color: var(--navy) }
+
+.wrap { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 20px; max-width: 1360px; margin: 0 auto;
+  padding-block: 16px 48px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)) }
+.side { position: sticky; top: 120px; align-self: start; max-height: calc(100vh - 140px); overflow: auto; padding-right: 4px }
+.side h2 { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 16px 8px 6px; font-weight: 600 }
+.side h2:first-child { margin-top: 0 }
+.fbtn { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0 8px; width: 100%; text-align: left; border: 0; background: transparent; padding: 7px 8px; border-radius: 6px; cursor: pointer }
+.fbtn:hover { background: var(--tint) }
+.fbtn[aria-current="true"] { background: var(--paper); box-shadow: inset 0 0 0 1px var(--line) }
+.fbtn b { font-weight: 600; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.fbtn span { grid-column: 1; font-family: var(--f-mono); font-size: 11px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.fbtn .n { grid-column: 2; grid-row: 1 / span 2; align-self: center; font-family: var(--f-sans); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; text-align: right }
+.fbtn .n em { font-style: normal; display: block; color: var(--mark-ink); background: var(--mark); border-radius: 999px; padding: 0 6px; font-weight: 600 }
+
+.main { min-width: 0 }
+.head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; margin-bottom: 10px }
+.head h2 { margin: 0; font-size: 20px; font-weight: 700; text-wrap: balance }
+.head code { font-family: var(--f-mono); font-size: 12px; color: var(--muted) }
+.head a { margin-left: auto; color: var(--accent); font-weight: 600; text-decoration: none; font-size: 13px }
+.head a:hover { text-decoration: underline }
+.note { color: var(--muted); font-size: 12.5px; margin: 0 0 12px }
+
+.sheet { background: var(--paper); border: 1px solid var(--line); border-radius: var(--r) }
+.row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; padding: 12px 14px; border-top: 1px solid var(--line) }
+.row:first-child { border-top: 0 }
+.row.is-draft { background: linear-gradient(90deg, var(--mark) 0 3px, transparent 3px) }
+.row.is-done { background: linear-gradient(90deg, var(--ok) 0 3px, transparent 3px) }
+.orig { min-width: 0 }
+.orig p { margin: 0; white-space: pre-wrap; word-break: break-word }
+.row.is-draft .orig p { color: var(--muted); text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--warn) 60%, transparent) }
+.meta { display: flex; flex-wrap: wrap; gap: 4px 8px; margin-top: 6px; font-size: 11.5px; color: var(--muted); align-items: center }
+.loc { font-family: var(--f-mono); font-size: 11px; background: var(--tint); color: var(--navy); border-radius: 4px; padding: 0 5px; border: 0; cursor: pointer }
+details.ctx { margin-top: 4px }
+details.ctx summary { cursor: pointer; font-size: 11.5px; color: var(--muted); list-style: none }
+details.ctx summary::-webkit-details-marker { display: none }
+details.ctx summary::before { content: "▸ "; }
+details.ctx[open] summary::before { content: "▾ "; }
+details.ctx pre { margin: 4px 0 0; padding: 8px; background: var(--bg); border-radius: 6px; font-family: var(--f-mono); font-size: 11.5px; white-space: pre-wrap; word-break: break-all; overflow-x: auto }
+.edit { min-width: 0; display: flex; flex-direction: column; gap: 4px }
+.edit textarea { width: 100%; min-height: 38px; resize: vertical; border: 1px solid var(--line); border-radius: 6px; padding: 7px 9px; background: var(--paper); line-height: 1.5; field-sizing: content }
+.edit textarea:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)) }
+.edit textarea:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent) }
+.edit textarea:disabled { background: var(--bg); color: var(--muted); cursor: not-allowed }
+.state { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 11.5px; color: var(--muted); min-height: 18px }
+.state .who { display: inline-flex; align-items: center; gap: 4px }
+.state img { width: 16px; height: 16px; border-radius: 50% }
+.undo { border: 0; background: none; color: var(--accent); cursor: pointer; padding: 0; font-size: 11.5px; text-decoration: underline }
+.more { padding: 12px 14px; color: var(--muted); font-size: 13px; border-top: 1px solid var(--line) }
+.empty { padding: 32px 16px; text-align: center; color: var(--muted) }
+.empty b { display: block; color: var(--ink); font-size: 15px; margin-bottom: 4px }
+
+.how { max-width: 1360px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 32px; color: var(--muted); font-size: 12.5px }
+.how ol { margin: 6px 0 0; padding-left: 18px }
+.how .flag { display: inline-block; font-weight: 700; color: var(--warn); margin-bottom: 4px }
+
+@media (max-width: 860px) {
+  .wrap { grid-template-columns: minmax(0, 1fr) }
+  .side { position: static; max-height: none; display: none; border: 1px solid var(--line); border-radius: var(--r); background: var(--paper); padding: 8px }
+  .side.is-open { display: block }
+  .navbtn { display: inline-block }
+  .row { grid-template-columns: minmax(0, 1fr) }
+  .tally { margin-left: 0; width: 100% }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important } }
+</style>
+
+<header class="top">
+  <div class="top__row">
+    <div class="brand"><h1>Insight Lab 문구 편집실</h1><small id="snap"></small></div>
+    <div class="tally" id="tally"></div>
+    <div class="tools">
+      <button class="navbtn" id="navbtn" type="button" aria-expanded="false" aria-controls="side">파일 목록</button>
+      <input class="search" id="q" type="search" placeholder="문구 검색 (예: 시연용, 신청하기)" aria-label="문구 검색">
+      <div class="seg" role="group" aria-label="보기">
+        <button type="button" data-view="all" aria-pressed="true">전체</button>
+        <button type="button" data-view="draft" aria-pressed="false">수정 대기</button>
+        <button type="button" data-view="done" aria-pressed="false">반영 완료</button>
+      </div>
+    </div>
+  </div>
+</header>
+<div id="banner"></div>
+
+<div class="wrap">
+  <nav class="side" id="side" aria-label="파일 목록"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<footer class="how">
+  <span class="flag">시연용 가상 화면 · 문구 편집 도구</span>
+  <div>고친 문구는 바로 공유 저장소에 저장되고, 이 페이지를 연 모든 사람에게 보여요. 사이트에 반영하는 순서:</div>
+  <ol>
+    <li>오른쪽 칸에서 문구를 고쳐요. 칸에서 벗어나거나 잠시 멈추면 저장돼요. 원래대로 되돌리면 수정이 취소돼요.</li>
+    <li>다 고쳤으면 Claude Code에 <b>"문구 반영해서 배포해줘"</b>라고 말해요. 수정 대기 문구만 사이트 코드에 넣고 확인한 뒤 배포해요.</li>
+    <li>배포가 끝나면 그 문구는 <b>반영 완료</b>로 바뀌고, 목록은 새 문구 기준으로 다시 만들어져요.</li>
+  </ol>
+  <div style="margin-top:6px">잠금 표시 문구는 코드에서 비교값(필터 · 분류 이름 등)으로도 쓰여서 여기서 바꾸면 기능이 깨질 수 있어 막아 두었어요. 바꾸고 싶으면 Claude에게 따로 말해 주세요.</div>
+</footer>
+
+<script id="data" type="application/json">__DATA__</script>
+<script>
+(function () {
+  'use strict';
+  var D = JSON.parse(document.getElementById('data').textContent);
+  var BYID = {};
+  D.entries.forEach(function (e) { BYID[e.id] = e; });
+  var FILES = D.files.filter(function (f) { return f.count > 0; });
+  var EDITS = {};          // id → doc body
+  var db = null, user = null, myId = null, canWrite = true, loaded = false;
+  var state = { file: FILES[0].f, view: 'all', q: '' };
+  try { var saved = JSON.parse(localStorage.getItem('copyed.ui') || '{}'); if (saved.file && FILES.some(function (f) { return f.f === saved.file; })) state.file = saved.file; } catch (e) {}
+
+  var $ = function (s) { return document.querySelector(s); };
+  var el = function (tag, cls, text) { var n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
+  var fmtTime = function (iso) { try { var d = new Date(iso); return (d.getMonth() + 1) + '/' + d.getDate() + ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); } catch (e) { return ''; } };
+  var fileOf = function (f) { return FILES.find(function (x) { return x.f === f; }) || D.files.find(function (x) { return x.f === f; }); };
+  var editOf = function (id) { var x = EDITS[id]; return x && x.status !== 'applied' ? x : null; };
+
+  $('#snap').textContent = '기준: 라이브 배포본 ' + D.snapshot + ' · 문구 ' + D.entries.length.toLocaleString() + '개';
+
+  function remember() { try { localStorage.setItem('copyed.ui', JSON.stringify({ file: state.file })); } catch (e) {} }
+
+  function tally() {
+    var draft = 0, done = 0;
+    Object.keys(EDITS).forEach(function (id) { if (EDITS[id].status === 'applied') done++; else if (BYID[id]) draft++; });
+    var t = $('#tally'); t.textContent = '';
+    t.appendChild(el('span', 'pill pill--draft', '수정 대기 ' + draft));
+    t.appendChild(el('span', 'pill pill--done', '반영 완료 ' + done));
+    if (!loaded) t.appendChild(el('span', 'pill pill--plain', '저장소 연결 중…'));
+  }
+
+  function side() {
+    var s = $('#side'); s.textContent = '';
+    var groups = [['페이지', FILES.filter(function (f) { return f.page; })],
+      ['화면 스크립트', FILES.filter(function (f) { return !f.page && !f.data; })],
+      ['가상 데이터 (행사 · 고객 예시)', FILES.filter(function (f) { return f.data; })]];
+    groups.forEach(function (g) {
+      if (!g[1].length) return;
+      s.appendChild(el('h2', null, g[0]));
+      g[1].forEach(function (f) {
+        var b = el('button', 'fbtn'); b.type = 'button';
+        b.setAttribute('aria-current', String(state.file === f.f && !state.q && state.view === 'all'));
+        b.appendChild(el('b', null, f.page ? f.label : f.label));
+        b.appendChild(el('span', null, f.f));
+        var n = el('span', 'n', String(f.count));
+        var dc = D.entries.filter(function (e) { return e.file === f.f && editOf(e.id); }).length;
+        if (dc) { var em = el('em', null, '수정 ' + dc); n.appendChild(em); }
+        b.appendChild(n);
+        b.addEventListener('click', function () {
+          state.file = f.f; state.q = ''; $('#q').value = ''; setView('all'); remember();
+          $('#side').classList.remove('is-open'); $('#navbtn').setAttribute('aria-expanded', 'false');
+          window.scrollTo(0, 0);
+        });
+        s.appendChild(b);
+      });
+    });
+  }
+
+  function liveUrl(f) {
+    var page = f.page;
+    if (!page) { var u = (f.label || '').split(' · ')[0]; var hit = FILES.find(function (x) { return x.page && x.label === u; }); page = hit && hit.page; }
+    if (!page) return null;
+    return D.base + (page === 'index' ? '' : page);
+  }
+
+  var LIMIT = 300;
+  function list() {
+    var m = $('#main'); m.textContent = '';
+    var rows, head = el('div', 'head');
+    var q = state.q.trim().toLowerCase();
+    if (state.view === 'draft' || state.view === 'done') {
+      var ids = Object.keys(EDITS).filter(function (id) { return state.view === 'done' ? EDITS[id].status === 'applied' : EDITS[id].status !== 'applied'; });
+      ids.sort(function (a, b) { return String(EDITS[b].at || '').localeCompare(String(EDITS[a].at || '')); });
+      rows = ids.map(function (id) { return BYID[id] || { id: id, text: EDITS[id].orig, file: EDITS[id].file, locs: [], gone: true }; });
+      if (q) rows = rows.filter(function (e) { return (e.text + ' ' + ((EDITS[e.id] || {}).text || '')).toLowerCase().indexOf(q) >= 0; });
+      head.appendChild(el('h2', null, state.view === 'done' ? '반영 완료된 문구' : '수정 대기 문구'));
+      head.appendChild(el('code', null, rows.length + '개 · 모든 파일'));
+      m.appendChild(head);
+      m.appendChild(el('p', 'note', state.view === 'done' ? '사이트에 반영되어 배포된 수정 기록이에요.' : '아직 사이트에 반영되지 않은 수정이에요. Claude Code에 "문구 반영해서 배포해줘"라고 하면 이 목록이 그대로 반영돼요.'));
+    } else if (q) {
+      rows = D.entries.filter(function (e) { return e.text.toLowerCase().indexOf(q) >= 0 || ((EDITS[e.id] || {}).text || '').toLowerCase().indexOf(q) >= 0; });
+      head.appendChild(el('h2', null, '“' + state.q.trim() + '” 검색 결과'));
+      head.appendChild(el('code', null, rows.length + '개 · 모든 파일'));
+      m.appendChild(head);
+    } else {
+      var f = fileOf(state.file);
+      rows = D.entries.filter(function (e) { return e.file === f.f; });
+      head.appendChild(el('h2', null, f.label));
+      head.appendChild(el('code', null, f.f + ' · ' + rows.length + '개'));
+      var url = liveUrl(f);
+      if (url) { var a = el('a', null, '라이브에서 보기 ↗'); a.href = url; a.target = '_blank'; a.rel = 'noopener'; head.appendChild(a); }
+      m.appendChild(head);
+      if (f.data) m.appendChild(el('p', 'note', '시연용 가상 데이터예요. 이름 · 분류값은 화면 필터와 연결된 경우가 있어 바꾸기 전에 한 번 더 확인해 주세요.'));
+      else if (!f.page) m.appendChild(el('p', 'note', '화면을 그리는 스크립트 안의 문구예요. 버튼 · 안내 · 오류 메시지 등이 여기 있어요.'));
+    }
+    var sheet = el('div', 'sheet');
+    if (!rows.length) {
+      var em = el('div', 'empty');
+      em.appendChild(el('b', null, state.view === 'draft' ? '아직 고친 문구가 없어요' : state.view === 'done' ? '아직 반영된 수정이 없어요' : '맞는 문구가 없어요'));
+      em.appendChild(document.createTextNode(state.view === 'draft' ? '왼쪽에서 페이지를 고르고 오른쪽 칸의 문구를 고치면 여기에 모여요.' : '다른 낱말로 찾아보세요.'));
+      sheet.appendChild(em);
+    }
+    rows.slice(0, LIMIT).forEach(function (e) { sheet.appendChild(row(e)); });
+    if (rows.length > LIMIT) sheet.appendChild(el('div', 'more', '앞의 ' + LIMIT + '개만 보여요. 검색어를 더 좁혀 주세요.'));
+    m.appendChild(sheet);
+    paintWho();
+  }
+
+  var timers = {};
+  function row(e) {
+    var ed = EDITS[e.id];
+    var r = el('div', 'row'); r.dataset.id = e.id;
+    if (ed) r.classList.add(ed.status === 'applied' ? 'is-done' : 'is-draft');
+    var o = el('div', 'orig');
+    o.appendChild(el('p', null, e.text));
+    var meta = el('div', 'meta');
+    var files = {};
+    (e.locs || []).forEach(function (l) { (files[l.f] = files[l.f] || []).push(l.l); });
+    Object.keys(files).slice(0, 4).forEach(function (f) {
+      var b = el('button', 'loc', f.replace(/^assets\//, '') + ':' + files[f].slice(0, 3).join(',') + (files[f].length > 3 ? '…' : ''));
+      b.type = 'button'; b.title = f + ' 파일 문구 보기';
+      b.addEventListener('click', function () { state.file = f; state.q = ''; $('#q').value = ''; setView('all'); remember(); });
+      meta.appendChild(b);
+    });
+    var nf = Object.keys(files).length;
+    if (nf > 4) meta.appendChild(el('span', null, '외 ' + (nf - 4) + '개 파일'));
+    if ((e.locs || []).length > 1) meta.appendChild(el('span', null, (e.locs.length) + '곳에 같은 문구 · 한 번에 바뀌어요'));
+    if (e.logic) meta.appendChild(el('span', 'pill pill--lock', '잠금 · 코드 비교값'));
+    if (e.gone) meta.appendChild(el('span', 'pill pill--plain', '현재 목록에 없는 이전 문구'));
+    o.appendChild(meta);
+    if (e.locs && e.locs.length) {
+      var dt = el('details', 'ctx'); dt.appendChild(el('summary', null, '코드에서 보기'));
+      dt.appendChild(el('pre', null, e.locs.slice(0, 3).map(function (l) { return l.f + ':' + l.l + '\n' + l.c; }).join('\n\n')));
+      o.appendChild(dt);
+    }
+    r.appendChild(o);
+
+    var w = el('div', 'edit');
+    var ta = el('textarea'); ta.id = 'ta-' + e.id; ta.rows = 1;
+    ta.setAttribute('aria-label', '수정 문구: ' + e.text.slice(0, 40));
+    ta.value = ed ? ed.text : e.text;
+    var locked = e.logic || e.gone || !canWrite || (ed && ed.status === 'applied');
+    ta.disabled = !!locked;
+    var st = el('div', 'state');
+    w.appendChild(ta); w.appendChild(st);
+    r.appendChild(w);
+    paintState(st, e, ed);
+
+    function commit() {
+      clearTimeout(timers[e.id]);
+      var v = ta.value;
+      var cur = EDITS[e.id];
+      if (cur && cur.status !== 'applied' && cur.text === v) return;
+      if (!cur && v === e.text) return;
+      save(e, v, st);
+    }
+    ta.addEventListener('input', function () { clearTimeout(timers[e.id]); timers[e.id] = setTimeout(commit, 1200); st.textContent = '입력 중…'; });
+    ta.addEventListener('blur', commit);
+    return r;
+  }
+
+  function paintState(st, e, ed) {
+    st.textContent = '';
+    if (ed && ed.status === 'applied') {
+      st.appendChild(el('span', 'pill pill--done', '반영 완료'));
+      if (ed.applied_at) st.appendChild(el('span', null, fmtTime(ed.applied_at) + ' 배포'));
+    } else if (ed) {
+      st.appendChild(el('span', 'pill pill--draft', '수정 대기'));
+      if (ed.text.trim() === '') st.appendChild(el('span', 'pill pill--warn', '빈 문구'));
+      var who = el('span', 'who'); who.dataset.uid = ed.by || ''; st.appendChild(who);
+      st.appendChild(el('span', null, fmtTime(ed.at)));
+      if (canWrite) {
+        var u = el('button', 'undo', '원래대로'); u.type = 'button';
+        u.addEventListener('click', function () { var ta = document.getElementById('ta-' + e.id); if (ta) ta.value = e.text; save(e, e.text, st); });
+        st.appendChild(u);
+      }
+    }
+  }
+
+  var writing = {};
+  function save(e, v, st) {
+    if (!db) { st.textContent = '저장소에 연결되지 않아 저장하지 못했어요.'; return; }
+    if (writing[e.id]) { writing[e.id].next = v; return; }
+    var ref = db.collection('edits').doc(e.id);
+    var body = v === e.text ? null : { orig: e.text, text: v, file: e.file, by: myId || '', at: new Date().toISOString(), status: 'draft' };
+    writing[e.id] = { next: undefined };
+    st.textContent = '저장 중…';
+    (body ? ref.set(body) : ref.delete()).then(function () {
+      if (body) EDITS[e.id] = body; else delete EDITS[e.id];
+      done();
+    }, function (err) {
+      st.textContent = '';
+      st.appendChild(el('span', 'pill pill--warn', err && err.code === 'invalid_argument' ? '이 페이지는 보기 권한이라 저장할 수 없어요' : '저장하지 못했어요. 잠시 뒤 다시 고쳐 주세요.'));
+      if (err && err.code === 'invalid_argument') { canWrite = false; }
+      var n = writing[e.id].next; delete writing[e.id]; if (n !== undefined) save(e, n, st);
+    });
+    function done() {
+      var n = writing[e.id].next; delete writing[e.id];
+      if (n !== undefined && n !== v) return save(e, n, st);
+      var r = document.querySelector('.row[data-id="' + e.id + '"]');
+      if (r) { r.classList.toggle('is-draft', !!EDITS[e.id]); }
+      paintState(st, e, EDITS[e.id]); paintWho(); tally(); side();
+    }
+  }
+
+  function paintWho() {
+    if (!user) return;
+    var nodes = Array.prototype.slice.call(document.querySelectorAll('.who[data-uid]')).filter(function (n) { return n.dataset.uid; });
+    if (!nodes.length) return;
+    var ids = nodes.map(function (n) { return n.dataset.uid; }).filter(function (v, i, a) { return a.indexOf(v) === i; });
+    user.profiles(ids).then(function (ps) {
+      nodes.forEach(function (n) {
+        var p = ps[n.dataset.uid]; if (!p) return;
+        n.textContent = '';
+        var img = el('img'); img.src = p.avatarUrl; img.alt = ''; n.appendChild(img);
+        n.appendChild(el('span', null, (p.isMe ? '나' : (p.name || '팀원'))));
+      });
+    });
+  }
+
+  function setView(v) {
+    state.view = v;
+    document.querySelectorAll('.seg button').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.view === v)); });
+    side(); list();
+  }
+  document.querySelectorAll('.seg button').forEach(function (b) { b.addEventListener('click', function () { setView(b.dataset.view); }); });
+  var qt;
+  $('#q').addEventListener('input', function (ev) { clearTimeout(qt); qt = setTimeout(function () { state.q = ev.target.value; side(); list(); }, 200); });
+  $('#navbtn').addEventListener('click', function () { var o = $('#side').classList.toggle('is-open'); this.setAttribute('aria-expanded', String(o)); });
+
+  function banner(cls, text) { var b = $('#banner'); b.textContent = ''; if (text) b.appendChild(el('div', 'banner ' + cls, text)); }
+
+  tally(); side(); list();
+
+  var c = window.claude;
+  if (!c || !c.use) { loaded = true; canWrite = false; banner('banner--warn', '이 화면에서는 공유 저장소를 쓸 수 없어 읽기만 할 수 있어요. claude.ai에서 로그인한 상태로 열어 주세요.'); tally(); list(); return; }
+  Promise.all([c.use('db'), c.use('user')]).then(function (res) {
+    db = res[0]; user = res[1];
+    if (!db) { loaded = true; canWrite = false; banner('banner--warn', '공유 저장소에 연결하지 못해 읽기만 할 수 있어요. claude.ai에 로그인한 뒤 다시 열어 주세요.'); tally(); list(); return; }
+    var p1 = user ? user.id().then(function (id) { myId = id; }) : Promise.resolve();
+    var p2 = user ? user.can('data.write').then(function (w) { if (w === false) { canWrite = false; banner('banner--info', '보기 권한으로 열었어요. 문구를 고치려면 공유한 사람에게 편집(Contributor 이상) 권한을 요청하세요.'); } }) : Promise.resolve();
+    Promise.all([p1, p2]).then(function () {
+      db.collection('edits').onSnapshot(function (snap) {
+        var next = {};
+        snap.docs.forEach(function (d) { if (d.exists) next[d.id] = d.data(); });
+        var first = !loaded; loaded = true;
+        var changed = Object.keys(next).filter(function (id) { return next[id] !== EDITS[id]; }).concat(Object.keys(EDITS).filter(function (id) { return !next[id]; }));
+        EDITS = next;
+        tally(); side();
+        var active = document.activeElement && document.activeElement.tagName === 'TEXTAREA';
+        if (first || !active) { list(); return; }
+        changed.forEach(function (id) {
+          var r = document.querySelector('.row[data-id="' + id + '"]');
+          if (!r) return;
+          var ta = r.querySelector('textarea');
+          if (ta === document.activeElement) return;
+          var e = BYID[id]; if (!e) return;
+          r.replaceWith(row(e));
+        });
+        paintWho();
+      }, function () { banner('banner--warn', '공유 저장소 연결이 끊겼어요. 페이지를 새로 고쳐 주세요.'); });
+    });
+  });
+})();
+</script>
