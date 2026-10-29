@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<script src="assets/gate.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>리서치 리포트 · 유진 Insight Lab</title>
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link rel="stylesheet" href="assets/app.css?v=20261029a">
+<link rel="stylesheet" href="assets/reports.css?v=20261029d">
+<script src="assets/config.js?v=20261029a"></script>
+<script src="assets/config.local.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" defer></script>
+<script src="assets/partials.js?v=20261029a" defer></script>
+<script src="assets/reports.js?v=20261029d" defer></script>
+</head>
+<body data-page-eyebrow="RESEARCH REPORTS" data-page-title="리서치 리포트" data-page-desc="리서치센터가 발간한 매크로·산업·기업 리포트를 한곳에서 찾아보세요. 행을 누르면 요약과 원문을 볼 수 있어요.">
+<main id="main">
+  <section class="section rp">
+    <div class="wrap rp__layout">
+
+      <!-- 왼쪽 필터 -->
+      <aside class="rp-filter" aria-label="리포트 필터">
+        <details class="rp-filter__box" data-filter-box open>
+          <summary class="rp-filter__sum">필터 <span class="rp-filter__on" data-filter-on></span></summary>
+          <div class="rp-filter__body">
+            <div class="rp-fg">
+              <h2 class="rp-fg__t">종류</h2>
+              <div class="chips" data-f="kind" role="group" aria-label="종류">
+                <button type="button" class="chip is-active" data-v="" aria-pressed="true">전체</button>
+                <button type="button" class="chip" data-v="macro" aria-pressed="false">매크로</button>
+                <button type="button" class="chip" data-v="sector" aria-pressed="false">산업</button>
+                <button type="button" class="chip" data-v="company" aria-pressed="false">기업</button>
+              </div>
+            </div>
+            <div class="rp-fg">
+              <label class="rp-fg__t" for="rp-sector">섹터</label>
+              <select class="input" id="rp-sector" data-f="category"><option value="">전체</option></select>
+            </div>
+            <div class="rp-fg">
+              <label class="rp-fg__t" for="rp-analyst">애널리스트</label>
+              <select class="input" id="rp-analyst" data-f="analyst"><option value="">전체</option></select>
+            </div>
+            <div class="rp-fg">
+              <h2 class="rp-fg__t">투자의견</h2>
+              <div class="chips" data-f="rating" role="group" aria-label="투자의견"></div>
+            </div>
+            <div class="rp-fg">
+              <h2 class="rp-fg__t">기간</h2>
+              <div class="chips" data-f="period" role="group" aria-label="기간">
+                <button type="button" class="chip is-active" data-v="" aria-pressed="true">전체</button>
+                <button type="button" class="chip" data-v="7" aria-pressed="false">1주</button>
+                <button type="button" class="chip" data-v="30" aria-pressed="false">1개월</button>
+                <button type="button" class="chip" data-v="90" aria-pressed="false">3개월</button>
+              </div>
+            </div>
+            <button class="btn btn--text" type="button" data-reset>필터 초기화</button>
+          </div>
+        </details>
+      </aside>
+
+      <!-- 오른쪽 목록 -->
+      <div class="rp-main">
+        <div class="rp-bar">
+          <label class="rp-search"><span class="sr-only">리포트 검색</span>
+            <input class="input" type="search" data-q placeholder="제목 · 종목 · 애널리스트 검색" autocomplete="off"></label>
+          <label class="rp-sort"><span class="sr-only">정렬</span>
+            <select class="input" data-sort><option value="new">최신순</option><option value="old">오래된순</option><option value="title">제목순</option></select></label>
+        </div>
+        <div class="rp-meta"><span data-count aria-live="polite"></span><span data-src></span></div>
+        <div class="card rp-card">
+          <div class="tbl-wrap">
+            <table class="tbl rp-tbl">
+              <thead><tr><th scope="col">발간일</th><th scope="col">분류</th><th scope="col">리포트</th><th scope="col">종목</th><th scope="col">투자의견</th><th scope="col" class="num">목표주가</th></tr></thead>
+              <tbody data-rows></tbody>
+            </table>
+          </div>
+          <div class="rp-empty" data-empty hidden>조건에 맞는 리포트가 없어요. 필터를 바꿔 보세요.</div>
+        </div>
+        <div class="rp-more"><button class="btn btn--secondary" type="button" data-more hidden>더 보기</button></div>
+      </div>
+
+    </div>
+  </section>
+</main>
+</body>
+</html>

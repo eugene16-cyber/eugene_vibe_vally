@@ -8,15 +8,121 @@
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
 <link rel="stylesheet" href="assets/app.css?v=20261029a">
+<link rel="stylesheet" href="assets/quant.css?v=20261029d">
 <script>if(document.documentElement.getAttribute("data-seg")==="wm")location.replace("home.html");</script>
 <script src="assets/config.js?v=20261029a"></script>
 <script src="assets/config.local.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" defer></script>
 <script src="assets/partials.js?v=20261029a" defer></script>
+<!-- 웨이브 2: Track A의 theme-rotation.js/.css가 병합되면 여기서 불러온다 (notes/D.md) -->
+<script src="assets/quant.js?v=20261029d" defer></script>
 </head>
 <body data-page-eyebrow="QUANT STUDIO" data-page-title="Quant Studio" data-page-desc="지금 돈이 몰리는 테마를 확인하고, 그 테마로 나만의 전략을 설계해 10년 데이터로 검증까지. 코드 한 줄 없이.">
 <main id="main">
-  <section class="section"><div class="wrap"><div class="card"><div class="card__body"><span class="badge badge--muted">준비 중</span><p style="margin-top:10px" class="muted">전략 만들기 · 백테스트 · 보관함을 M4에서 채워요.</p></div></div></div></section>
+
+  <!-- 스튜디오: 전략 만들기 · 백테스트 · 보관함 -->
+  <section class="section q-studio" id="studio">
+    <div class="wrap">
+      <div class="q-studio__top">
+        <div class="tabs" role="tablist" aria-label="Quant Studio 도구">
+          <button role="tab" id="tab-build" data-tab="build" aria-selected="true" aria-controls="pane-build">전략 만들기</button>
+          <button role="tab" id="tab-bt" data-tab="bt" aria-selected="false" aria-controls="pane-bt">백테스트</button>
+          <button role="tab" id="tab-vault" data-tab="vault" aria-selected="false" aria-controls="pane-vault">내 전략 보관함 <span class="q-count" data-vault-count></span></button>
+        </div>
+        <span class="q-src" data-src="studio"></span>
+      </div>
+
+      <!-- ① 전략 만들기 (다이렉트 인덱싱) -->
+      <div class="q-pane" id="pane-build" role="tabpanel" aria-labelledby="tab-build">
+        <div class="q-step"><b>1</b>테마 고르기 <span class="muted">구성 종목 3개 이상 · 이번 주 버블 테마 먼저</span></div>
+        <div class="chips q-themes" data-themes role="group" aria-label="테마 선택"></div>
+
+        <div class="q-build">
+          <div class="card"><div class="card__body">
+            <div class="q-build__head">
+              <div class="q-step"><b>2</b>종목별 비중 <span class="muted">합계는 항상 100%로 맞춰져요</span></div>
+              <button class="btn btn--text" type="button" data-equal>동일 비중으로</button>
+            </div>
+            <ul class="q-weights" data-weights></ul>
+          </div></div>
+
+          <div class="card q-metrics-card"><div class="card__body">
+            <div class="q-step"><b>3</b>예상 지표 <span class="muted">종목 통계의 가중 추정</span></div>
+            <div class="q-metrics" data-metrics aria-live="polite"></div>
+            <p class="form-note q-note">과거 데이터로 계산한 추정치예요. 종목 간 상관계수는 0.5로 가정했어요.</p>
+            <form class="q-save" data-save-form>
+              <label class="sr-only" for="q-name">전략 이름</label>
+              <input class="input" id="q-name" name="title" maxlength="40" placeholder="전략 이름 (예: AI 반도체 집중)">
+              <button class="btn btn--primary" type="submit">보관함에 저장</button>
+            </form>
+          </div></div>
+        </div>
+      </div>
+
+      <!-- ② 백테스트 -->
+      <div class="q-pane" id="pane-bt" role="tabpanel" aria-labelledby="tab-bt" hidden>
+        <div class="q-bt">
+          <form class="card q-bt__ctrl" data-bt-form><div class="card__body">
+            <fieldset class="q-fs">
+              <legend class="field__label">팩터 <span class="muted">여러 개면 동일가중 결합</span></legend>
+              <div class="q-factors" data-factors></div>
+            </fieldset>
+            <label class="field"><span class="field__label">기간</span>
+              <select class="input" name="years"><option value="3">최근 3년</option><option value="5">최근 5년</option><option value="10" selected>최근 10년</option></select></label>
+            <label class="field"><span class="field__label">리밸런싱</span>
+              <select class="input" name="rebal"><option value="1">매월</option><option value="3" selected>분기</option><option value="6">반기</option><option value="12">연 1회</option></select></label>
+            <label class="field"><span class="field__label">거래비용 (편도, bp)</span>
+              <input class="input" type="number" name="cost" min="0" max="100" step="1" value="15"></label>
+            <button class="btn btn--primary btn--block" type="submit">백테스트 실행</button>
+          </div></form>
+
+          <div class="q-bt__out" data-bt-out aria-live="polite"></div>
+        </div>
+      </div>
+
+      <!-- ③ 내 전략 보관함 -->
+      <div class="q-pane" id="pane-vault" role="tabpanel" aria-labelledby="tab-vault" hidden>
+        <div class="q-vault__note" data-vault-note></div>
+        <div class="q-vault" data-vault></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 테마 로테이션 (7-5 모듈, Track A) -->
+  <section class="section section--gray" id="theme">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="sec-eyebrow">THEME ROTATION</span>
+        <h2 class="sec-title">지금 돈이 몰리는 테마</h2>
+        <p class="sec-sub">버블을 눌러 테마를 살펴보고, 그 테마로 바로 전략을 만들어 보세요.</p>
+      </div>
+      <div data-theme-host></div>
+    </div>
+  </section>
+
+  <!-- 전략 템플릿 -->
+  <section class="section" id="templates">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="sec-eyebrow">TEMPLATES</span>
+        <h2 class="sec-title">전략 템플릿 예시</h2>
+        <p class="sec-sub">자주 쓰는 설정을 한 번에 불러와요. 불러온 뒤 자유롭게 바꿔 보세요.</p>
+      </div>
+      <div class="q-grid3" data-templates></div>
+    </div>
+  </section>
+
+  <!-- 크로스링크 -->
+  <section class="section q-links">
+    <div class="wrap">
+      <div class="q-grid3">
+        <a class="card q-link" href="#theme"><div class="card__body"><span class="sec-eyebrow">THEME</span><h3>테마 로테이션</h3><p class="muted">자금이 몰리는 테마를 버블로 확인해요.</p><span class="btn--text">바로 가기 →</span></div></a>
+        <a class="card q-link" href="reports.html"><div class="card__body"><span class="sec-eyebrow">REPORTS</span><h3>리서치 리포트</h3><p class="muted">전략의 근거가 되는 리포트를 찾아봐요.</p><span class="btn--text">리포트 목록 →</span></div></a>
+        <a class="card q-link" href="market.html#stock-events"><div class="card__body"><span class="sec-eyebrow">EVENTS</span><h3>종목 이벤트</h3><p class="muted">공시·실적 이벤트와 주가 반응을 살펴봐요.</p><span class="btn--text">Research에서 보기 →</span></div></a>
+      </div>
+    </div>
+  </section>
+
 </main>
 </body>
 </html>
