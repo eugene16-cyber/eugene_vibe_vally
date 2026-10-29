@@ -8,40 +8,31 @@
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
 <link rel="stylesheet" href="assets/app.css?v=20261029e">
-<link rel="stylesheet" href="assets/orbit-books.css?v=20261029c">
 <link rel="stylesheet" href="assets/cardnews/cardnews.css?v=20261029c">
-<link rel="stylesheet" href="assets/theme-rotation.css?v=20261029a">
-<link rel="stylesheet" href="assets/home.css?v=20261029f">
+<link rel="stylesheet" href="assets/desk.css?v=20261029c">
+<link rel="stylesheet" href="assets/home.css?v=20261029i">
 <script src="assets/config.js?v=20261029a"></script>
 <script src="assets/config.local.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" defer></script>
 <script src="assets/partials.js?v=20261029a" defer></script>
 <script src="assets/events-data.js?v=20261029c" defer></script>
 <script src="assets/conf-records.js?v=20261029c" defer></script>
-<script src="assets/orbit-books.js?v=20261029c" defer></script>
-<script src="assets/anchor.js?v=20261029a" defer></script>
+<script src="assets/saved-research.js?v=20261029c" defer></script>
 <script src="assets/cardnews/cardnews.js?v=20261029c" defer></script>
-<script src="assets/theme-rotation.js?v=20261029a" defer></script>
-<script src="assets/home.js?v=20261029f" defer></script>
-<script src="assets/home-feed.js?v=20261029e" defer></script>
+<script src="assets/home.js?v=20261029i" defer></script>
+<script src="assets/desk.js?v=20261029i" defer></script>
+<script src="assets/yuri-qa.js?v=20261029i" defer></script>
 </head>
 <body data-no-crumb data-nav="dark">
 <main id="main">
 
-  <!-- 0. VIP Lounge 메인 — 메인 카피 · 홀로그램(web effect/eugene-hologram-v3) · 내 추천 서비스 -->
-  <section class="hm-top" id="lounge" aria-labelledby="hm-main">
-    <div class="wrap hm-top__in">
-      <p class="hm-top__k">EUGENE VIP LOUNGE</p>
-      <h1 class="hm-top__title" id="hm-main">법인 맞춤형 추천 서비스</h1>
-      <p class="hm-top__sub">행사로 만나고 리서치로 이어 가는, 유진투자증권 리서치센터의 법인 고객 라운지예요.</p>
-    </div>
-    <div class="hm-holo">
-      <iframe src="index.html" title="유진 홀로그램 — 유리와 대화" allow="microphone; autoplay" loading="eager"></iframe>
-    </div>
+  <!-- 맞춤형 서비스 라운지 — 제목 · 가입 상담 기반 추천 -->
+  <section class="hm-top" aria-labelledby="hm-main">
     <div class="wrap">
+      <h1 class="hm-top__title" id="hm-main"></h1>
       <div class="hm-recs" aria-labelledby="hm-recs-title">
         <div class="hm-recs__head">
-          <h2 class="hm-recs__title" id="hm-recs-title">추천 서비스</h2>
+          <h2 class="hm-recs__title" id="hm-recs-title">맞춤 서비스 추천</h2>
           <p class="hm-recs__meta" id="hm-recs-meta"></p>
         </div>
         <ul class="hm-recs__list" id="hm-recs"></ul>
@@ -49,151 +40,121 @@
     </div>
   </section>
 
-  <!-- 1. 근거형 Q&A — AI 리서치 어시스턴트 -->
-  <section class="hh" id="assistant" aria-labelledby="hh-title">
-    <div class="hh__orb" aria-hidden="true">
-      <span class="hh__ring hh__ring--1"></span><span class="hh__ring hh__ring--2"></span><span class="hh__ring hh__ring--3"></span>
-      <span class="hh__core"></span>
-    </div>
-
-    <div class="hh__intro">
-      <p class="hh__eyebrow">RESEARCH Q&amp;A · 유리</p>
-      <h2 class="hh__title" id="hh-title">리서치센터 자료로 답하는<br>근거형 Q&amp;A, 유리예요.</h2>
-      <p class="hh__desc">애널리스트가 검수한 질문부터 물어보세요. 답변마다 근거 리포트를 함께 보여드려요.</p>
-    </div>
-
-    <aside class="hh__presets" aria-label="검수 완료 질문">
-      <p class="hh__label">검수 완료 질문</p>
-      <ul id="hh-presets"></ul>
-    </aside>
-
-    <article class="hh__answer" id="hh-answer" aria-live="polite" hidden></article>
-
-    <div class="hh__dock">
-      <form class="hh__chat" id="hh-chat" hidden>
-        <label class="sr-only" for="hh-input">유리에게 질문하기</label>
-        <input id="hh-input" class="hh__input" autocomplete="off" placeholder="예) 이번 주 반도체 관련 리포트를 요약해 줘">
-        <button class="hh__mic" type="button" id="hh-mic" aria-label="음성으로 질문하기">🎙</button>
-        <button class="btn btn--primary" type="submit">질문</button>
-      </form>
-      <div class="hh__btns">
-        <button class="btn btn--primary hh__open" type="button" id="hh-open" aria-expanded="false" aria-controls="hh-chat">채팅으로 질문하기</button>
-        <button class="hh__wake" type="button" id="hh-wake" aria-pressed="false"><span class="hh__wake-dot" aria-hidden="true"></span>유리 호출 켜기</button>
-      </div>
-      <p class="hh__note">서버 연결 전이라 검수 완료 질문에만 답해요. 답변은 정보 제공용이며 투자 권유가 아니에요.</p>
-    </div>
-  </section>
-
-  <!-- 2. 유진 Event -->
-  <section class="section" id="event" aria-labelledby="ev-title">
+  <!-- 내 라운지 — 고객 분류별 기본 구성, 직접 꾸미기 -->
+  <section class="lg" id="lounge" aria-labelledby="lg-title">
     <div class="wrap">
-      <div class="sec-head hm-head">
+      <div class="lg-head">
         <div>
-          <p class="sec-eyebrow">EUGENE EVENT</p>
-          <h2 class="sec-title" id="ev-title">책을 골라 행사를 살펴보세요</h2>
-          <p class="sec-sub">Corporate Day부터 WM 세미나까지, 리서치센터 행사 여섯 갈래예요.</p>
+          <h2 class="lg-title" id="lg-title">내 라운지</h2>
+          <p class="lg-meta" id="lg-meta" aria-live="polite"></p>
         </div>
-        <a class="btn btn--text" href="conferences.html">전체 일정 보기 →</a>
+        <button class="btn btn--secondary btn--sm" type="button" id="lg-edit" aria-pressed="false">라운지 꾸미기</button>
       </div>
-    </div>
-    <div class="hm-orbit" id="hm-orbit"></div>
-  </section>
-
-  <!-- 3. AI 앵커 -->
-  <section class="hm-anchor" id="anchor" aria-labelledby="an-title">
-    <div class="wrap hm-anchor__in">
-      <div class="hm-anchor__copy">
-        <p class="sec-eyebrow hm-anchor__eyebrow">AI ANCHOR BRIEFING</p>
-        <h2 class="hm-anchor__title" id="an-title">매일 아침,<br>AI 앵커가 먼저 읽어드려요.</h2>
-        <ol class="hm-steps">
-          <li><b>오늘의 시황 브리핑</b><span>KOSPI · KOSDAQ 마감, 투자자별 수급, 업종 흐름, 환율</span></li>
-          <li><b>발간 리포트 브리핑</b><span>오늘 나온 리포트의 핵심을 1분 안에</span></li>
-          <li><b>해외 오버나이트</b><span>밤사이 미국 · 아시아 지수와 섹터 움직임</span></li>
-        </ol>
-        <a class="btn btn--secondary hm-anchor__more" href="market.html">Research에서 자세히 보기 →</a>
-      </div>
-      <div class="hm-anchor__card" id="hm-anchor-card"></div>
-    </div>
-  </section>
-
-  <!-- 4. 카드뉴스 스크롤 이펙트 -->
-  <section class="cnx" id="cardnews-fx" aria-labelledby="cnx-title">
-    <div class="cnx__stage">
-      <div class="cnx__copy">
-        <p class="sec-eyebrow">CARD NEWS</p>
-        <h2 class="cnx__title" id="cnx-title">수많은 리포트,<br>한 장의 카드로.</h2>
-        <p class="cnx__step" id="cnx-step" aria-live="polite">리포트 본문 숫자로 카드를 만들어요.</p>
-        <a class="btn btn--text" href="desk.html#cardnews">카드뉴스 전체 보기 →</a>
-      </div>
-      <div class="cnx__phone" aria-hidden="true">
-        <div class="cnx__screen" id="cnx-screen"></div>
-        <span class="cnx__cursor" data-c="analyst">애널리스트</span>
-        <span class="cnx__cursor" data-c="ai">AI 요약</span>
-        <span class="cnx__cursor" data-c="editor">에디터</span>
-        <span class="cnx__cursor" data-c="comp">컴플라이언스</span>
-      </div>
-      <div class="cnx__archive">
-        <p class="cnx__archive-k">DESK ARCHIVE · 최신 리포트</p>
-        <ul id="cnx-archive"></ul>
+      <ul class="lg-grid" id="lg-grid"></ul>
+      <div class="lg-tray" id="lg-tray" hidden>
+        <p class="lg-tray__k">추가할 수 있는 메뉴</p>
+        <div class="lg-tray__list" id="lg-tray-list"></div>
+        <button class="btn btn--text" type="button" id="lg-reset">추천 구성으로 되돌리기</button>
       </div>
     </div>
   </section>
-
-  <!-- 5. 고객 유형별 -->
-  <section class="hm-quant" id="quant-teaser" data-for="inst" aria-labelledby="qt-title">
-    <div class="wrap hm-quant__in">
-      <div>
-        <p class="sec-eyebrow">QUANT STUDIO</p>
-        <h2 class="sec-title" id="qt-title">읽는 투자에서,<br>설계하는 투자로.</h2>
-        <p class="sec-sub">테마를 고르고 종목 비중을 정해 10년 데이터로 검증해 보세요. 코드 한 줄 없이요.</p>
+  <!-- 2. 리서치 워크스페이스 -->
+  <section class="section desk-sec" id="my">
+    <span id="workspace"></span>
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="sec-eyebrow">MY RESEARCH</div>
+        <h2 class="sec-title" id="ws-title">리서치 워크스페이스</h2>
+        <p class="sec-sub">관심 분야에 맞춘 브리핑과 자료를 한곳에 모았어요.</p>
       </div>
-      <div class="hm-quant__viz">
-        <svg class="hm-quant__svg" viewBox="0 0 560 300" role="img" aria-label="예시 누적 수익 곡선: 전략과 벤치마크">
-          <g class="hm-quant__grid"><line x1="40" y1="60" x2="540" y2="60"/><line x1="40" y1="130" x2="540" y2="130"/><line x1="40" y1="200" x2="540" y2="200"/><line x1="40" y1="260" x2="540" y2="260"/></g>
-          <path class="hm-quant__bench" id="qt-bench" d=""/>
-          <path class="hm-quant__line" id="qt-line" d=""/>
-          <text x="40" y="288" class="hm-quant__axis">2016</text><text x="540" y="288" class="hm-quant__axis" text-anchor="end">2026</text>
-        </svg>
-        <span class="badge badge--sample hm-quant__tag">예시 곡선</span>
-        <div class="hm-quant__reveal">
-          <div class="hm-quant__portal">
-            <p>테마 → 전략 → 백테스트</p>
-            <a class="btn btn--primary btn--sm" href="quant.html">퀀트 스튜디오 열기 →</a>
+      <div class="ws">
+        <div class="ws__main">
+          <article class="card ws-brief" id="ws-brief" aria-live="polite"></article>
+          <article class="card">
+            <div class="card__body">
+              <div class="ws-h"><h3>맞춤 자료함</h3><span class="ws-h__note" id="ws-fmt"></span></div>
+              <div class="ws-files" id="ws-files"></div>
+            </div>
+          </article>
+        </div>
+        <div class="ws__side">
+          <article class="card">
+            <div class="card__body">
+              <div class="ws-h"><h3>상담 · 담당자</h3></div>
+              <div id="ws-consult"></div>
+              <div class="ws-mgr">
+                <div><span class="ws-mgr__eyebrow" id="ws-mgr-role">담당</span><b id="ws-mgr-title">담당자 연결 · 상담 요청</b><p>궁금한 리포트나 미팅 요청을 남겨 주세요.</p></div>
+                <button type="button" class="btn btn--sm ws-mgr__btn" id="ws-consult-btn">상담 요청</button>
+              </div>
+            </div>
+          </article>
+          <article class="card">
+            <div class="card__body">
+              <div class="ws-h"><h3>관심 종목 · 테마</h3></div>
+              <ul class="ws-tags" id="ws-tags" aria-label="관심 종목 · 테마"></ul>
+              <form class="ws-add" id="ws-add" autocomplete="off">
+                <label class="sr-only" for="ws-add-input">관심 종목 · 테마 추가</label>
+                <input class="input" id="ws-add-input" maxlength="20" placeholder="예: 전력기기">
+                <button class="btn btn--secondary btn--sm" type="submit">+ 추가</button>
+              </form>
+              <div class="ws-alerts" role="group" aria-label="알림 설정">
+                <div class="ws-alerts__h">알림</div>
+                <label class="tgl"><span>새 리포트 · 관심 테마</span><input type="checkbox" data-alert="report"><i aria-hidden="true"></i></label>
+                <label class="tgl"><span>신청한 행사 일정</span><input type="checkbox" data-alert="events"><i aria-hidden="true"></i></label>
+                <label class="tgl"><span>새 카드뉴스</span><input type="checkbox" data-alert="cardnews"><i aria-hidden="true"></i></label>
+                <p class="form-note">시연 화면이라 설정만 저장되고 실제 알림은 보내지 않아요.</p>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. 카드뉴스 -->
+  <section class="section section--gray desk-sec" id="cardnews">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="sec-eyebrow">CARD NEWS</div>
+        <h2 class="sec-title">오늘의 리서치, 카드 한 장으로</h2>
+        <p class="sec-sub">리포트의 핵심 숫자를 카드 몇 장으로 정리했어요. 카드를 누르면 넘겨 볼 수 있어요.</p>
+      </div>
+      <div class="tabs" role="tablist" aria-label="카드뉴스 분류" id="cn-tabs">
+        <button role="tab" aria-selected="true" data-tab="rec" aria-controls="cn-grid">추천</button>
+        <button role="tab" aria-selected="false" data-tab="market" aria-controls="cn-grid">시황·전략</button>
+        <button role="tab" aria-selected="false" data-tab="industry" aria-controls="cn-grid">산업·테마</button>
+        <button role="tab" aria-selected="false" data-tab="company" aria-controls="cn-grid">기업 리포트</button>
+      </div>
+      <div class="cn-grid" id="cn-grid" role="tabpanel" aria-label="카드뉴스 목록"></div>
+      <div class="cn-more"><button type="button" class="btn btn--text" id="cn-more" aria-expanded="false">카드뉴스 전체 보기 →</button></div>
+    </div>
+  </section>
+
+  <!-- 4. 나의 리서치 | 내 이벤트 신청 내역 -->
+  <section class="section desk-sec" id="history">
+    <div class="wrap desk-two">
+      <article class="card" id="research">
+        <div class="card__body">
+          <div class="ws-h"><h3>나의 리서치</h3></div>
+          <div class="tabs" role="tablist" aria-label="나의 리서치" id="rs-tabs">
+            <button role="tab" aria-selected="true" data-tab="saved" aria-controls="rs-list">저장한 리서치</button>
+            <button role="tab" aria-selected="false" data-tab="received" aria-controls="rs-list">받은 자료</button>
           </div>
+          <div class="chips rs-chips" id="rs-chips" role="group" aria-label="카테고리"></div>
+          <ul class="rs-list" id="rs-list" role="tabpanel" aria-label="나의 리서치 목록"></ul>
+          <button type="button" class="btn btn--text" id="rs-more" hidden>전체 보기 →</button>
         </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="section section--tint" id="theme" data-for="wm" aria-labelledby="th-title">
-    <div class="wrap">
-      <div class="sec-head">
-        <p class="sec-eyebrow">THEME ROTATION</p>
-        <h2 class="sec-title" id="th-title">지금 돈이 몰리는 테마</h2>
-        <p class="sec-sub">버블을 눌러 테마별 종목 · 리포트 · 뉴스를 살펴보세요.</p>
-      </div>
-      <div id="hm-theme"></div>
-    </div>
-  </section>
-
-  <!-- 6. 이어서 보기 -->
-  <section class="section" id="continue" aria-labelledby="ct-title">
-    <div class="wrap">
-      <div class="sec-head">
-        <p class="sec-eyebrow">CONTINUE</p>
-        <h2 class="sec-title" id="ct-title">이어서 보기</h2>
-      </div>
-      <div class="hm-cont">
-        <div class="card"><div class="card__body">
-          <h3 class="hm-cont__h">최근 질문</h3>
-          <ul class="hm-cont__list" id="ct-questions"></ul>
-        </div></div>
-        <div class="card"><div class="card__body">
-          <h3 class="hm-cont__h">신청한 행사</h3>
-          <ul class="hm-cont__list" id="ct-events"></ul>
-          <a class="btn btn--text" href="desk.html#events">Private Desk에서 보기 →</a>
-        </div></div>
-      </div>
+      </article>
+      <article class="card" id="events">
+        <div class="card__body">
+          <div class="ws-h"><h3>내 이벤트 신청 내역</h3><a class="btn btn--text" href="conferences.html">Events →</a></div>
+          <div class="tabs" role="tablist" aria-label="이벤트 신청 내역" id="ev-tabs">
+            <button role="tab" aria-selected="true" data-tab="up" aria-controls="ev-list">다가오는 행사</button>
+            <button role="tab" aria-selected="false" data-tab="past" aria-controls="ev-list">지난 행사</button>
+          </div>
+          <ul class="ev-list" id="ev-list" role="tabpanel" aria-label="이벤트 신청 목록"></ul>
+        </div>
+      </article>
     </div>
   </section>
 </main>

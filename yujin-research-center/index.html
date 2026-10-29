@@ -24,7 +24,7 @@
     --mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
     --hud: Orbitron, var(--mono);
     --header-h: 64px;
-    --banner-h: 36px;
+    --banner-h: 0px;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { background: var(--bg); color: var(--text); }
@@ -259,28 +259,53 @@
   .method { margin-top: 10px; font-size: 11px; color: var(--faint); line-height: 1.5; }
 
   /* 입력부 — 빠른 답변 칩 + 직접 입력 */
-  .composer { border-top: 1px solid var(--panel-line); padding: 10px 12px 12px; }
-  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .composer { padding: 10px 12px 12px; }
+  .msg .q-t { display: block; font-size: 15px; font-weight: 700; color: var(--text); line-height: 1.45; }
+  .msg .q-h { display: block; margin-top: 3px; font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+  /* 보기 패널 — 머리 / 번호 행 / 직접 입력 행 */
+  .qbox { border: 1px solid rgba(63, 243, 255, 0.28); border-radius: 12px; background: rgba(2, 14, 22, 0.82); overflow: hidden; animation: rise 0.25s ease-out; }
+  .opts-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; padding: 11px 14px 9px; border-bottom: 1px solid var(--panel-line); }
+  .opts-head b { font-size: 13.5px; font-weight: 600; color: var(--text); }
+  .opts-head span { flex: none; font-family: var(--mono); font-size: 10.5px; color: var(--faint); letter-spacing: 0.04em; }
+  .chips { display: flex; flex-direction: column; max-height: 38vh; overflow-y: auto; }
   .chips:empty { display: none; }
-  .chips + .ask { margin-top: 9px; }
-  .qchip {
-    padding: 7px 12px; border-radius: 16px; cursor: pointer; font: inherit; font-size: 13px; font-weight: 600;
-    color: var(--holo); background: rgba(63, 243, 255, 0.06); border: 1px solid rgba(63, 243, 255, 0.35);
-  }
-  .qchip:hover, .qchip:focus-visible { background: rgba(63, 243, 255, 0.16); outline: none; }
-  .qchip[aria-pressed="true"] { color: #021018; background: var(--holo); }
-  .qchip.done { color: #021018; background: var(--good); border-color: var(--good); }
-  .qchip.done:disabled { opacity: 0.4; cursor: default; }
-  .qchip.plain { color: var(--muted); border-color: var(--panel-line); background: transparent; }
-  .ask { display: flex; gap: 8px; }
-  .ask input {
-    flex: 1; min-width: 0; height: 40px; padding: 0 12px; border-radius: 7px;
-    font: inherit; font-size: 14px; color: var(--text); background: rgba(0, 10, 18, 0.7); border: 1px solid var(--panel-line);
-  }
-  .ask input:focus { outline: none; border-color: rgba(63, 243, 255, 0.6); box-shadow: 0 0 0 3px rgba(63, 243, 255, 0.12); }
+  .opt { display: flex; align-items: flex-start; gap: 12px; width: 100%; padding: 10px 14px; text-align: left; font: inherit; color: var(--text); cursor: pointer;
+    background: transparent; border: 0; border-bottom: 1px solid rgba(63, 243, 255, 0.08); transition: background 0.15s; }
+  .opt:hover, .opt:focus-visible { background: rgba(63, 243, 255, 0.08); outline: none; }
+  .opt-n { flex: none; width: 26px; height: 26px; border-radius: 7px; display: grid; place-items: center; font-family: var(--mono); font-size: 12px; color: var(--muted);
+    background: rgba(63, 243, 255, 0.06); border: 1px solid var(--panel-line); }
+  .opt-b { min-width: 0; padding-top: 2px; }
+  .opt-b b { display: block; font-size: 14px; font-weight: 600; line-height: 1.35; }
+  .opt-b small { display: block; margin-top: 2px; font-size: 12px; color: var(--muted); line-height: 1.4; }
+  .opt[aria-pressed="true"] { background: rgba(63, 243, 255, 0.1); }
+  .opt[aria-pressed="true"] .opt-n { color: #021018; background: var(--holo); border-color: var(--holo); }
+  .opt:disabled { opacity: 0.5; cursor: default; }
+  .ask { display: flex; align-items: center; gap: 8px; padding: 7px 8px 7px 14px; }
+  .ask[hidden] { display: none; }
+  .ask-ic { flex: none; color: var(--muted); font-size: 14px; }
+  .ask input { flex: 1; min-width: 0; height: 34px; border: 0; background: transparent; color: var(--text); font: inherit; font-size: 14px; }
+  .ask input:focus { outline: none; }
   .ask input::placeholder { color: var(--faint); }
-  .ask button { flex: none; width: 40px; height: 40px; border-radius: 7px; cursor: pointer; font-size: 16px; color: #021018; background: var(--holo); border: 0; }
-  .ask button:disabled, .ask input:disabled { opacity: 0.45; cursor: default; }
+  #ask-extra { display: contents; }
+  .ask-btn { flex: none; height: 30px; padding: 0 11px; border-radius: 7px; font: inherit; font-size: 12.5px; cursor: pointer; color: var(--muted); background: rgba(63, 243, 255, 0.06); border: 1px solid var(--panel-line); }
+  .ask-btn.primary { color: #021018; background: var(--holo); border-color: var(--holo); font-weight: 600; }
+  .ask-btn.wide { width: 100%; height: 40px; font-size: 14px; }
+  .ask-btn:disabled { opacity: 0.4; cursor: default; }
+  .ask-send { flex: none; width: 32px; height: 30px; border-radius: 7px; cursor: pointer; font-size: 14px; color: var(--muted); background: transparent; border: 1px solid var(--panel-line); }
+  .ask-send:disabled, .ask input:disabled { opacity: 0.45; cursor: default; }
+  /* 마지막 — 이름 · 회사 메일 */
+  .contact { display: grid; gap: 10px; padding: 12px 14px 14px; }
+  .contact label { display: grid; gap: 4px; font-size: 12px; color: var(--muted); }
+  .contact input { height: 38px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--panel-line); background: rgba(4, 22, 34, 0.7); color: var(--text); font: inherit; font-size: 14px; }
+  .contact input:focus { outline: none; border-color: rgba(63, 243, 255, 0.6); }
+  .contact-err { min-height: 0; font-size: 12px; color: #ff8a8a; }
+  .contact-err:empty { display: none; }
+  .contact-note { font-size: 11px; color: var(--faint); }
+  .pending { margin-top: 10px; padding: 10px 12px; border-radius: 8px; border: 1px solid rgba(255, 209, 102, 0.4); background: rgba(255, 209, 102, 0.07); }
+  .pending b { display: block; font-size: 13px; color: #ffd166; }
+  .pending span { display: block; margin-top: 2px; font-size: 12px; color: var(--muted); }
+  .pf.offer div { flex-direction: column; gap: 1px; }
+  .pf.offer b { text-align: left; }
   .privacy { margin-top: 8px; font-size: 11px; color: var(--faint); }
 
   @media (max-width: 900px) {
@@ -310,7 +335,6 @@
 </style>
 </head>
 <body>
-  <div class="demo-banner"><b>시연용 가상 화면</b> · 대화 내용은 이 브라우저에만 저장돼요. 실명·연락처 같은 실제 개인정보는 입력하지 마세요. 투자 권유가 아닙니다.</div>
 
   <header>
     <div class="brand">
@@ -322,7 +346,7 @@
     </div>
     <div class="header-right">
       <span class="clock num" id="clock">--:--:-- KST</span>
-      <span class="live">LIVE · 가상</span>
+      <span class="live">LIVE · 시연용 가상 화면</span>
     </div>
   </header>
 
@@ -343,7 +367,6 @@
         <p>대화로 고객 유형을 파악해 필요한 리서치 서비스를 골라 드려요. 1분이면 충분해요.</p>
         <div class="intro-actions">
           <button type="button" class="btn" id="open-chat">유리와 대화로 가입하기</button>
-          <a class="btn ghost" href="signup.html?pick=1" target="_top">직접 유형 고르기</a>
         </div>
       </div>
 
@@ -358,13 +381,17 @@
         <div class="progress" aria-hidden="true"><i id="progress"></i></div>
         <div class="log" id="log" role="log" aria-live="polite"></div>
         <div class="composer">
-          <div class="chips" id="chips"></div>
-          <form class="ask" id="ask">
-            <label for="ask-input" class="sr-only">유리에게 답하기</label>
-            <input id="ask-input" autocomplete="off" placeholder="직접 입력해도 돼요">
-            <button type="submit" aria-label="보내기">↑</button>
-          </form>
-          <div class="privacy">시연용 · 가상 이름과 가상 소속을 써 주세요</div>
+          <div class="qbox" id="qbox" hidden>
+            <div class="opts-head" id="opts-head"><b></b><span></span></div>
+            <div class="chips" id="chips" role="group" aria-label="보기"></div>
+            <form class="ask" id="ask">
+              <span class="ask-ic" aria-hidden="true">✎</span>
+              <label for="ask-input" class="sr-only">직접 입력</label>
+              <input id="ask-input" autocomplete="off" placeholder="직접 입력">
+              <span id="ask-extra"></span>
+              <button type="submit" class="ask-send" aria-label="보내기">↵</button>
+            </form>
+          </div>
         </div>
       </aside>
     </section>
@@ -374,7 +401,7 @@
 <script src="assets/config.local.js"></script>
 <script src="assets/disclosure-data.js?v=20261029g"></script>
 <script src="assets/events-data.js?v=20261029c"></script>
-<script src="assets/yuri-flow.js?v=20261029g"></script>
+<script src="assets/yuri-flow.js?v=20261029h"></script>
 <script type="importmap">
 {
   "imports": {
@@ -1193,19 +1220,19 @@ function onArrival() {
 }
 
 // 질문 트리 · 슬롯 · 추천은 assets/yuri-flow.js(YuriFlow, 어드민 설정)에서 — 이 화면은 대화 UI만 맡는다
-const RC = "";  // 사이트 루트에 있음 — Home iframe에서 열려도 이동은 최상위 창에서
+const RC = "";  // 사이트 루트에 있음 — iframe에서 열려도 이동은 최상위 창에서
 let flow;
 function resetState() { flow = window.YuriFlow.create(); }
 
 const log = $("log"), chipsEl = $("chips"), form = $("ask"), input = $("ask-input"), yuriBox = $("yuri");
+const qbox = $("qbox"), optsHead = $("opts-head"), askExtra = $("ask-extra");
 let busy = false, started = false;
 
 function setBusy(on) {
   busy = on;
   yuriBox.dataset.busy = on ? "1" : "0";
   input.disabled = on;
-  form.querySelector("button").disabled = on;
-  for (const b of chipsEl.querySelectorAll("button")) b.disabled = on;
+  for (const b of qbox.querySelectorAll("button, input")) b.disabled = on;
 }
 function setStatus(main, sub) {
   $("status-main").textContent = main;
@@ -1220,62 +1247,107 @@ function addMsg(who, html, cls = "") {
   scrollLog();
   return el;
 }
-// 유리가 말할 때: 입력 중 표시 → 말풍선, 홀로그램 링이 번쩍인다
-async function say(text, cls) {
+// 유리가 말할 때: 입력 중 표시 → 말풍선. 질문은 '굵은 제목 + 작은 보조 설명'으로 끊어서
+async function say(title, hint, cls) {
   const t = addMsg("bot", "<i></i><i></i><i></i>", "typing");
   t.setAttribute("aria-label", "유리가 입력 중");
-  await sleep(380 + Math.min(text.length * 9, 800));
+  await sleep(320 + Math.min((title + (hint || "")).length * 7, 700));
   t.remove();
   hudFlash = 1;
-  return addMsg("bot", esc(text).replace(/\n/g, "<br>"), cls);
+  const body = hint === null
+    ? esc(title).replace(/\n/g, "<br>")
+    : `<b class="q-t">${esc(title)}</b>${hint ? `<span class="q-h">${esc(hint)}</span>` : ""}`;
+  return addMsg("bot", body, cls);
 }
+const note = (text) => say(text, null);
 // 고객 답은 빛이 되어 구로 흘러 들어간다
 function answer(text) {
-  addMsg("me", esc(text));
+  if (text) addMsg("me", esc(text));
   beamIn();
 }
 
-function renderChips(q) {
+/* 보기 패널 — Claude 질문 패널처럼: 머리(질문 · 단계) / 번호 행(이름 + 설명) / 직접 입력 행 */
+function renderPanel(q) {
   chipsEl.replaceChildren();
+  askExtra.replaceChildren();
+  qbox.hidden = false;
+  form.hidden = !!q.form;
+  // 머리: 지금 단계 / 고르는 방식 (질문 문장은 말풍선에 있으니 반복하지 않는다)
+  optsHead.querySelector("b").textContent = flow.stepLabel();
+  optsHead.querySelector("span").textContent = q.form ? "필수 입력" : q.multi ? "여러 개 선택 · 직접 입력 가능" : q.options.length ? "하나 선택 · 직접 입력 가능" : "직접 입력";
+  if (q.form) return renderContact();
   q.options.forEach((o, i) => {
     const b = document.createElement("button");
-    b.type = "button"; b.className = "qchip"; b.textContent = o.label; b.dataset.i = i;
+    b.type = "button"; b.className = "opt"; b.dataset.i = i;
     if (o.act) b.dataset.pick = o.act;
     if (q.multi) b.setAttribute("aria-pressed", "false");
+    b.innerHTML = `<span class="opt-n">${i + 1}</span><span class="opt-b"><b>${esc(o.label)}</b>${o.desc ? `<small>${esc(o.desc)}</small>` : ""}</span>`;
     chipsEl.appendChild(b);
   });
   if (q.multi) {
-    const done = document.createElement("button");
-    done.type = "button"; done.className = "qchip done"; done.dataset.act = "done"; done.textContent = "선택 완료"; done.disabled = true;
-    chipsEl.appendChild(done);
+    const d = document.createElement("button");
+    d.type = "button"; d.className = "ask-btn primary"; d.dataset.act = "done"; d.textContent = "선택 완료"; d.disabled = true;
+    askExtra.appendChild(d);
+  } else if (q.slot === "q0" || q.slot === "deep") {
+    const s = document.createElement("button");
+    s.type = "button"; s.className = "ask-btn"; s.dataset.act = "skip"; s.textContent = "건너뛰기";
+    askExtra.appendChild(s);
   }
-  input.placeholder = q.placeholder || (q.multi ? "골라 주시거나 직접 적어 주세요 (예: 바이오 쪽 세미나 자주 듣고 싶어요)" : "골라 주시거나 직접 적어 주세요");
+  input.placeholder = q.input || "직접 입력";
+}
+function renderContact() {
+  const f = document.createElement("form");
+  f.className = "contact"; f.noValidate = true;
+  f.innerHTML = `
+    <label><span>이름</span><input name="name" autocomplete="name" value="${esc(flow.name())}" placeholder="이름 (가상)"></label>
+    <label><span>회사 메일</span><input name="email" type="email" autocomplete="email" placeholder="name@company.com (가상)"></label>
+    <p class="contact-err" role="alert"></p>
+    <button type="submit" class="ask-btn primary wide">가입 신청</button>
+    <p class="contact-note">시연에서는 가상 이름 · 가상 메일을 써 주세요.</p>`;
+  chipsEl.appendChild(f);
+  f.addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (busy) return;
+    const r = flow.contact(f.name.value, f.email.value);
+    if (r.error) { f.querySelector(".contact-err").textContent = r.error; return; }
+    answer(`${f.name.value.trim()} · ${f.email.value.trim()}`);
+    qbox.hidden = true;
+    next();
+  });
+  f.name.focus({ preventScroll: true });
 }
 function progress() {
-  $("progress").style.width = `${flow.progressRatio() * 100}%`;
-  $("step-label").textContent = flow.current() ? `가입 상담 · ${flow.progressLabel()}` : "추천 결과";
+  $("progress").style.width = `${flow.stepRatio() * 100}%`;
+  $("step-label").textContent = flow.current() ? `가입 상담 · ${flow.stepLabel()}` : "가입 신청 완료";
 }
 
 async function next() {
   setBusy(true);
-  chipsEl.replaceChildren();
+  qbox.hidden = true;
   const q = await flow.next();
   progress();
-  if (!q) return analyze();
+  if (!q) return finish();
   setStatus("YURI LISTENING", `asking · ${q.slot}${q.byAi ? " · gemini" : ""}`);
-  await say(q.text);
-  renderChips(q);
+  if (q.offers && (q.offers.report || q.offers.events.length)) addMsg("bot", offerCard(q.offers), "result db");
+  await say(q.title, q.hint || "");
+  renderPanel(q);
   setBusy(false);
-  (chipsEl.querySelector("button") || input).focus({ preventScroll: true });
+  (chipsEl.querySelector(".opt, input") || input).focus({ preventScroll: true });
 }
 
-// 공시 · DB 조회 결과 카드
+// ④ 안내 카드 — 최근 리포트 · 지금 열린 행사
+function offerCard(o) {
+  const rows = [];
+  if (o.report) rows.push(`<div><span>최근 ${esc(o.report.sector)} 리포트</span><b>${esc(o.report.title)}</b></div>`);
+  for (const e of o.events) rows.push(`<div><span>신청 가능 · ${esc(e.when)}</span><b>${esc(e.title)}</b></div>`);
+  return `<span class="eyebrow">지금 안내할 수 있어요</span><div class="pf offer">${rows.join("")}</div>
+    ${o.report ? `<div class="why">이 리포트 주제로 애널리스트 세미나를 요청할 수 있어요.</div>` : ""}`;
+}
 function dbCard(db) {
   const rows = db.facts.map(([k, v]) => `<div><span>${esc(k)}</span><b>${esc(v)}</b></div>`).join("");
-  return `<span class="eyebrow">DISCLOSURE LOOKUP · ${esc(db.src)}</span>
+  return `<span class="eyebrow">공시 조회 · ${esc(db.src)}</span>
     <h3>${esc(db.name)}${db.virtual ? ' <em class="src-tag">가상</em>' : ""}</h3>
-    <div class="pf">${rows}</div>
-    ${db.note ? `<div class="why">${esc(db.note)}</div>` : ""}`;
+    <div class="pf">${rows}</div>`;
 }
 
 // 답 하나 → 엔진이 슬롯을 채우고(여러 개일 수도) 다음 질문을 고른다
@@ -1283,62 +1355,77 @@ async function submit(text, picks, act) {
   if (busy || !flow.current()) return;
   answer(text);
   setBusy(true);
-  chipsEl.replaceChildren();
+  qbox.hidden = true;
   setStatus("YURI THINKING", "reading your answer");
   const r = await flow.answer(text, picks, act);
   if (r.card) { hudFlash = 1; addMsg("bot", dbCard(r.card), "result db"); }
-  for (const n of r.notes || []) await say(n);
+  for (const n of r.notes || []) await note(n);
   if (r.retry) {
-    await say(r.retry);
-    renderChips(flow.current());
+    await note(r.retry);
+    renderPanel(flow.current());
     setBusy(false);
     return;
   }
   next();
 }
+function pickedIdx() { return [...chipsEl.querySelectorAll('.opt[aria-pressed="true"]')].map((x) => +x.dataset.i); }
 
 chipsEl.addEventListener("click", (e) => {
-  const b = e.target.closest("button");
+  const b = e.target.closest(".opt");
   const q = flow && flow.current();
   if (!b || busy || !q) return;
-  if (b.dataset.act === "done") {
-    const sel = [...chipsEl.querySelectorAll('[aria-pressed="true"]')].map((x) => +x.dataset.i);
-    return submit(sel.map((i) => q.options[i].label).join(", "), sel);
-  }
   if (q.multi) {
-    b.setAttribute("aria-pressed", b.getAttribute("aria-pressed") === "true" ? "false" : "true");
-    chipsEl.querySelector('[data-act="done"]').disabled = !chipsEl.querySelector('[aria-pressed="true"]');
+    const on = b.getAttribute("aria-pressed") !== "true";
+    b.setAttribute("aria-pressed", on);
+    b.querySelector(".opt-n").textContent = on ? "✓" : String(+b.dataset.i + 1);
+    askExtra.querySelector('[data-act="done"]').disabled = !pickedIdx().length;
     return;
   }
   const i = +b.dataset.i;
   submit(q.options[i].label, b.dataset.pick ? [] : [i], b.dataset.pick);
 });
-
+askExtra.addEventListener("click", (e) => {
+  const b = e.target.closest("button");
+  const q = flow && flow.current();
+  if (!b || busy || !q) return;
+  if (b.dataset.act === "skip") return submit("", []);
+  if (b.dataset.act === "done") {
+    const sel = pickedIdx();
+    const typed = input.value.trim(); input.value = "";
+    return submit(typed || sel.map((i) => q.options[i].label).join(", "), sel);
+  }
+});
 form.addEventListener("submit", (e) => {
   e.preventDefault();
   const raw = input.value.trim();
   const q = flow && flow.current();
   if (busy || !raw || !q) return;
   input.value = "";
-  // 칩을 골라 둔 채 직접 입력하면 둘 다 반영
-  const sel = q.multi ? [...chipsEl.querySelectorAll('[aria-pressed="true"]')].map((x) => +x.dataset.i) : [];
-  submit(raw, sel);
+  submit(raw, q.multi ? pickedIdx() : []);
+});
+// 숫자 키 1~9로 보기 고르기 (입력창 밖에서)
+yuriBox.addEventListener("keydown", (e) => {
+  if (busy || e.target.tagName === "INPUT" || !/^[1-9]$/.test(e.key)) return;
+  const b = chipsEl.querySelectorAll(".opt")[+e.key - 1];
+  if (b) { e.preventDefault(); b.click(); }
 });
 
-async function analyze() {
-  chipsEl.replaceChildren();
+async function finish() {
+  qbox.hidden = true;
   setBusy(true);
-  setStatus("YURI ANALYZING", "matching services to profile");
+  setStatus("YURI ANALYZING", "building your profile");
   setThinking(true);
-  await say("답변을 프로필로 정리하고 있어요. 잠시만요.");
-  await sleep(1200);
+  await note("가입 신청을 정리하고 있어요.");
+  await sleep(1000);
   setThinking(false);
-  renderResult();
+  const session = flow.session();
+  try { localStorage.setItem("il.session", JSON.stringify(session)); localStorage.setItem("il.profile", JSON.stringify(session.profile)); } catch (e) {}
+  renderResult(session);
   setBusy(false);
 }
 
-function renderResult() {
-  const p = flow.profile(), r = flow.result();
+function renderResult(ses) {
+  const p = ses.profile, r = flow.result();
   const SRC = { DB: "공시·DB", "대화": "대화", AI: "AI 추출" };
   const tag = (k) => (p.src[k] ? `<em class="src-tag ${p.src[k] === "DB" ? "db" : p.src[k] === "AI" ? "ai" : ""}">${SRC[p.src[k]]}</em>` : "");
   const rows = [
@@ -1346,43 +1433,46 @@ function renderResult() {
     ["④ 관심 분야", (p.sectors || []).join(" · "), "sectors"], ["④ 원하는 서비스", (p.services || []).join(" · "), "services"], ["⑤ 심화", p.deep, null],
   ].map(([k, v, id]) => `<div><span>${k}</span><b>${esc(v || "—")}${id ? tag(id) : ""}</b></div>`).join("");
   const svcs = r.items.map((s, i) => `
-    <a class="svc" href="${RC}${s.href}" target="_top">
+    <div class="svc">
       <div class="svc-top"><b>${i + 1}. ${esc(s.label)}</b><span>${s.pillar === "행사" ? "EVENT" : "RESEARCH"}${s.moved === "new" ? " · AI+" : s.moved === "up" ? " · AI↑" : ""}</span></div>
       <p>${esc(s.desc)}${s.why.length ? `<br>· ${esc(s.why.join(" / "))}` : ""}</p>
-    </a>`).join("");
+    </div>`).join("");
   const el = addMsg("bot", `
-    <span class="eyebrow">YURI MATCH · 고객 프로필</span>
-    <h3>${esc(p.company || "고객")}에 맞춘 <em>서비스</em>예요</h3>
+    <span class="eyebrow">가입 신청 완료 · 승인 대기</span>
+    <h3>${esc(ses.name)}님, <em>신청을 받았어요</em></h3>
+    <div class="pending"><b>담당자가 소속을 확인하고 있어요</b><span>승인되면 ${esc(ses.email)}로 알려 드려요. 승인 후 맞춤 라운지가 열려요.</span></div>
     <div class="pf">${rows}</div>
-    <div class="why" style="margin-top:12px">이 서비스부터 권해 드려요</div>
+    <div class="why" style="margin-top:12px">승인되면 이 서비스부터 준비해 둘게요</div>
     <div class="svc-list">${svcs}</div>
-    <div class="method">어드민 기본 순서: ${esc(r.adminOrder.join(" → "))}<br>답변 기반 판단으로 ${r.changed ? `${r.changed}개 순서를 바꿨어요.` : "기본 순서를 유지했어요."}</div>
     <div class="result-actions">
-      <button type="button" class="btn" data-act="start">이 추천으로 시작하기</button>
+      <button type="button" class="btn" data-act="demo">시연 모드로 보기</button>
       <button type="button" class="btn ghost" data-act="restart">다시 상담하기</button>
     </div>
-    <div class="method">판단 방식: ${r.ai ? "질문 문구 · 답변 해석은 Gemini, 추천 점수는 어드민 규칙" : "시연용 규칙 기반(서버 AI 미연결)"} · 서비스 안내이며 투자 권유가 아닙니다.</div>`, "result");
-  // 결과 카드는 제목부터 보이게
+    <div class="method">어드민 기본 순서: ${esc(r.adminOrder.join(" → "))} · 답변 기반으로 ${r.changed ? `${r.changed}개 순서를 바꿨어요` : "기본 순서 유지"}<br>${r.ai ? "질문 문구 · 답변 해석은 Gemini" : "규칙 기반 계산(서버 AI 미연결)"} · 서비스 안내이며 투자 권유가 아닙니다.</div>`, "result");
   log.scrollTop = el.offsetTop - log.offsetTop - 8;
   hudFlash = 1;
-  setStatus("YURI MATCHED", `profile ${p.segment || "-"}${r.ai ? " · gemini" : ""}`);
-  $("step-label").textContent = "추천 결과";
+  setStatus("YURI PENDING", "waiting for approval");
+  $("step-label").textContent = "승인 대기";
   $("progress").style.width = "100%";
-  el.querySelector('[data-act="start"]').focus({ preventScroll: true });
+  el.querySelector('[data-act="demo"]').focus({ preventScroll: true });
 }
 
 log.addEventListener("click", (e) => {
   const b = e.target.closest("button[data-act]");
   if (!b || busy) return;
-  if (b.dataset.act === "start") return startSession();
+  if (b.dataset.act === "demo") return startDemo();
   if (b.dataset.act === "restart") { log.replaceChildren(); resetState(); next(); }
 });
 
-// 2장 세션 형식(+ 프로필 · 추천)으로 저장하고 Insight Lab 홈으로
-function startSession() {
-  const session = flow.session();
-  try { localStorage.setItem("il.session", JSON.stringify(session)); localStorage.setItem("il.profile", JSON.stringify(session.profile)); } catch (e) {}
-  setStatus("YURI WELCOME", "opening insight lab");
+// 시연 모드 — 승인된 것으로 보고 라운지로
+function startDemo() {
+  let s = null;
+  try { s = JSON.parse(localStorage.getItem("il.session") || "null"); } catch (e) {}
+  if (!s) return;
+  s.status = "approved"; s.via = "demo";
+  try { localStorage.setItem("il.session", JSON.stringify(s)); } catch (e) {}
+  try { sessionStorage.setItem("il.yuri-dock", "1"); } catch (e) {}  // Home에서 유리 구가 버튼 자리로 작아진다
+  setStatus("YURI WELCOME", "opening your lounge");
   beamIn();
   setTimeout(() => { (window.top || window).location.href = `${RC}home.html`; }, reduceMotion ? 0 : 900);
 }

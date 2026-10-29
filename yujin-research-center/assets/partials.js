@@ -183,8 +183,7 @@
       '<a class="logo" href="home.html" aria-label="유진투자증권 Insight Lab 홈"><span class="logo__mark" aria-hidden="true">E</span>유진투자증권<span class="logo__bar" aria-hidden="true"></span><span class="logo__sub">Insight Lab</span></a>' +
       '<nav class="gnb__menu" aria-label="주 메뉴">' + links + '</nav>' +
       '<div class="gnb__right">' +
-        '<a class="gnb__desk" href="desk.html"' + cur(onDesk) + '>Private Desk</a>' +
-        '<a class="gnb__me" href="desk.html" aria-label="' + esc(name) + '님의 Private Desk"><span class="avatar" aria-hidden="true">' + esc(name.charAt(0)) + '</span>' + esc(name) + '님</a>' +
+        '<a class="gnb__me" href="home.html#my" aria-label="' + esc(name) + '님의 라운지"><span class="avatar" aria-hidden="true">' + esc(name.charAt(0)) + '</span>' + esc(name) + '님</a>' +
         '<button class="gnb__out" type="button" data-signout>로그아웃</button>' +
       '</div>' +
       '<button class="gnb__burger" type="button" aria-label="메뉴 열기" aria-expanded="false" aria-controls="il-drawer">☰</button>' +
@@ -198,7 +197,7 @@
     '<div class="drawer__panel" role="dialog" aria-modal="true" aria-label="메뉴">' +
       '<div class="drawer__head"><span class="avatar" aria-hidden="true">' + esc(name.charAt(0)) + '</span><b>' + esc(name) + '님</b>' +
       '<button class="drawer__close" type="button" aria-label="메뉴 닫기">×</button></div>' +
-      links + '<a href="desk.html"' + cur(onDesk) + '>Private Desk</a>' +
+      links +
       '<button class="drawer__out" type="button" data-signout>로그아웃</button>' +
     '</div>';
   document.body.appendChild(drawer);

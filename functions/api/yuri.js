@@ -1,6 +1,6 @@
 // Cloudflare Pages Function — POST /api/yuri
 // 유리 가입 상담의 AI 부분만 맡는다. Gemini 키는 Pages 시크릿 GEMINI_API_KEY에만 둔다(클라이언트 · git에 넣지 않음).
-//   task 'ask'     : 어드민이 정한 질문(base)을 고객 프로필에 맞게 한두 문장으로 다듬는다. 보기(칩)는 바꾸지 않는다.
+//   task 'ask'     : 어드민이 정한 질문을 고객에 맞게 '제목 30자 + 보조 40자'로 다듬는다. 보기(칩)는 바꾸지 않는다.
 //   task 'extract' : 자유 입력 한 문장에서 여러 슬롯을 한 번에 뽑는다(정해진 보기 안에서만).
 const MODEL = 'gemini-3.5-flash';            // 2026-10 기준 이 키로 호출되는 Flash 모델
 const FALLBACK = 'gemini-3.5-flash-lite';     // 혼잡(5xx)일 때 한 번 더
@@ -15,13 +15,16 @@ const RULES = [
 function prompt(body) {
   if (body.task === 'ask') {
     return [
-      `다음 질문을 이 고객에게 맞게 자연스럽게 다듬어 줘. 의미와 묻는 항목(${body.slot})은 그대로, 2문장 이내, 220자 이내.`,
-      `기본 질문: ${body.base}`,
+      `다음 질문을 이 고객에게 맞게 다듬어 줘. 묻는 항목(${body.slot})과 의미는 그대로.`,
+      '화면에 크게 보일 제목(title)은 한 문장 30자 이내의 짧은 질문, 보조 설명(hint)은 40자 이내(필요 없으면 빈 문자열).',
+      `기본 제목: ${body.title}`,
+      `기본 보조 설명: ${body.hint || ''}`,
       `고객이 고를 보기(바꾸지 말 것): ${(body.options || []).join(' / ')}`,
       `고객 프로필: ${JSON.stringify(body.profile || {})}`,
-      body.offers ? `지금 안내할 수 있는 행사 · 리포트(이 안에서만 언급): ${JSON.stringify(body.offers)}` : '',
-      '출력 형식: {"question": "..."}'
-    ].filter(Boolean).join('\n');
+      body.offers ? `참고 — 지금 안내할 수 있는 행사 · 리포트(언급할 때는 이 안에서만): ${JSON.stringify(body.offers)}` : '',
+      '출력 형식: {"title": "...", "hint": "..."}'
+    ].filter(Boolean).join('
+');
   }
   if (body.task === 'extract') {
     return [

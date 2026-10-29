@@ -42,16 +42,18 @@
   /* =========================================================
      1. 인사 헤더
      ========================================================= */
-  $('#desk-avatar').textContent = name.charAt(0);
-  $('#desk-title').textContent = name + '님의 Private Desk';
-  $('#ws-title').textContent = name + '님의 리서치 워크스페이스';
-  $('#desk-badges').innerHTML = [
+  // Home에 합쳐지며 인사 헤더 · 요약 숫자 칸은 없을 수 있다 — 있을 때만 채운다
+  var put = function (sel, prop, v) { var el = $(sel); if (el) el[prop] = v; };
+  put('#desk-avatar', 'textContent', name.charAt(0));
+  put('#desk-title', 'textContent', name + '님의 Private Desk');
+  put('#ws-title', 'textContent', name + '님의 리서치 워크스페이스');
+  put('#desk-badges', 'innerHTML', [
     '<span class="badge badge--point">' + (isWM ? 'WM 고객' : '기관 고객') + '</span>',
     s.cust_type ? '<span class="badge badge--muted">' + esc(s.cust_type) + '</span>' : '',
     (s.org || s.branch) ? '<span class="badge badge--muted">' + esc(s.org || s.branch) + '</span>' : '',
     '<span class="badge badge--brand">' + (s.status === 'approved' ? '승인 완료' : '승인 대기') + '</span>',
     s.via === 'demo' ? '<span class="badge badge--sample">시연 모드</span>' : '<span class="badge badge--muted">이메일 로그인</span>'
-  ].join('');
+  ].join(''));
 
   /* =========================================================
      2. 워크스페이스
@@ -340,7 +342,7 @@
   };
   function renderEvents() {
     var rows = evRows();
-    $('#sum-events').textContent = rows.filter(function (x) { return !x.past; }).length;
+    put('#sum-events', 'textContent', rows.filter(function (x) { return !x.past; }).length);
     var l = rows.filter(function (x) { return evTab === 'past' ? x.past : !x.past; })
       .sort(function (a, b) { return (evTab === 'past' ? -1 : 1) * String(a.date || '9').localeCompare(String(b.date || '9')); });
     $('#ev-list').innerHTML = l.length ? l.map(function (x) {
@@ -404,8 +406,8 @@
   function renderSummary() {
     var since = addDays(TODAY, -7);
     var fresh = cards.filter(function (c) { return String(c.published_at).slice(0, 10) >= since; });
-    $('#sum-cn').textContent = fresh.length;
-    $('#sum-saved').textContent = window.ILSaved ? ILSaved.list().length : 0;
+    put('#sum-cn', 'textContent', fresh.length);
+    put('#sum-saved', 'textContent', window.ILSaved ? ILSaved.list().length : 0);
   }
   if (window.ILSaved) ILSaved.onChange(function () { renderSummary(); renderResearch(); renderCards(); });
 

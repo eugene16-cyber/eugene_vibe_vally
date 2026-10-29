@@ -13,7 +13,7 @@
   .ad-grid>*{min-width:0}
   .ad-k{font-size:12px;font-weight:700;color:var(--blue-main);letter-spacing:.06em}
   .ad h2{font-size:var(--text-lg);font-weight:700;margin:4px 0 12px}
-  .ad-seg{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+  .ad-seg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
   .ad-seg .card__body{padding:16px}
   .ad-seg b{display:block;font-size:15px;margin-bottom:8px}
   .ad-seg dt{font-size:12px;color:var(--ink-500);margin-top:8px}
@@ -26,7 +26,7 @@
 </style>
 <script src="assets/config.js?v=20261029a"></script>
 <script src="assets/partials.js?v=20261029a" defer></script>
-<script src="assets/yuri-flow.js?v=20261029g" defer></script>
+<script src="assets/yuri-flow.js?v=20261029h" defer></script>
 </head>
 <body data-chrome="none">
 <main class="wrap ad" id="main">
@@ -43,6 +43,8 @@
 
     <section>
       <p class="ad-k">STEP 2 · Q1에서 한 번만 분기</p>
+      <h2>Q1 · 공시 대상 기업인가요?</h2>
+      <div class="ad-chips" id="ad-q1" style="margin-bottom:14px"></div>
       <h2>고객 구분별 ② · ③ 보기</h2>
       <div class="ad-seg" id="ad-seg"></div>
       <p class="ad-note">질문 문구는 Gemini가 고객 프로필에 맞게 다듬고, 보기(칩)는 이 설정에서만 바뀌어요.</p>
@@ -62,16 +64,17 @@ document.addEventListener('DOMContentLoaded', function () {
   var F = window.IL_SIGNUP_FLOW; if (!F) return;
   var chips = function (opts) { return '<div class="ad-chips">' + opts.map(function (o) { return '<span>' + esc(o.label) + '</span>'; }).join('') + '</div>'; };
   $('#ad-slots').innerHTML = F.slots.map(function (s) { return '<tr><td>' + s.no + '</td><td><b>' + esc(s.label) + '</b></td><td>' + esc(s.how) + '</td></tr>'; }).join('');
+  $('#ad-q1').innerHTML = F.q1.options.map(function (o) { return '<span>' + esc(o.label) + ' → ' + esc(o.desc) + '</span>'; }).join('');
   $('#ad-seg').innerHTML = Object.keys(F.segments).map(function (k) {
     var g = F.segments[k];
     return '<div class="card"><div class="card__body"><b>' + esc(g.label) + '</b><dl>' +
-      '<dt>② ' + esc(g.identity.ask) + '</dt><dd>' + chips(g.identity.options) + '</dd>' +
-      '<dt>③ ' + esc(g.purpose.ask) + '</dt><dd>' + chips(g.purpose.options) + '</dd></dl></div></div>';
+      '<dt>② ' + esc(g.identity.title) + '</dt><dd>' + chips(g.identity.options) + '</dd>' +
+      '<dt>③ ' + esc(g.purpose.title) + '</dt><dd>' + chips(g.purpose.options) + '</dd></dl></div></div>';
   }).join('');
   $('#ad-svc').innerHTML = F.services.map(function (s) {
     var d = F.deep[s.id];
     return '<tr><td><b>' + esc(s.label) + '</b></td><td>' + esc(s.pillar) + '</td><td class="num">' + (F.adminBase[s.id] || 0) + '</td><td>' +
-      (d ? esc(d.ask({ sectors: ['관심 섹터'] })) + chips(d.options) : '-') + '</td></tr>';
+      (d ? esc(d.title({ sectors: ['관심 섹터'] })) + chips(d.options) : '-') + '</td></tr>';
   }).join('');
 });
 </script>

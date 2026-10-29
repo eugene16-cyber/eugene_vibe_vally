@@ -133,7 +133,7 @@
         var on = toggleSaved(r);
         if (typeof on !== 'boolean') on = isSaved(r.id);
         b.setAttribute('aria-pressed', on); b.textContent = on ? '★ 저장됨' : '☆ 나의 리서치에 저장';
-        toast(on ? '나의 리서치에 저장했어요. Private Desk에서 볼 수 있어요.' : '저장을 취소했어요.');
+        toast(on ? '나의 리서치에 저장했어요. Home에서 볼 수 있어요.' : '저장을 취소했어요.');
       }
       if (e.target.closest('[data-copy]')) {
         var url = location.href.split('#')[0];
