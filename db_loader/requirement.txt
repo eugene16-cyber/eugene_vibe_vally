@@ -1,0 +1,5 @@
+requests>=2.31
+yfinance>=0.2.50
+# 카드뉴스 · 시황 요약 (선택: claude_api_key 있을 때만 사용)
+anthropic>=0.40
+pymupdf>=1.24

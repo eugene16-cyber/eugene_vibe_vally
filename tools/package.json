@@ -1,0 +1,12 @@
+{
+  "name": "insightlab-tools",
+  "private": true,
+  "type": "module",
+  "description": "로컬 확인 도구 — 1440·390px 스크린샷 · 콘솔 오류 · 가로 스크롤 검사",
+  "scripts": {
+    "check": "node check.mjs"
+  },
+  "dependencies": {
+    "playwright-core": "^1.55.0"
+  }
+}

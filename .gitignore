@@ -1,0 +1,27 @@
+# 비밀값 — 절대 커밋 금지
+_secrets/
+.env
+.env.*
+*.env
+env.download
+gmail_credentials.json
+gmail_token.json
+kis_token.json
+*token*.json
+*credential*.json
+
+# 기획 · 참고 자료 (저장소에 넣지 않음)
+*.docx
+~$*
+*.pdf
+deck.html
+deck.txt
+output/
+web effect/
+
+# 빌드 · 도구 산출물
+node_modules/
+__pycache__/
+*.pyc
+dist/
+tools/shots/
