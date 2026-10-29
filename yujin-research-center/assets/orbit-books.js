@@ -1,247 +1,221 @@
 // Orbit Books — 행사 카테고리 책 공전 모듈 (Events · Home)
-// OrbitBooks.mount(host, {books: CATS, center:'Insight.', onPick(catId), onClose(), detail(cat) → HTML, openAt:0.5, dockHint, openHint})
-//   반환: {dock(id|null), open(id), close(), toggleOpen(id), pick(id)=dock, play(), pause(), destroy()}
-// 데스크톱: 책이 타원 궤도를 3D 원근으로 돌고(뒤쪽은 작고 흐림), 누르면 앞으로 와서 멈추고(dock), 한 번 더 누르면 표지가 열려요.
-// 모바일(760px 이하): 공전 없이 가로로 넘기는 책 카드.
+// OrbitBooks.mount(host, opts) → {select(id|null), current(), refresh(), play(), pause(), destroy()}
+//   opts.books      CATS (id · label · ko · color · ink · ed · mk · foot)
+//   opts.center     가운데 구 글자 (기본 'Insight.')
+//   opts.info(cat)  → {next:'NEXT · 11.05 (목)', title, up, open} 책 속지 · 모바일 카드 한 줄
+//   opts.panel(cat) → 오른쪽 패널 HTML. 안의 [data-ob-close]는 선택을 풀어요(× 버튼은 모듈이 붙여요)
+//   opts.onSelect(id|null)  책 · 탭 · 화살표로 고르거나 풀 때
+//   opts.cx · rx(w) · ry · focusX  궤도 중심(폭 비율) · 가로/세로 반지름 · 고른 책이 비켜설 위치(폭 비율)
+// 데스크톱: 책이 기울어진 채 타원 궤도를 돌고, 고르면 정면으로 돌아온 뒤 왼쪽으로 비켜서며 표지가 열리고 오른쪽에 패널이 나와요.
+// 모바일(760px 이하): 공전 없이 가로로 넘기는 카드 + 아래 패널.
 (function () {
   'use strict';
-  var PERIOD = 36; // 한 바퀴 초
   var TAU = Math.PI * 2;
   var esc = function (s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; });
   };
-  var mq = function (q) { return window.matchMedia ? window.matchMedia(q) : { matches: false, addEventListener: function () {} }; };
-  var reduceMQ = mq('(prefers-reduced-motion: reduce)');
-  var trackMQ = mq('(max-width:760px)');
-  var easeOut = function (p) { return 1 - Math.pow(1 - p, 3); };
+  var mq = function (q) { return window.matchMedia ? window.matchMedia(q) : { matches: false, addEventListener: function () {}, removeEventListener: function () {} }; };
+  var reduced = mq('(prefers-reduced-motion: reduce)');
+  var mobile = mq('(max-width:760px)');
+  var easeOut3 = function (p) { return 1 - Math.pow(1 - p, 3); };
+  var easeOut4 = function (p) { return 1 - Math.pow(1 - p, 4); };
 
   function bookHTML(c, i) {
-    var no = ('0' + (i + 1)).slice(-2);
-    return '<button class="ob-book" type="button" data-cat="' + esc(c.id) + '" style="--c:' + esc(c.color) + ';--ink:' + esc(c.ink || '#fff') + '"' +
-      ' aria-label="' + esc(c.label) + ' · ' + esc(c.ko) + '" aria-pressed="false">' +
-      '<span class="ob-book__vol">' +
-        '<span class="ob-book__body"><span class="ob-book__page">' +
-          '<span class="ob-page__ko">' + esc(c.ko) + '</span>' +
-          '<span class="ob-page__desc">' + esc(c.desc || '') + '</span>' +
-          '<span class="ob-page__detail" data-detail></span>' +
-        '</span></span>' +
-        '<span class="ob-book__cover" aria-hidden="true">' +
-          '<span class="ob-book__front">' +
-            '<span class="ob-cv__ed">' + esc(c.ed) + '</span>' +
-            '<span class="ob-cv__mk">' + esc(c.mk) + '</span>' +
-            '<span class="ob-cv__label">' + esc(c.label) + '</span>' +
-            '<span class="ob-cv__foot"><span>' + esc(c.foot) + '</span><span>' + no + '</span></span>' +
-          '</span>' +
-          '<span class="ob-book__back"><span class="ob-cv__mk">' + esc(c.mk) + '</span><span class="ob-cv__label">' + esc(c.label) + '</span></span>' +
+    var light = c.ink && c.ink.toLowerCase() !== '#fff';
+    return '<button class="ob-book" type="button" data-cat="' + esc(c.id) + '" aria-pressed="false"' + (light ? ' data-light' : '') +
+      ' style="--cover:' + esc(c.color) + ';--ctext:' + esc(c.ink || '#fff') + '" aria-label="' + esc(c.label) + ' · ' + esc(c.ko) + '">' +
+      '<span class="ob-vol" aria-hidden="true">' +
+        '<span class="ob-paper"></span>' +
+        '<span class="ob-inside" data-inside></span>' +
+        '<span class="ob-cover">' +
+          '<span class="ob-ed">' + esc(c.ed) + '</span>' +
+          '<span class="ob-bt">' + esc(c.label).replace(' ', ' <br>') + '</span>' +
+          '<span class="ob-mk">' + esc(c.mk) + '</span>' +
+          '<span class="ob-bm" data-meta></span>' +
+          '<span class="ob-bf"><span>' + esc(c.foot) + '</span><span data-no>' + ('0' + (i + 1)).slice(-2) + '</span></span>' +
         '</span>' +
       '</span>' +
-      '<span class="ob-book__cap" data-cap></span>' +
     '</button>';
   }
 
-  function mount(host, opts) {
-    opts = opts || {};
-    var books = opts.books || [];
-    var n = books.length || 1, step = TAU / n;
-    var reduce = reduceMQ.matches;
-    var running = !reduce, hold = false, picked = null, docked = null, anim = null;
-    var phase = 0, last = 0, raf = 0, visible = true, track = trackMQ.matches;
-    var W = 0, H = 0, cx = 0, cy = 0, rx = 0, ry = 0, bw = 80, openS = 1.6;
+  function mount(host, o) {
+    o = o || {};
+    var books = o.books || [], n = books.length || 1, step = TAU / n;
+    var CX = o.cx == null ? 0.5 : o.cx, RX = o.rx || function (w) { return Math.min(w * 0.36, 470); }, RY = o.ry == null ? 118 : o.ry;
+    var FX = o.focusX == null ? 0.3 : o.focusX;
+    var phase = Math.PI / 2, prev = 0, raf = 0, paused = reduced.matches, hovered = false, focusIn = false, visible = true;
+    var tween = null, openTimer = 0, cur = null, fLvl = 0, fFrom = 0, fTo = 0, fT0 = 0, w = 0, h = 0;
 
     host.classList.add('ob');
     host.innerHTML =
-      '<div class="ob__stage" role="group" aria-label="행사 카테고리 선택">' +
-        '<span class="ob__ring ob__ring--outer" aria-hidden="true"></span><span class="ob__ring ob__ring--inner" aria-hidden="true"></span>' +
-        '<div class="ob__core" aria-hidden="true"><span>' + esc(opts.center || 'Insight.') + '</span></div>' +
-        books.map(bookHTML).join('') +
-      '</div>' +
-      '<div class="ob__bar">' +
+      '<div class="ob__shelf">' +
+        '<div class="ob__center" aria-hidden="true">' + esc(o.center || 'Insight.') + '</div>' +
+        '<div class="ob__ring" aria-hidden="true"></div><div class="ob__ring ob__ring--two" aria-hidden="true"></div>' +
+        '<i class="ob__star" aria-hidden="true"></i><i class="ob__star ob__star--two" aria-hidden="true"></i>' +
         '<button class="ob__toggle" type="button" aria-pressed="false"></button>' +
-        '<p class="ob__hint" aria-live="polite"></p>' +
-        '<button class="ob__close" type="button" hidden>표지 닫기</button>' +
+        '<div class="ob__track" role="group" aria-label="행사 카테고리 선택">' + books.map(bookHTML).join('') + '</div>' +
+        '<div class="ob__panel" hidden></div>' +
+      '</div>' +
+      '<div class="ob__tabs">' +
+        '<button class="ob__arrow" type="button" data-step="-1" aria-label="이전 카테고리">‹</button>' +
+        '<div class="ob__tablist" role="group" aria-label="행사 카테고리">' + books.map(function (c) {
+          return '<button class="ob__tab" type="button" data-cat="' + esc(c.id) + '" aria-pressed="false">' + esc(c.label) + '</button>';
+        }).join('') + '</div>' +
+        '<button class="ob__arrow" type="button" data-step="1" aria-label="다음 카테고리">›</button>' +
       '</div>';
-    var stage = host.querySelector('.ob__stage');
-    var rings = host.querySelectorAll('.ob__ring');
-    var els = Array.prototype.slice.call(host.querySelectorAll('.ob-book'));
-    var toggle = host.querySelector('.ob__toggle');
-    var hint = host.querySelector('.ob__hint');
-    var closeBtn = host.querySelector('.ob__close');
-    var elOf = function (id) { return els.filter(function (x) { return x.dataset.cat === id; })[0] || null; };
+    var shelf = host.querySelector('.ob__shelf'), track = host.querySelector('.ob__track');
+    var panel = host.querySelector('.ob__panel'), toggle = host.querySelector('.ob__toggle');
+    var els = Array.prototype.slice.call(track.querySelectorAll('.ob-book'));
+    var tabs = Array.prototype.slice.call(host.querySelectorAll('.ob__tab'));
     var catOf = function (id) { return books.filter(function (c) { return c.id === id; })[0]; };
+    var active = function () { return !mobile.matches; };
 
-    // 책 속지 · 모바일 카드 아래 한 줄 — detail(cat)
-    function fillDetail() {
-      if (!opts.detail) return;
-      els.forEach(function (el) {
-        var html = opts.detail(catOf(el.dataset.cat)) || '';
-        el.querySelector('[data-detail]').innerHTML = html;
-        el.querySelector('[data-cap]').innerHTML = html;
+    function measure() { w = shelf.clientWidth; h = shelf.clientHeight; }
+    function draw() {
+      if (!active()) return;
+      var cx = w * CX, cy = h * 0.53, rx = RX(w), ry = RY;
+      els.forEach(function (b, i) {
+        var a = phase + i * step, depth = (Math.sin(a) + 1) / 2;
+        var bw = b.offsetWidth, bh = b.offsetHeight;
+        var s = 0.64 + depth * 0.36, x = cx + Math.cos(a) * rx - bw / 2, y = cy + Math.sin(a) * ry - bh / 2;
+        var op = 0.62 + depth * 0.38, z = Math.round(depth * 10) + 4;
+        if (fLvl > 0) {
+          if (b.dataset.cat === cur) { x += (w * FX - bw / 2 - x) * fLvl; y += (cy - bh / 2 - y) * fLvl; s += (1.12 - s) * fLvl; op = 1; z = 40; }
+          else { op *= 1 - fLvl; s *= 1 - 0.18 * fLvl; }
+        }
+        b.style.transform = 'translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px) scale(' + s.toFixed(3) + ')';
+        b.style.zIndex = z;
+        b.style.opacity = op.toFixed(3);
+        b.style.visibility = op < 0.02 ? 'hidden' : '';
+        b.style.setProperty('--by', (-14 + Math.cos(a) * 17).toFixed(2) + 'deg');
+        b.style.setProperty('--bz', (Math.cos(a) * -4).toFixed(2) + 'deg');
       });
     }
+    function clear() { els.forEach(function (b) { b.style.transform = b.style.zIndex = b.style.opacity = b.style.visibility = ''; }); }
 
-    function measure() {
-      W = stage.clientWidth; H = stage.clientHeight;
-      bw = Math.max(52, Math.min(96, W * 0.17));
-      var bh = bw * 1.38;
-      cx = W / 2; cy = H / 2;
-      rx = W / 2 - bw * 0.62;
-      ry = Math.max(20, Math.min(H * 0.27, H / 2 - bh * 0.5));
-      openS = Math.max(1, Math.min(1.75, (H * 0.88) / bh, (W * 0.92) / (2 * bw)));
-      stage.style.setProperty('--bw', bw + 'px');
-      rings[0].style.cssText = 'width:' + rx * 2 + 'px;height:' + ry * 2 + 'px;left:' + (cx - rx) + 'px;top:' + (cy - ry) + 'px';
-      rings[1].style.cssText = 'width:' + rx * 1.24 + 'px;height:' + ry * 1.24 + 'px;left:' + (cx - rx * 0.62) + 'px;top:' + (cy - ry * 0.62) + 'px';
+    // 매 프레임 — 공전 · 정면 돌려 세우기(tween) · 비켜서기(fLvl)를 실제 시간으로 보간
+    function tick(t) {
+      var dt = Math.min((t - prev) / 1000, 0.05) || 0; prev = t;
+      if (active() && visible && !document.hidden) {
+        var target = cur && !tween ? 1 : 0;
+        if (target !== fTo) { fFrom = fLvl; fTo = target; fT0 = t; }
+        if (fLvl !== fTo) { var q = reduced.matches ? 1 : Math.min((t - fT0) / 700, 1); fLvl = fFrom + (fTo - fFrom) * easeOut3(q); if (q === 1) fLvl = fTo; }
+        if (tween) {
+          var p = Math.min((t - tween.t0) / 850, 1);
+          phase = tween.from + tween.delta * easeOut4(p);
+          if (p === 1) tween = null;
+          draw();
+        } else if (fLvl > 0 || cur) draw();
+        else if (!paused && !hovered && !focusIn) { phase += dt * 0.2; draw(); }
+      }
+      raf = requestAnimationFrame(tick);
     }
 
-    function layout() {
-      if (track) return;
-      els.forEach(function (el, i) {
-        if (el === picked) return;
-        var a = phase + i * step + Math.PI / 2; // 0번 책이 맨 앞에서 시작
-        var sn = Math.sin(a), d = (sn + 1) / 2;
-        var s = (0.58 + 0.42 * d) * (el.dataset.cat === docked ? 1.08 : 1);
-        el.style.transform = 'translate(' + (cx + Math.cos(a) * rx).toFixed(1) + 'px,' + (cy + sn * ry).toFixed(1) + 'px) translate(-50%,-50%) scale(' + s.toFixed(3) + ')';
-        el.style.zIndex = sn >= 0 ? 20 + Math.round(d * 10) : 1 + Math.round(d * 8);
-        el.style.opacity = picked ? 0.22 : (0.5 + 0.5 * d).toFixed(2);
-        el.style.filter = d < 0.45 && !picked ? 'blur(' + ((0.45 - d) * 3.2).toFixed(2) + 'px)' : '';
+    function label() {
+      toggle.textContent = paused ? '↻ 공전 재생' : 'Ⅱ 공전 멈추기';
+      toggle.setAttribute('aria-pressed', String(paused));
+    }
+    function setOpen(id) { els.forEach(function (b) { b.classList.toggle('is-open', !!id && b.dataset.cat === id); }); }
+
+    function fillInfo() {
+      if (!o.info) return;
+      els.forEach(function (b) {
+        var f = o.info(catOf(b.dataset.cat)) || {};
+        b.querySelector('[data-inside]').innerHTML =
+          '<small>' + esc(f.next || 'NEXT · 추후 안내') + '</small><strong>' + esc(f.title || '') + '</strong>' +
+          '<span class="ob-in__n">예정 <b>' + (f.up || 0) + '</b>건 · 신청 가능 <b>' + (f.open || 0) + '</b>건</span>' +
+          '<small>' + esc(f.hint == null ? '아래 일정 목록이\n이 카테고리로 정리돼요' : f.hint).replace(/\n/g, '<br>') + '</small>';
+        b.querySelector('[data-meta]').textContent = f.meta || '';
+        b.querySelector('[data-no]').textContent = f.up ? ('0' + f.up).slice(-2) : '—';
       });
     }
-
-    var spinning = function () { return running && !hold && !picked && !docked && visible && !track; };
-    function frame(t) {
-      raf = 0;
-      var dt = last ? Math.min(t - last, 50) : 16; last = t;
-      if (anim) {
-        var p = Math.min(1, (t - anim.t0) / anim.dur);
-        if (!anim.t0) { anim.t0 = t; p = 0; }
-        phase = anim.from + anim.delta * easeOut(p);
-        if (p >= 1) anim = null;
-      } else if (spinning()) phase = (phase + dt / 1000 * TAU / PERIOD) % TAU;
-      layout();
-      if (anim || spinning()) raf = requestAnimationFrame(frame); else last = 0;
-    }
-    function kick() { if (!raf && !track) raf = requestAnimationFrame(frame); }
-
-    function setToggle() {
-      toggle.setAttribute('aria-pressed', String(!running));
-      toggle.textContent = running ? 'Ⅱ 공전 멈추기' : '▶ 공전 ' + (reduce && !phase ? '시작' : '다시 시작');
-    }
-    function setHint() {
-      hint.textContent = picked ? (opts.openHint == null ? '아래 일정 목록이 이 카테고리로 정리돼요.' : opts.openHint)
-        : docked && !track ? (opts.dockHint == null ? '한 번 더 누르면 책이 펼쳐져요.' : opts.dockHint) : '';
-      closeBtn.hidden = !picked;
+    function renderPanel(still) {
+      if (!cur || !o.panel) { panel.hidden = true; panel.innerHTML = ''; return; }
+      panel.innerHTML = '<button type="button" class="ob__x" data-ob-close aria-label="닫고 다른 행사 보기">×</button>' + o.panel(catOf(cur));
+      panel.hidden = false;
+      if (still) return; // 내용만 갱신할 때는 들어오는 모션을 다시 틀지 않아요
+      panel.classList.remove('is-in'); void panel.offsetWidth; panel.classList.add('is-in');
     }
 
-    // 고른 책을 맨 앞으로 돌려 세워요. null이면 다시 공전.
-    function dock(id) {
-      if (id && !elOf(id)) id = null;
-      if (picked && picked.dataset.cat !== id) close(true);
-      docked = id || null;
-      els.forEach(function (el) { el.setAttribute('aria-pressed', String(el.dataset.cat === docked)); el.classList.toggle('is-docked', el.dataset.cat === docked); });
-      if (docked && !track) {
-        var i = els.indexOf(elOf(docked));
-        var target = (-i * step) % TAU;
-        var delta = ((target - phase) % TAU + TAU * 1.5) % TAU - Math.PI;
-        if (reduce || Math.abs(delta) < 0.001) { phase += delta; anim = null; }
-        else anim = { from: phase, delta: delta, t0: 0, dur: 650 };
+    // 고르기 — 정면으로 돌려 세운 뒤(850ms) 비켜서며 표지를 열어요. null이면 궤도로 돌아가요.
+    function select(id, silent) {
+      if (id && !catOf(id)) id = null;
+      clearTimeout(openTimer); setOpen(null);
+      cur = id || null;
+      shelf.classList.toggle('is-focus', !!cur);
+      els.forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.cat === cur)); });
+      tabs.forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.cat === cur)); });
+      renderPanel();
+      if (cur) {
+        var i = els.indexOf(track.querySelector('[data-cat="' + cur + '"]'));
+        if (!active()) {
+          var b = els[i];
+          track.scrollTo({ left: b.offsetLeft - (track.clientWidth - b.clientWidth) / 2, behavior: reduced.matches ? 'auto' : 'smooth' });
+        } else {
+          var target = Math.PI / 2 - i * step;
+          var delta = ((target - phase + Math.PI) % TAU + TAU) % TAU - Math.PI;
+          if (reduced.matches) { phase += delta; tween = null; draw(); setOpen(cur); }
+          else {
+            tween = { from: phase, delta: delta, t0: performance.now() };
+            openTimer = setTimeout(function () { if (cur === id) setOpen(id); }, 620);
+          }
+        }
       }
-      if (docked && track) {
-        var el = elOf(docked);
-        stage.scrollTo({ left: el.offsetLeft - (stage.clientWidth - el.offsetWidth) / 2, behavior: reduce ? 'auto' : 'smooth' });
-      }
-      setHint(); layout(); kick();
+      if (!silent && o.onSelect) o.onSelect(cur);
     }
 
-    function open(id) {
-      var el = elOf(id);
-      if (!el || track) return;
-      if (picked === el) return;
-      if (picked) close(true);
-      if (docked !== id) dock(id);
-      picked = el;
-      var at = opts.openAt == null ? 0.5 : opts.openAt;
-      el.classList.add('is-flying', 'is-open');
-      el.setAttribute('aria-expanded', 'true');
-      el.style.zIndex = 60; el.style.opacity = 1; el.style.filter = '';
-      el.style.transform = 'translate(' + (W * at + bw * openS * 0.5).toFixed(1) + 'px,' + cy.toFixed(1) + 'px) translate(-50%,-50%) scale(' + openS.toFixed(3) + ')';
-      host.classList.add('is-picked');
-      setHint(); layout();
-    }
-
-    function close(silent) {
-      if (!picked) return;
-      var el = picked;
-      picked = null;
-      el.classList.remove('is-open');
-      el.removeAttribute('aria-expanded');
-      host.classList.remove('is-picked');
-      setHint(); layout();
-      setTimeout(function () { el.classList.remove('is-flying'); kick(); }, 560);
-      if (!silent && opts.onClose) opts.onClose();
-    }
-
-    function setMode() {
-      track = trackMQ.matches;
-      host.classList.toggle('ob--track', track);
-      if (track) {
-        close(true); anim = null;
-        els.forEach(function (el) { el.style.transform = el.style.zIndex = el.style.opacity = el.style.filter = ''; });
-      } else { measure(); layout(); }
-      setHint(); kick();
-    }
-
-    els.forEach(function (el) {
-      el.addEventListener('click', function () {
-        var id = el.dataset.cat;
-        if (picked === el) { close(); return; }
-        if (docked === id && !track) { open(id); return; }
-        dock(id);
-        if (opts.onPick) opts.onPick(id);
+    els.forEach(function (b) {
+      b.addEventListener('click', function () {
+        var id = b.dataset.cat;
+        if (cur === id && active()) b.classList.toggle('is-open'); // 한 번 더 누르면 표지만 닫았다 열어요
+        else select(id);
       });
     });
-    // 책 사이 ←→ 이동
-    stage.addEventListener('keydown', function (e) {
+    track.addEventListener('keydown', function (e) {
       if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
       var i = els.indexOf(document.activeElement); if (i < 0) return;
       e.preventDefault();
-      els[(i + (e.key === 'ArrowRight' ? 1 : -1) + els.length) % els.length].focus();
+      var nx = els[(i + (e.key === 'ArrowRight' ? 1 : -1) + n) % n];
+      nx.focus(); select(nx.dataset.cat);
     });
-    closeBtn.addEventListener('click', function () { var el = picked; close(); if (el) el.focus(); });
-    toggle.addEventListener('click', function () { running = !running; setToggle(); kick(); });
-    // 마우스를 올리거나 키보드로 책에 들어오면 잠깐 멈춰서 누르기 쉽게
-    stage.addEventListener('pointerenter', function () { hold = true; });
-    stage.addEventListener('pointerleave', function () { hold = false; kick(); });
-    stage.addEventListener('focusin', function () { hold = true; });
-    stage.addEventListener('focusout', function () { hold = false; kick(); });
-    host.addEventListener('keydown', function (e) { if (e.key === 'Escape' && picked) { var el = picked; close(); el.focus(); } });
+    host.addEventListener('click', function (e) {
+      if (e.target.closest('[data-ob-close]')) { var was = cur; select(null); var b = was && track.querySelector('[data-cat="' + was + '"]'); if (b && active()) b.focus({ preventScroll: true }); return; }
+      var tb = e.target.closest('.ob__tab');
+      if (tb) { select(cur === tb.dataset.cat ? null : tb.dataset.cat); return; }
+      var st = e.target.closest('[data-step]');
+      if (st) {
+        var i = books.findIndex(function (c) { return c.id === cur; }), d = +st.dataset.step;
+        select(books[((i < 0 ? (d > 0 ? -1 : 0) : i) + d + n) % n].id);
+      }
+    });
+    host.addEventListener('keydown', function (e) { if (e.key === 'Escape' && cur) { e.stopPropagation(); select(null); } });
+    toggle.addEventListener('click', function () { paused = !paused; tween = null; if (!paused && cur) select(null); label(); });
+    shelf.addEventListener('pointerenter', function (e) { if (e.pointerType !== 'touch') hovered = true; });
+    shelf.addEventListener('pointerleave', function () { hovered = false; });
+    shelf.addEventListener('focusin', function () { focusIn = true; });
+    shelf.addEventListener('focusout', function (e) { focusIn = shelf.contains(e.relatedTarget); });
 
-    var ro = window.ResizeObserver ? new ResizeObserver(function () {
-      if (track) return;
-      measure();
-      if (picked) { var id = picked.dataset.cat; close(true); open(id); }
-      layout();
-    }) : null;
-    if (ro) ro.observe(stage); else window.addEventListener('resize', function () { if (!track) { measure(); layout(); } });
-    var io = window.IntersectionObserver ? new IntersectionObserver(function (en) { visible = en[0].isIntersecting; kick(); }) : null;
-    if (io) io.observe(stage);
-    var onVis = function () { visible = !document.hidden; kick(); };
-    document.addEventListener('visibilitychange', onVis);
-    if (trackMQ.addEventListener) trackMQ.addEventListener('change', setMode);
+    var ro = window.ResizeObserver ? new ResizeObserver(function () { measure(); if (active()) draw(); else clear(); }) : null;
+    if (ro) ro.observe(shelf);
+    var io = window.IntersectionObserver ? new IntersectionObserver(function (en) { visible = en[0].isIntersecting; }) : null;
+    if (io) io.observe(shelf);
+    var onMode = function () { measure(); if (active()) draw(); else clear(); };
+    if (mobile.addEventListener) mobile.addEventListener('change', onMode);
 
-    fillDetail(); setToggle(); setMode();
+    fillInfo(); label(); measure(); draw();
+    raf = requestAnimationFrame(tick);
 
     return {
-      dock: dock, pick: dock, open: open,
-      close: function () { close(true); },
-      toggleOpen: function (id) { if (picked && picked.dataset.cat === id) close(true); else open(id); },
-      refresh: fillDetail,
-      play: function () { running = true; setToggle(); kick(); },
-      pause: function () { running = false; setToggle(); },
+      select: function (id) { if ((id || null) !== cur) select(id, true); },
+      current: function () { return cur; },
+      refresh: function () { fillInfo(); if (cur) renderPanel(true); },
+      play: function () { paused = false; label(); },
+      pause: function () { paused = true; label(); },
       destroy: function () {
-        if (raf) cancelAnimationFrame(raf);
+        cancelAnimationFrame(raf); clearTimeout(openTimer);
         if (ro) ro.disconnect(); if (io) io.disconnect();
-        document.removeEventListener('visibilitychange', onVis);
-        if (trackMQ.removeEventListener) trackMQ.removeEventListener('change', setMode);
-        host.innerHTML = ''; host.classList.remove('ob', 'ob--track', 'is-picked');
+        if (mobile.removeEventListener) mobile.removeEventListener('change', onMode);
+        host.innerHTML = ''; host.classList.remove('ob');
       }
     };
   }

@@ -58,43 +58,36 @@
     }).sort(function (a, b) { return state.phase === 'past' ? byStart(b, a) : byStart(a, b); });
   }
 
-  /* ═════════ 상단: 카테고리 책 · 설명 ═════════ */
+  /* ═════════ 상단: 카테고리 책 (고르면 왼쪽에서 펼쳐지고 오른쪽에 카테고리 패널) ═════════ */
+  var dateShort = function (e) { return e.tba ? e.tba : md(e.start) + (e.end && e.end !== e.start ? '–' + md(e.end) : ''); };
+  var pastOf = function (cat) { return EVENTS.filter(function (e) { return e.cat === cat && D.isPast(e) && e.source; }); };
   var orbit = window.OrbitBooks ? OrbitBooks.mount($('#cx-orbit'), {
     books: D.CATS, center: 'Insight.',
-    detail: function (c) {
-      var up = upcomingOf(c.id);
-      return '예정 ' + up.length + '건 · 신청 가능 ' + up.filter(function (e) { return D.status(e).can; }).length + '건';
+    info: function (c) {
+      var up = upcomingOf(c.id), open = up.filter(function (e) { return D.status(e).can; }).length, next = up[0];
+      return {
+        next: next ? 'NEXT · ' + (next.tba ? next.tba.replace(' 중', '') + ' 예정' : md(next.start) + ' (' + wd(next.start) + ')') : 'NEXT · 추후 안내',
+        title: next ? next.title : c.ko + ' 일정 준비 중', up: up.length, open: open,
+        meta: next ? '다음 ' + dateShort(next) + ' · 예정 ' + up.length + '건' + (open ? ' · 신청 가능 ' + open : '') : '예정 일정 없음'
+      };
     },
-    onPick: function (id) { setCat(id); }
+    panel: function (c) {
+      var up = upcomingOf(c.id), past = pastOf(c.id), list = (up.length ? up : past.slice().reverse()).slice(0, 4);
+      return '<p class="obp__k">' + esc(c.ed) + '</p>' +
+        '<h3 class="obp__t">' + esc(c.label) + '<span>' + esc(c.ko) + '</span></h3>' +
+        '<p class="obp__d">' + esc(c.desc) + '</p>' +
+        '<div class="obp__stat"><span>예정 <b>' + up.length + '</b>건</span>' + (past.length ? '<span>2026년 <b>' + past.length + '</b>회 진행</span>' : '') + '</div>' +
+        '<p class="obp__h">' + (up.length ? '다가오는 일정' : past.length ? '최근 진행한 행사' : '예정된 행사가 없어요') + '</p>' +
+        (list.length ? '<ul class="obp__list">' + list.map(function (e) {
+          var r = D.status(e);
+          return '<li><button type="button" data-detail="' + e.id + '"><time>' + esc(dateShort(e)) + '</time><span><b>' + esc(e.title) + '</b>' +
+            '<em>' + esc([(e.analysts || []).join(', '), r.label].filter(Boolean).join(' · ')) + srcTag(e) + '</em></span></button></li>';
+        }).join('') + '</ul>' : '<p class="obp__none">담당자에게 일정을 문의해 주세요.</p>') +
+        '<div class="obp__acts"><button type="button" class="btn btn--primary btn--sm" data-jump>' + esc(c.ko) + ' 일정 보기 ' + ARROW + '</button>' +
+          '<button type="button" class="btn btn--text btn--sm" data-ob-close>← 다른 행사 보기</button></div>';
+    },
+    onSelect: function (id) { setCat(id || 'all'); }
   }) : null;
-
-  function renderBookDesc() {
-    var box = $('#cx-desc');
-    if (state.cat === 'all') {
-      var up = EVENTS.filter(function (e) { return !D.isPast(e); });
-      var open = up.filter(function (e) { return D.status(e).can; }).length;
-      box.innerHTML = '<div class="cx-desc__copy"><p class="cx-eyebrow">6개 카테고리 · 예정 ' + up.length + '건</p>' +
-        '<h3>책을 골라 행사 카테고리를 펼쳐보세요</h3>' +
-        '<p>지금 신청 가능한 행사 ' + open + '건 · 아래 캘린더·목록에서 전체 일정을 바로 확인할 수 있어요.</p></div>' +
-        '<div class="cx-desc__acts"><button type="button" class="btn btn--primary btn--sm" data-jump>전체 일정 보기 ' + ARROW + '</button></div>';
-      return;
-    }
-    var c = catOf(state.cat), ups = upcomingOf(c.id), next = ups[0];
-    var opens = ups.filter(function (e) { return D.status(e).can; }).length;
-    var extra = {
-      corp: '<button type="button" class="btn btn--secondary btn--sm" data-detail="corp-260907">Q3 참여기업 보기</button>',
-      earnings: '<button type="button" class="btn btn--secondary btn--sm" data-request="earnings">실적발표 문의</button>',
-      ndr: '<button type="button" class="btn btn--secondary btn--sm" data-request="ndr">NDR 참여 문의</button>',
-      wm: '<button type="button" class="btn btn--secondary btn--sm" data-goto="seminar">맞춤 세미나 요청</button>'
-    }[c.id] || '';
-    box.innerHTML = '<div class="cx-desc__copy"><p class="cx-eyebrow">' + esc(c.label) + ' · 예정 ' + ups.length + '건 · 신청 가능 ' + opens + '건</p>' +
-      '<h3>' + (next ? esc(next.title) : esc(c.ko) + ' — 예정된 일정 없음') + '</h3>' +
-      '<p>' + (next ? esc(D.dateLabel(next)) + (D.where(next) ? ' · ' + esc(D.where(next)) : '') + ' — ' : '') + esc(c.desc) + '</p></div>' +
-      '<div class="cx-desc__acts">' +
-        '<button type="button" class="btn btn--primary btn--sm" data-jump>' + esc(c.ko) + ' 일정 ' + ups.length + '건 보기 ' + ARROW + '</button>' + extra +
-        '<button type="button" class="btn btn--text cx-desc__all" data-filter="all">전체 보기</button>' +
-      '</div>';
-  }
 
   /* ═════════ 하단: 카테고리 칩 · 목록 · 캘린더 ═════════ */
   function renderCats() {
@@ -197,7 +190,7 @@
     if (state.view === 'list') renderList(); else renderCalendar();
   }
   function syncMyCount() { var n = $('#cx-my-n'), k = R.list().length; n.textContent = k; n.toggleAttribute('data-zero', !k); }
-  function renderAll() { renderBookDesc(); renderExplore(); syncMyCount(); syncUrl(); if (orbit) orbit.refresh(); }
+  function renderAll() { renderExplore(); syncMyCount(); syncUrl(); if (orbit) orbit.refresh(); }
 
   // 필터 상태를 주소에 반영 — 공유 · 뒤로가기 · Home 링크가 같은 상태로 열려요
   function syncUrl() {
@@ -216,7 +209,7 @@
     state.cat = id;
     if (state.view === 'calendar') focusMonth();
     renderAll();
-    if (orbit) orbit.dock(id === 'all' ? null : id);
+    if (orbit) orbit.select(id === 'all' ? null : id);
     $('#cx-live').textContent = id === 'all' ? '전체 일정을 표시해요.' : filterLabel(id) + ' 일정 ' + filtered().length + '건으로 목록을 정리했어요.';
     var chip = $('#cx-cats [data-filter="' + id + '"]'), row = $('#cx-cats');
     if (chip && row.scrollWidth > row.clientWidth) row.scrollTo({ left: chip.offsetLeft - (row.clientWidth - chip.clientWidth) / 2 });
@@ -467,7 +460,8 @@
   $('[data-fields="seminar"]').outerHTML = requestFields('seminar', 'sm-');
 
   document.addEventListener('click', function (ev) {
-    var b = ev.target.closest('button'); if (!b || b.closest('.ob')) return;
+    // 책 · 아래 카테고리 탭 · 공전 토글 · 패널 닫기는 orbit-books.js가 처리해요
+    var b = ev.target.closest('button'); if (!b || b.closest('.ob-book,.ob__tabs,.ob__toggle,[data-ob-close]')) return;
     var ds = b.dataset;
     if (ds.filter) { setCat(ds.filter); return; }
     if ('jump' in ds) { jumpToExplore(); return; }
@@ -529,7 +523,7 @@
   if (init.get('phase') === 'past') { state.phase = 'past'; setPressed('#cx-phase [data-phase]', function (x) { return x.dataset.phase === 'past'; }); }
   if (panels[initTab] && initTab !== 'internal') tabs.select(initTab);
   focusMonth(); renderAll();
-  if (state.cat !== 'all' && orbit) orbit.dock(state.cat);
+  if (state.cat !== 'all' && orbit) orbit.select(state.cat);
   var initEvent = init.get('event');
   if (initEvent && D.byId(initEvent)) detail(initEvent);
   else if ((init.has('view') || init.has('category') || init.has('cat')) && state.tab === 'internal') jumpToExplore();

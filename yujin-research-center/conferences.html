@@ -9,16 +9,16 @@
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
 <link rel="stylesheet" href="assets/app.css?v=20261029a">
-<link rel="stylesheet" href="assets/orbit-books.css?v=20261029c">
-<link rel="stylesheet" href="assets/conferences.css?v=20261029c">
+<link rel="stylesheet" href="assets/orbit-books.css?v=20261029d">
+<link rel="stylesheet" href="assets/conferences.css?v=20261029d">
 <script src="assets/config.js?v=20261029a"></script>
 <script src="assets/config.local.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" defer></script>
 <script src="assets/partials.js?v=20261029a" defer></script>
-<script src="assets/events-data.js?v=20261029c" defer></script>
-<script src="assets/conf-records.js?v=20261029c" defer></script>
-<script src="assets/orbit-books.js?v=20261029c" defer></script>
-<script src="assets/conferences.js?v=20261029c" defer></script>
+<script src="assets/events-data.js?v=20261029d" defer></script>
+<script src="assets/conf-records.js?v=20261029d" defer></script>
+<script src="assets/orbit-books.js?v=20261029d" defer></script>
+<script src="assets/conferences.js?v=20261029d" defer></script>
 </head>
 <body data-page-eyebrow="CORPORATE ACCESS" data-page-title="세미나·컨퍼런스" data-page-desc="Corporate Day부터 WM 세미나까지 — 책을 골라 카테고리를 살펴보고, 아래 캘린더·목록에서 일정을 찾아 신청해주세요.">
 <main id="main" class="cx">
@@ -34,16 +34,9 @@
 
     <!-- ═══════ 기업행사/컨퍼런스 ═══════ -->
     <section role="tabpanel" id="panel-internal" aria-labelledby="tab-internal" class="cx-panel">
-      <div class="cx-hero" aria-label="행사 카테고리">
-        <div class="cx-hero__copy">
-          <p class="cx-hero__cap">EUGENE INSIGHT LAB <span aria-hidden="true">/</span> LIVE ACCESS</p>
-          <h2 class="cx-hero__title">Conferences</h2>
-          <p class="cx-hero__desc">현재 신청 가능/진행 예정 중인 행사를 확인해주세요</p>
-          <p class="cx-hero__idx">SIX WAYS TO CONNECT</p>
-        </div>
-        <div class="cx-hero__orbit" id="cx-orbit"></div>
-      </div>
-      <div class="cx-desc" id="cx-desc"></div>
+      <h2 class="sr-only">행사 카테고리</h2>
+      <div class="cx-orbit" id="cx-orbit"></div>
+      <div class="cx-bookdesc"><button type="button" class="btn btn--text" data-jump>전체 행사 일정 보기 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button></div>
       <p class="sr-only" id="cx-live" aria-live="polite"></p>
 
       <section class="cx-explore" id="explore" aria-labelledby="explore-title">
