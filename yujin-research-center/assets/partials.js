@@ -185,10 +185,10 @@
   header.className = 'gnb';
   header.innerHTML =
     '<div class="gnb__in">' +
-      '<a class="logo" href="home.html" aria-label="유진투자증권 Insight Lab 홈"><span class="logo__wm">유진투자증권</span><span class="logo__bar" aria-hidden="true"></span><span class="logo__sub">Insight Lab</span></a>' +
+      '<span class="logo" role="img" aria-label="유진 Insight Lab"><span class="logo__wm">유진</span><span class="logo__sub">Insight Lab</span></span>' +
       '<nav class="gnb__menu" aria-label="주 메뉴">' + links + '</nav>' +
       '<div class="gnb__right">' +
-        '<a class="gnb__me" href="home.html" aria-label="' + esc(name) + '님의 라운지"><span class="avatar" aria-hidden="true">' + esc(name.charAt(0)) + '</span>' + esc(name) + '님</a>' +
+        '<a class="gnb__me" href="mypage.html" aria-label="' + esc(name) + '님의 My page"><span class="avatar" aria-hidden="true">' + esc(name.charAt(0)) + '</span>' + esc(name) + '님</a>' +
         '<button class="gnb__out" type="button" data-signout>로그아웃</button>' +
       '</div>' +
       '<button class="gnb__burger" type="button" aria-label="메뉴 열기" aria-expanded="false" aria-controls="il-drawer">☰</button>' +
@@ -200,7 +200,7 @@
   drawer.innerHTML =
     '<div class="drawer__dim"></div>' +
     '<div class="drawer__panel" role="dialog" aria-modal="true" aria-label="메뉴">' +
-      '<div class="drawer__head"><span class="avatar" aria-hidden="true">' + esc(name.charAt(0)) + '</span><b>' + esc(name) + '님</b>' +
+      '<div class="drawer__head"><span class="avatar" aria-hidden="true">' + esc(name.charAt(0)) + '</span><a class="drawer__me" href="mypage.html"><b>' + esc(name) + '님</b><span>My page ›</span></a>' +
       '<button class="drawer__close" type="button" aria-label="메뉴 닫기">×</button></div>' +
       links +
       '<button class="drawer__out" type="button" data-signout>로그아웃</button>' +

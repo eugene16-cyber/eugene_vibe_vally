@@ -269,6 +269,12 @@
   .opts-head span { flex: none; font-family: var(--mono); font-size: 10.5px; color: var(--faint); letter-spacing: 0.04em; }
   .chips { display: flex; flex-direction: column; max-height: 38vh; overflow-y: auto; }
   .chips:empty { display: none; }
+  /* 여러 개 고르는 질문 — 2열 칩으로 줄여 '선택 완료'가 늘 보이게 */
+  .chips.is-multi { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; padding: 10px; max-height: min(30vh, 250px); }
+  .chips.is-multi .opt { padding: 7px 9px; gap: 8px; align-items: center; border: 1px solid var(--panel-line); border-radius: 9px; }
+  .chips.is-multi .opt-n { width: 22px; height: 22px; font-size: 11px; }
+  .chips.is-multi .opt[aria-pressed="true"] { border-color: rgba(232, 236, 241, 0.6); }
+  .ask-btn[data-act="done"]:not(:disabled) { color: #0b1530; background: #eef1f5; border-color: #eef1f5; font-weight: 700; padding: 0 14px; }
   .opt { display: flex; align-items: flex-start; gap: 12px; width: 100%; padding: 10px 14px; text-align: left; font: inherit; color: var(--text); cursor: pointer;
     background: transparent; border: 0; border-bottom: 1px solid rgba(170, 180, 192, 0.056); transition: background 0.15s; }
   .opt:hover, .opt:focus-visible { background: rgba(170, 180, 192, 0.056); outline: none; }
@@ -409,9 +415,9 @@
 
 <script src="assets/config.js?v=20261029a"></script>
 <script src="assets/config.local.js"></script>
-<script src="assets/disclosure-data.js?v=20261029g"></script>
+<script src="assets/disclosure-data.js?v=20261030e"></script>
 <script src="assets/events-data.js?v=20261029c"></script>
-<script src="assets/yuri-flow.js?v=20261029h"></script>
+<script src="assets/yuri-flow.js?v=20261030f"></script>
 <script>
 // 제안 메일 링크(?ref=)로 들어온 방문 — 어드민 '신규 유입' 집계용(assets/outreach.js)
 (function () {
@@ -1310,6 +1316,7 @@ function answer(text) {
 function renderPanel(q) {
   setMood("listening");
   chipsEl.replaceChildren();
+  chipsEl.classList.toggle("is-multi", !!q.multi);
   askExtra.replaceChildren();
   qbox.hidden = false;
   form.hidden = !!q.form;
@@ -1327,7 +1334,7 @@ function renderPanel(q) {
   });
   if (q.multi) {
     const d = document.createElement("button");
-    d.type = "button"; d.className = "ask-btn primary"; d.dataset.act = "done"; d.textContent = "선택 완료"; d.disabled = true;
+    d.type = "button"; d.className = "ask-btn primary"; d.dataset.act = "done"; d.textContent = "골라 주세요"; d.disabled = true;
     askExtra.appendChild(d);
   } else if (q.slot === "q0" || q.slot === "deep") {
     const s = document.createElement("button");
@@ -1420,7 +1427,8 @@ chipsEl.addEventListener("click", (e) => {
     const on = b.getAttribute("aria-pressed") !== "true";
     b.setAttribute("aria-pressed", on);
     b.querySelector(".opt-n").textContent = on ? "✓" : String(+b.dataset.i + 1);
-    askExtra.querySelector('[data-act="done"]').disabled = !pickedIdx().length;
+    const n = pickedIdx().length, done = askExtra.querySelector('[data-act="done"]');
+    done.disabled = !n; done.textContent = n ? `선택 완료 (${n}) →` : "골라 주세요";
     return;
   }
   const i = +b.dataset.i;

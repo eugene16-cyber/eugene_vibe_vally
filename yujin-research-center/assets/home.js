@@ -8,6 +8,7 @@
 
   /* ---------- 유진 Event — Orbit Books (Events 페이지와 같은 모듈) ---------- */
   var E = window.IL_EVENTS;
+  if (E && E.CATS) $('#ev-title').innerHTML = '<em>' + esc(s.name || '고객') + '</em>님에게 도착한 맞춤형 서비스 ' + E.CATS.length + '개';
   if (window.OrbitBooks && E) {
     var upcoming = function (cat) {
       return E.EVENTS.filter(function (e) { return e.cat === cat && !E.isPast(e); })

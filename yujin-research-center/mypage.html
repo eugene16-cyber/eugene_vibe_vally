@@ -1,10 +1,39 @@
 <!doctype html>
 <html lang="ko">
 <head>
+<script src="assets/gate.js?v=20261029k"></script>
 <meta charset="utf-8">
-<meta http-equiv="refresh" content="0; url=market.html">
-<title>이동 중 · 유진 Insight Lab</title>
-<script>location.replace("market.html"+(location.hash||""));</script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My page · 유진 Insight Lab</title>
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link rel="stylesheet" href="assets/app.css?v=20261030g">
+<link rel="stylesheet" href="assets/mypage.css?v=20261030b">
+<script src="assets/config.js?v=20261029a"></script>
+<script src="assets/config.local.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" defer></script>
+<script src="assets/partials.js?v=20261030g" defer></script>
+<script src="assets/mypage.js?v=20261030b" defer></script>
 </head>
-<body></body>
+<body data-page-eyebrow="MY PAGE" data-page-title="My page" data-page-desc="자주 보는 정보를 위젯으로 골라 나만의 데스크를 꾸며 보세요. 구성은 이 브라우저에 저장돼요.">
+<main id="main">
+  <section class="section mp-sec">
+    <div class="wrap">
+      <div class="mp-head">
+        <div class="mp-who" id="mp-who"></div>
+        <div class="mp-tools">
+          <button type="button" class="btn btn--secondary btn--sm" id="mp-edit" aria-pressed="false">DIY 편집</button>
+        </div>
+      </div>
+      <div class="mp-add" id="mp-add" hidden>
+        <span class="mp-add__k">위젯 추가</span>
+        <div class="mp-add__list" id="mp-add-list"></div>
+        <button type="button" class="btn btn--text mp-add__reset" id="mp-reset">기본 구성으로</button>
+      </div>
+      <div class="mp-grid" id="mp-grid" aria-live="polite"></div>
+      <p class="mp-note">시황 · 테마 · 실적 숫자는 Supabase에 쌓인 데이터를 그대로 보여 드려요. 정보 제공용이며 투자 권유가 아니에요. 과거 수치는 미래 수익을 보장하지 않아요.</p>
+    </div>
+  </section>
+</main>
+</body>
 </html>

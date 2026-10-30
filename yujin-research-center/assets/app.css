@@ -142,6 +142,12 @@ a.card:hover,.card.is-hover:hover{transform:translateY(-3px);box-shadow:var(--sh
   color:#fff;font-size:13px;font-weight:800}
 .logo__bar{width:1px;height:14px;background:var(--gray-200)}
 .logo__sub{font-weight:600;color:var(--ink-800)}
+/* 로고: "유진 Insight Lab" 한 덩어리 워드마크(링크 없음) */
+.logo{gap:5px;cursor:default;user-select:none}
+.logo__wm{font-size:19px;font-weight:900;letter-spacing:-.04em}
+.logo__sub{font-size:19px;font-weight:800;letter-spacing:-.03em;color:var(--ink-900)}
+.drawer__me{display:flex;flex-direction:column;line-height:1.3;color:inherit}
+.drawer__me span{font-size:12.5px;font-weight:600;color:var(--blue-cta)}
 .gnb__menu{display:flex;gap:4px}
 .gnb__menu a{height:36px;padding:0 14px;display:inline-flex;align-items:center;border-radius:var(--radius-full);font-weight:600;color:var(--ink-500);
   transition:background var(--dur-micro),color var(--dur-micro)}
@@ -159,8 +165,8 @@ a.card:hover,.card.is-hover:hover{transform:translateY(-3px);box-shadow:var(--sh
 /* 다크 메뉴 (홈 히어로) */
 body[data-nav=dark] .gnb{background:rgba(6,16,38,.72);border-bottom-color:rgba(255,255,255,.08)}
 body[data-nav=dark] .logo,body[data-nav=dark] .gnb__desk,body[data-nav=dark] .gnb__burger{color:#fff}
-body[data-nav=dark] .logo__wm{color:#fff}
-body[data-nav=dark] .logo__sub{color:#e5242b}
+body[data-nav=dark] .logo__wm{color:#ff4d5a}
+body[data-nav=dark] .logo__sub{color:#fff}
 body[data-nav=dark] .logo__bar{background:#444}
 body[data-nav=dark] .gnb__menu a{color:rgba(255,255,255,.66)}
 body[data-nav=dark] .gnb__menu a:hover{background:rgba(255,255,255,.08);color:#fff}

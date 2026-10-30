@@ -369,3 +369,6 @@
 .yqa__tag{background:var(--yd-chip);border-color:var(--yd-line);color:#e6ebf3}
 .yqa__tag.is-stock{background:rgba(106,168,255,.16);border-color:rgba(106,168,255,.4);color:#b8d3ff}
 .yqa__tag.is-theme{background:rgba(170,130,255,.16);border-color:rgba(170,130,255,.4);color:#d6c6ff}
+
+/* VIP 라운지 제목 — 이름 강조 */
+#ev-title em{font-style:normal;color:var(--blue-cta)}

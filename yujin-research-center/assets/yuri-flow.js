@@ -112,13 +112,40 @@
   var cfg = window.IL_CONFIG || {};
   function rest(path) {
     if (!cfg.supabaseUrl || !cfg.supabaseAnonKey) return Promise.resolve(null);
-    return fetch(cfg.supabaseUrl + '/rest/v1/' + path, { headers: { apikey: cfg.supabaseAnonKey, Authorization: 'Bearer ' + cfg.supabaseAnonKey } })
-      .then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
+    var ctl = window.AbortController ? new AbortController() : null, t = ctl && setTimeout(function () { ctl.abort(); }, 8000);
+    return fetch(cfg.supabaseUrl + '/rest/v1/' + path, { headers: { apikey: cfg.supabaseAnonKey, Authorization: 'Bearer ' + cfg.supabaseAnonKey }, signal: ctl && ctl.signal })
+      .then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })
+      .then(function (j) { if (t) clearTimeout(t); return j; });
   }
   var FIN_SECTOR = /은행|증권|보험|금융|캐피탈|지주|카드/;
   var bucketSmall = function (b) { return b === '100억 미만' || b === '100억~1,000억'; };
+  // 실제 기업 DB(corp_directory · DART 기업개황)를 먼저 보고, 없으면 시연용 가상 스냅샷 → 상장사 DB 순서
+  var CORP_COLS = 'name,type,kind,industry,founded,market,stock_code,aum,aum_bucket,sectors,assets_eok';
+  function corpLookup(q) {
+    if (q.length < 2) return Promise.resolve(null);
+    return rest('corp_directory?select=' + CORP_COLS + '&name_key=eq.' + encodeURIComponent(q) + '&limit=1').then(function (rows) {
+      if (rows && rows.length) return rows[0];
+      return rest('corp_directory?select=' + CORP_COLS + '&search_key=ilike.*' + encodeURIComponent(q.toLowerCase()) + '*&limit=8').then(function (r2) {
+        if (!r2 || !r2.length) return null;
+        return r2.filter(function (r) { return r.name === q; })[0] || r2.sort(function (a, b) { return a.name.length - b.name.length; })[0];
+      });
+    }).then(function (c) {
+      if (!c) return null;
+      var finType = c.type !== '일반 법인';
+      var seg = !finType ? (c.stock_code ? 'listed' : 'corp') : (c.founded >= 2019 || bucketSmall(c.aum_bucket)) ? 'newfin' : 'fin';
+      var idMap = seg === 'newfin' ? { '자산운용사': '신생 자산운용사', '투자자문사': '신생 투자자문·일임사' } : { '자산운용사': '자산운용사', '투자자문사': '투자자문·일임사', '연기금·보험·은행': /보험|연기금|공제/.test(c.kind || '') ? '보험·연기금·공제회' : '은행·증권·캐피탈' };
+      var sectors = (c.sectors || []).filter(function (x) { return SECTORS.some(function (s) { return s.label === x; }); });
+      var eok = c.assets_eok, size = c.aum || (eok ? '자산 약 ' + (eok >= 10000 ? (Math.round(eok / 1000) / 10).toLocaleString('ko-KR') + '조 원' : Math.round(eok).toLocaleString('ko-KR') + '억 원') : null);
+      return { name: c.name, src: 'DART 기업개황 · 기업 DB', segment: seg, identity: finType ? (idMap[c.type] || null) : (c.industry || null),
+        scale: c.aum || null, sectors: sectors,
+        facts: [['구분', SEGMENTS[seg].label + (c.market ? ' · ' + c.market : '')], ['업종', c.industry || c.kind || '-'], ['설립', c.founded ? c.founded + '년' : '-'], [finType ? '운용 규모' : '규모', size || '공시에 없음 · 대화로 확인']] };
+    });
+  }
   function lookup(name) {
     var q = String(name || '').replace(/\(가상\)|㈜|\(주\)|주식회사|\s/g, '');
+    return corpLookup(q).then(function (real) { return real || lookupDemo(q); });
+  }
+  function lookupDemo(q) {
     var D = window.IL_DISCLOSURE, v = D && D.lookup(q);
     if (v) {
       var finType = v.type !== '일반 법인';
@@ -222,7 +249,7 @@
       if (st.phase === 'q0') return { slot: 'q0', title: '반가워요, 유리예요. 뭐라고 불러 드릴까요?', hint: '닉네임도 괜찮아요', options: [], input: '이름 또는 닉네임', base: true };
       if (st.phase === 'q1') return { slot: 'q1', title: Q1.title, hint: Q1.hint, options: Q1.options, base: true };
       if (st.phase === 'q1name') return { slot: 'q1name', title: '법인명을 알려 주세요', hint: st.branch === 'disc' ? '공시로 확인되는 정보는 다시 묻지 않을게요' : '등록된 정보가 있으면 먼저 채워 드릴게요',
-        options: (st.branch === 'disc' ? [{ label: '황소자산운용', desc: '예시 · 가상 금융사' }] : [{ label: 'A자문사', desc: '예시 · 가상 신생 자문사' }, { label: 'B법인', desc: '예시 · 가상 일반 법인' }]),
+        options: (st.branch === 'disc' ? [{ label: '유진자산운용', desc: '공시 기업 예시 · 실제 기업 DB 조회' }] : [{ label: 'A자문사', desc: '예시 · 가상 신생 자문사' }, { label: 'B법인', desc: '예시 · 가상 일반 법인' }]),
         input: '법인명', base: true };
       if (!s.segment) {
         var keys = PICK[st.branch] || Object.keys(SEGMENTS);
