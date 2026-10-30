@@ -14,18 +14,24 @@
     .then(function (r) { return latest(r.data || []); }, function () { return []; }) : Promise.resolve([]);
   var consP = window.sb ? sb.from('theme_constituents').select('theme_name,stock_name,stock_code,ret_1d,ret_1w,week_of').order('week_of', { ascending: false }).limit(600)
     .then(function (r) { return latest(r.data || []); }, function () { return []; }) : Promise.resolve([]);
-  var themeKeys = function (name) { return String(name).split(/[\s/()·,＆&]+/).filter(function (w) { return w.length >= 2; }); };
+  // 테마는 대표 이름(괄호 앞, '/'로 나뉜 각 이름)으로만 맞춘다 — '로봇(산업용/…)'의 '산업용' 같은 보조어로 엉뚱하게 걸리지 않게
+  var themeKeys = function (name) { return String(name).replace(/\(.*?\)/g, ' ').split(/[/·,＆&]+/).map(function (w) { return w.trim(); }).filter(function (w) { return w.length >= 2; }); };
 
   function findTags(m) {
     var text = [m.q, m.lead].concat(m.docs.map(function (d) { return [d.title, d.company, d.category, d.summary].join(' '); })).join(' ');
+    var heads = [m.q].concat(m.docs.map(function (d) { return d.title; })).join(' ');
+    var fixed = m.preset && m.preset.stocks;
     return Promise.all([themesP, consP]).then(function (res) {
       var themes = res[0], cons = res[1], stocks = [], th = [];
       var addStock = function (n) { if (n && stocks.indexOf(n) < 0 && stocks.length < 3) stocks.push(n); };
-      m.docs.forEach(function (d) { if (d.company) addStock(d.company); });
-      cons.forEach(function (c) { if (text.indexOf(c.stock_name) > -1) addStock(c.stock_name); });
-      themes.forEach(function (t) { if (th.length < 3 && themeKeys(t.name).some(function (k) { return text.indexOf(k) > -1; })) th.push(t.name); });
-      // 태그한 종목이 속한 테마도 함께
-      cons.forEach(function (c) { if (th.length < 3 && stocks.indexOf(c.stock_name) > -1 && th.indexOf(c.theme_name) < 0) th.push(c.theme_name); });
+      if (fixed) fixed.forEach(addStock);
+      else {
+        m.docs.forEach(function (d) { if (d.company) addStock(d.company); });
+        cons.forEach(function (c) { if (text.indexOf(c.stock_name) > -1) addStock(c.stock_name); });
+      }
+      themes.forEach(function (t) { if (th.length < 3 && themeKeys(t.name).some(function (k) { return heads.indexOf(k) > -1; })) th.push(t.name); });
+      // 태그한 종목이 속한 테마도 함께 — 검수 질문은 고정 종목이라 넓은 소속 테마(LED 등)까지 끌어오지 않는다
+      if (!fixed) cons.forEach(function (c) { if (th.length < 3 && stocks.indexOf(c.stock_name) > -1 && th.indexOf(c.theme_name) < 0) th.push(c.theme_name); });
       // 종목 태그는 상장 종목 DB(stocks)에 있는 것만 — 비상장 · IPO 예정사는 뺀다
       var listed = stocks.length && window.sb ? sb.from('stocks').select('name').in('name', stocks).then(function (r) { return (r.data || []).map(function (x) { return x.name; }); }, function () { return []; }) : Promise.resolve([]);
       return listed.then(function (ok) {
@@ -87,7 +93,7 @@
       '<aside class="yqa__view" aria-label="원문 근거"></aside>' +
     '</div>';
     openDoc(0);
-    findTags({ q: m.q, lead: lead, docs: docs }).then(function (tags) {
+    findTags({ q: m.q, lead: lead, docs: docs, preset: m.preset }).then(function (tags) {
       var el = $('.yqa__tagbar', host); if (!el || !tags.length) return;
       el.innerHTML = '<span class="yqa__tags-k">관련 종목 · 테마</span>' + tags.map(function (t) {
         return '<button type="button" class="yqa__tag is-' + t.kind + '" data-tag="' + esc(t.name) + '" data-kind="' + t.kind + '">' + (t.kind === 'stock' ? '종목 ' : '테마 ') + '#' + esc(t.name) + '</button>';

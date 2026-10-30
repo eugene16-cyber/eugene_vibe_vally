@@ -90,9 +90,10 @@
 
   /* ---------- 검수 완료 질문 — 관심 분야 순서로 ---------- */
   var PRESETS = [
-    { id: 'semi', tag: '반도체', q: '최근 반도체 리포트 요약해 줘', keys: /반도체|메모리|HBM|파운드리|D램/i },
-    { id: 'market', tag: '시황', q: '최근 시황 리포트 핵심만 알려 줘', keys: /시황|전략|매크로|증시|코스피/i, macro: true },
-    { id: 'ai', tag: 'AI 인프라', q: 'AI 인프라 관련 최근 자료 찾아 줘', keys: /AI|인공지능|데이터센터|전력기기|GPU/i },
+    // stocks: 검수 질문의 관련 종목 태그(자동 추출 대신 고정) — 정보 제공용, 추천 아님
+    { id: 'semi', tag: '반도체', q: '최근 반도체 리포트 요약해 줘', keys: /반도체|메모리|HBM|파운드리|D램/i, stocks: ['삼성전자', 'SK하이닉스', '한미반도체'] },
+    { id: 'market', tag: '시황', q: '최근 시황 리포트 핵심만 알려 줘', keys: /시황|전략|매크로|증시|코스피/i, macro: true, stocks: [] },
+    { id: 'ai', tag: 'AI 인프라', q: 'AI 인프라 관련 최근 자료 찾아 줘', keys: /AI|인공지능|데이터센터|전력기기|GPU/i, stocks: ['SK하이닉스', 'LS ELECTRIC', 'HD현대일렉트릭'], skip: /의료|바이오|제약|헬스/ },
     { id: 'bio', tag: '바이오', q: '바이오 업종 리포트 정리해 줘', keys: /바이오|제약|헬스|의료/ },
     { id: 'battery', tag: '2차전지', q: '2차전지 리포트는 어떤 내용이야?', keys: /2차전지|이차전지|배터리|양극재/ },
     { id: 'rate', tag: '금리', q: '금리 전망 다룬 리포트 있어?', keys: /금리|채권|연준|FOMC|국채/i },
@@ -130,6 +131,7 @@
       });
       if (pre && pre.keys.test(title + ' ' + meta + ' ' + body)) sc += 1;
       if (pre && pre.macro && (r.kind === 'macro' || /투자전략|시황|매크로/.test(r.category || ''))) sc += 3;
+      if (pre && pre.skip && pre.skip.test(r.category || '')) sc = 0;   // 다른 업종 자료가 낱말만 겹쳐 끼지 않게
       return { r: r, sc: sc };
     }).filter(function (x) { return x.sc > 0; })
       .sort(function (a, b) { return b.sc - a.sc || String(b.r.published_at).localeCompare(String(a.r.published_at)); })
@@ -233,6 +235,7 @@
   function ask(text, byVoice, preset) {
     text = String(text || '').trim(); if (!text || busy) return;
     busy = true;
+    preset = preset || PRESETS.filter(function (x) { return x.q === text; })[0];
     if (inline && window.YuriAnswer) {
       remember(text);
       setMood('thinking');
